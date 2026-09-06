@@ -521,8 +521,13 @@ public sealed class AutopilotGraphImportClient(
             logger,
             operationName,
             cancellationToken,
-            options.RetryCount,
-            options.RetryDelay).ConfigureAwait(false);
+            HttpOperationOptions.Metadata with
+            {
+                MaximumAttempts = checked(options.RetryCount + 1),
+                InitialRetryDelay = options.RetryDelay,
+                MaximumRetryDelay = options.RetryDelay > HttpOperationOptions.Metadata.MaximumRetryDelay
+                    ? options.RetryDelay : HttpOperationOptions.Metadata.MaximumRetryDelay
+            }).ConfigureAwait(false);
     }
 
     private async Task SendGraphNoContentAsync<TBody>(
@@ -560,8 +565,13 @@ public sealed class AutopilotGraphImportClient(
             logger,
             operationName,
             cancellationToken,
-            options.RetryCount,
-            options.RetryDelay).ConfigureAwait(false);
+            HttpOperationOptions.Metadata with
+            {
+                MaximumAttempts = checked(options.RetryCount + 1),
+                InitialRetryDelay = options.RetryDelay,
+                MaximumRetryDelay = options.RetryDelay > HttpOperationOptions.Metadata.MaximumRetryDelay
+                    ? options.RetryDelay : HttpOperationOptions.Metadata.MaximumRetryDelay
+            }).ConfigureAwait(false);
     }
 
     private Task DelayAsync(TimeSpan delay, CancellationToken cancellationToken)

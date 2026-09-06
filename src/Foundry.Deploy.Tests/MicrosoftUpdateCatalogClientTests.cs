@@ -9,6 +9,15 @@ namespace Foundry.Deploy.Tests;
 
 public sealed class MicrosoftUpdateCatalogClientTests
 {
+    [Theory]
+    [InlineData("not-base64")]
+    [InlineData("AQID")]
+    public void ParseDownloads_MalformedDeclaredDigestFailsClosed(string value)
+    {
+        string html = $"downloadInformation[0].files[0].url = 'https://example.test/driver.cab'; downloadInformation[0].files[0].sha256 = '{value}';";
+        Assert.Throws<InvalidDataException>(() => MicrosoftUpdateCatalogClient.ParseDownloads(html, NullLogger<MicrosoftUpdateCatalogClient>.Instance));
+    }
+
     [Fact]
     public void ParseDownloads_DecodesBase64HashesAndFileName()
     {

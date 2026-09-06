@@ -4,6 +4,7 @@
 
 using System.IO;
 using Foundry.Deploy.Services.Download;
+using Foundry.Deploy.Services.Cache;
 using Foundry.Deploy.Services.Logging;
 
 namespace Foundry.Deploy.Services.Deployment.Steps;
@@ -11,42 +12,34 @@ namespace Foundry.Deploy.Services.Deployment.Steps;
 public sealed class DownloadOperatingSystemImageStep : DeploymentStepBase
 {
     private readonly IArtifactDownloadService _artifactDownloadService;
+    private readonly PayloadCachePlacementService _placement;
 
-    public DownloadOperatingSystemImageStep(IArtifactDownloadService artifactDownloadService)
+    public DownloadOperatingSystemImageStep(IArtifactDownloadService artifactDownloadService, PayloadCachePlacementService? placement = null)
     {
         _artifactDownloadService = artifactDownloadService;
+        _placement = placement ?? new PayloadCachePlacementService(artifactDownloadService, new VolumeStorageProbe());
     }
 
     public override string Name => DeploymentStepNames.DownloadOperatingSystemImage;
 
     protected override async Task<DeploymentStepResult> ExecuteLiveAsync(DeploymentStepExecutionContext context, CancellationToken cancellationToken)
     {
-        string osDirectory = context.ResolveOperatingSystemCacheRoot(context.Request.OperatingSystem.SizeBytes);
-        Directory.CreateDirectory(osDirectory);
+        ArtifactIdentity artifact = ArtifactIntegrityPolicy.FromOperatingSystem(context.Request.OperatingSystem);
         const string stepMessage = "Downloading OS image...";
-
-        string fileName = DeploymentStepExecutionContext.ResolveFileName(
-            context.Request.OperatingSystem.FileName,
-            context.Request.OperatingSystem.Url);
-        string destinationPath = Path.Combine(osDirectory, fileName);
-        string? expectedOsHash = DeploymentStepExecutionContext.ResolvePreferredHash(
-            context.Request.OperatingSystem.Sha256,
-            context.Request.OperatingSystem.Sha1);
 
         context.EmitCurrentStepIndeterminate(
             stepMessage,
             "Checking cache...",
             DeploymentOperationNames.DownloadOperatingSystemImage);
+        PayloadCachePlacement placement = await _placement.ResolveAsync(artifact,
+            context.ResolveOperatingSystemCacheRoot(), context.ResolveTargetPayloadCacheRoot("OperatingSystems"), cancellationToken).ConfigureAwait(false);
         IProgress<DownloadProgress> osDownloadProgress = context.CreateDownloadProgressReporter(
             "OS image",
             DeploymentOperationNames.DownloadOperatingSystemImage);
-        ArtifactDownloadResult result = await _artifactDownloadService
+        ArtifactDownloadResult result = placement.CachedArtifact ?? await _artifactDownloadService
             .DownloadAsync(
-                context.Request.OperatingSystem.Url,
-                destinationPath,
-                expectedHash: expectedOsHash,
-                expectedSizeBytes: context.Request.OperatingSystem.SizeBytes,
-                artifactKind: "OperatingSystemImage",
+                artifact,
+                placement.Path,
                 cancellationToken: cancellationToken,
                 progress: osDownloadProgress)
             .ConfigureAwait(false);
@@ -74,7 +67,7 @@ public sealed class DownloadOperatingSystemImageStep : DeploymentStepBase
         string simulatedPath = Path.Combine(osDirectory, $"{fileName}.dryrun.txt");
         await File.WriteAllTextAsync(
             simulatedPath,
-            $"Dry-run artifact created at {DateTimeOffset.UtcNow:O}{Environment.NewLine}SourceUrl={context.Request.OperatingSystem.Url}",
+            $"Dry-run artifact created at {DateTimeOffset.UtcNow:O}{Environment.NewLine}SourceHost={new Uri(context.Request.OperatingSystem.Url).Host}",
             cancellationToken).ConfigureAwait(false);
 
         context.RuntimeState.DownloadedOperatingSystemPath = simulatedPath;

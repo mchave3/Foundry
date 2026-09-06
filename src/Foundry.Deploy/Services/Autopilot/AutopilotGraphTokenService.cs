@@ -83,8 +83,13 @@ public sealed class AutopilotGraphTokenService(
             logger,
             "Autopilot Graph token acquisition",
             cancellationToken,
-            options.RetryCount,
-            options.RetryDelay).ConfigureAwait(false);
+            HttpOperationOptions.Metadata with
+            {
+                MaximumAttempts = checked(options.RetryCount + 1),
+                InitialRetryDelay = options.RetryDelay,
+                MaximumRetryDelay = options.RetryDelay > HttpOperationOptions.Metadata.MaximumRetryDelay
+                    ? options.RetryDelay : HttpOperationOptions.Metadata.MaximumRetryDelay
+            }).ConfigureAwait(false);
     }
 
     internal static string CreateClientAssertion(

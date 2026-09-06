@@ -128,13 +128,13 @@ internal static partial class MicrosoftUpdateCatalogSupport
         return compatibleFallback ?? cabDownloads[0];
     }
 
-    public static string ResolvePreferredHash(MicrosoftUpdateCatalogDownload download)
+    /// <summary>Keeps fallback cache bytes on the staging volume but outside its recursively consumed raw tree.</summary>
+    internal static string ResolveFallbackCacheRoot(string stagingRoot)
     {
-        ArgumentNullException.ThrowIfNull(download);
-
-        return !string.IsNullOrWhiteSpace(download.Sha256)
-            ? download.Sha256
-            : download.Sha1;
+        string fullRoot = Path.TrimEndingDirectorySeparator(Path.GetFullPath(stagingRoot));
+        string parent = Path.GetDirectoryName(fullRoot)
+            ?? throw new InvalidOperationException("A staging directory with a parent is required for fallback cache placement.");
+        return Path.Combine(parent, $"{Path.GetFileName(fullRoot)}.cache");
     }
 
     public static string ResolveFileNameFromUrl(string downloadUrl)

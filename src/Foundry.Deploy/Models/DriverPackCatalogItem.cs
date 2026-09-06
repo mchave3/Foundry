@@ -6,6 +6,8 @@ namespace Foundry.Deploy.Models;
 
 public sealed record DriverPackCatalogItem
 {
+    /// <summary>Identifies the authenticated bounded catalog response that supplied this metadata.</summary>
+    public string CatalogRevision { get; init; } = string.Empty;
     public string Id { get; init; } = string.Empty;
     public string PackageId { get; init; } = string.Empty;
     public string Manufacturer { get; init; } = string.Empty;

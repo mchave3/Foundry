@@ -5,6 +5,7 @@
 using System.IO;
 using Foundry.Deploy.Models;
 using Foundry.Deploy.Services.Download;
+using Foundry.Deploy.Services.Cache;
 using Foundry.Deploy.Services.System;
 using Foundry.Utilities.IO;
 using Microsoft.Extensions.Logging;
@@ -24,17 +25,20 @@ public sealed class MicrosoftUpdateCatalogDriverService : IMicrosoftUpdateCatalo
     private readonly IArchiveExtractionService _archiveExtractionService;
     private readonly IMicrosoftUpdateCatalogClient _catalogClient;
     private readonly IArtifactDownloadService _artifactDownloadService;
+    private readonly PayloadCachePlacementService _placement;
     private readonly ILogger<MicrosoftUpdateCatalogDriverService> _logger;
 
     public MicrosoftUpdateCatalogDriverService(
         IArchiveExtractionService archiveExtractionService,
         IMicrosoftUpdateCatalogClient catalogClient,
         IArtifactDownloadService artifactDownloadService,
-        ILogger<MicrosoftUpdateCatalogDriverService> logger)
+        ILogger<MicrosoftUpdateCatalogDriverService> logger,
+        PayloadCachePlacementService? placement = null)
     {
         _archiveExtractionService = archiveExtractionService;
         _catalogClient = catalogClient;
         _artifactDownloadService = artifactDownloadService;
+        _placement = placement ?? new PayloadCachePlacementService(artifactDownloadService, new VolumeStorageProbe());
         _logger = logger;
     }
 
@@ -142,6 +146,7 @@ public sealed class MicrosoftUpdateCatalogDriverService : IMicrosoftUpdateCatalo
                     candidate,
                     destinationPath,
                     cacheDirectory,
+                    destinationDirectory,
                     cancellationToken)
                 .ConfigureAwait(false);
 
@@ -308,32 +313,15 @@ public sealed class MicrosoftUpdateCatalogDriverService : IMicrosoftUpdateCatalo
         CatalogDownloadCandidate candidate,
         string destinationPath,
         string cacheDirectory,
+        string stagingRoot,
         CancellationToken cancellationToken)
     {
-        string expectedHash = MicrosoftUpdateCatalogSupport.ResolvePreferredHash(candidate.Download);
-        if (string.IsNullOrWhiteSpace(expectedHash))
-        {
-            await _artifactDownloadService
-                .DownloadAsync(candidate.Download.DownloadUrl, destinationPath, artifactKind: "MicrosoftUpdateCatalogDriver", cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-            return;
-        }
-
-        string cachePath = Path.Combine(
-            cacheDirectory,
-            MicrosoftUpdateCatalogSupport.SanitizePathSegment(candidate.Update.UpdateId),
-            ResolveFileName(candidate.Download));
-
-        await _artifactDownloadService
-            .DownloadAsync(
-                candidate.Download.DownloadUrl,
-                cachePath,
-                expectedHash: expectedHash,
-                artifactKind: "MicrosoftUpdateCatalogDriver",
-                cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-
-        CopyFile(cachePath, destinationPath);
+        ArtifactIdentity artifact = ArtifactIntegrityPolicy.FromMicrosoftUpdate(candidate.Update, candidate.Download, "MicrosoftUpdateCatalogDriver");
+        string fallbackCacheRoot = Path.Combine(MicrosoftUpdateCatalogSupport.ResolveFallbackCacheRoot(stagingRoot), artifact.SourceId);
+        PayloadCachePlacement placement = await _placement.ResolveAsync(artifact, Path.Combine(cacheDirectory, artifact.SourceId),
+            fallbackCacheRoot, cancellationToken).ConfigureAwait(false);
+        ArtifactDownloadResult result = placement.CachedArtifact ?? await _artifactDownloadService.DownloadAsync(artifact, placement.Path, cancellationToken).ConfigureAwait(false);
+        CopyFile(result.DestinationPath, destinationPath);
     }
 
     private async Task<MicrosoftUpdateCatalogUpdate?> SearchByReleaseAsync(

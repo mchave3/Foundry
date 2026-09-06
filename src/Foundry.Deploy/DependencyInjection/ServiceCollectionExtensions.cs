@@ -114,6 +114,8 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IMicrosoftUpdateCatalogDriverService, MicrosoftUpdateCatalogDriverService>();
         services.AddSingleton<IMicrosoftUpdateCatalogFirmwareService, MicrosoftUpdateCatalogFirmwareService>();
         services.AddSingleton<IArtifactDownloadService, ArtifactDownloadService>();
+        services.AddSingleton<IVolumeStorageProbe, VolumeStorageProbe>();
+        services.AddSingleton<PayloadCachePlacementService>();
         services.AddSingleton<IDriverPackStrategyResolver, DriverPackStrategyResolver>();
         services.AddSingleton<IDriverPackExtractionService, DriverPackExtractionService>();
         services.AddSingleton<IWindowsDeploymentService, WindowsDeploymentService>();

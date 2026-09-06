@@ -5,6 +5,7 @@
 using System.IO;
 using Foundry.Deploy.Models;
 using Foundry.Deploy.Services.Download;
+using Foundry.Deploy.Services.Cache;
 using Foundry.Deploy.Services.System;
 using Foundry.Utilities.IO;
 using Microsoft.Extensions.Logging;
@@ -16,17 +17,20 @@ public sealed class MicrosoftUpdateCatalogFirmwareService : IMicrosoftUpdateCata
     private readonly IArchiveExtractionService _archiveExtractionService;
     private readonly IMicrosoftUpdateCatalogClient _catalogClient;
     private readonly IArtifactDownloadService _artifactDownloadService;
+    private readonly PayloadCachePlacementService _placement;
     private readonly ILogger<MicrosoftUpdateCatalogFirmwareService> _logger;
 
     public MicrosoftUpdateCatalogFirmwareService(
         IArchiveExtractionService archiveExtractionService,
         IMicrosoftUpdateCatalogClient catalogClient,
         IArtifactDownloadService artifactDownloadService,
-        ILogger<MicrosoftUpdateCatalogFirmwareService> logger)
+        ILogger<MicrosoftUpdateCatalogFirmwareService> logger,
+        PayloadCachePlacementService? placement = null)
     {
         _archiveExtractionService = archiveExtractionService;
         _catalogClient = catalogClient;
         _artifactDownloadService = artifactDownloadService;
+        _placement = placement ?? new PayloadCachePlacementService(artifactDownloadService, new VolumeStorageProbe());
         _logger = logger;
     }
 
@@ -108,7 +112,7 @@ public sealed class MicrosoftUpdateCatalogFirmwareService : IMicrosoftUpdateCata
         string destinationPath = Path.Combine(updateDirectory, fileName);
 
         progress?.Report(50d);
-        await DownloadToStagingAsync(update, selectedDownload, destinationPath, cacheDirectory, cancellationToken)
+        await DownloadToStagingAsync(update, selectedDownload, destinationPath, cacheDirectory, rawDirectory, cancellationToken)
             .ConfigureAwait(false);
 
         progress?.Report(75d);
@@ -178,32 +182,15 @@ public sealed class MicrosoftUpdateCatalogFirmwareService : IMicrosoftUpdateCata
         MicrosoftUpdateCatalogDownload download,
         string destinationPath,
         string cacheDirectory,
+        string stagingRoot,
         CancellationToken cancellationToken)
     {
-        string expectedHash = MicrosoftUpdateCatalogSupport.ResolvePreferredHash(download);
-        if (string.IsNullOrWhiteSpace(expectedHash))
-        {
-            await _artifactDownloadService
-                .DownloadAsync(download.DownloadUrl, destinationPath, artifactKind: "MicrosoftUpdateCatalogFirmware", cancellationToken: cancellationToken)
-                .ConfigureAwait(false);
-            return;
-        }
-
-        string cachePath = Path.Combine(
-            cacheDirectory,
-            MicrosoftUpdateCatalogSupport.SanitizePathSegment(update.UpdateId),
-            ResolveFileName(download));
-
-        await _artifactDownloadService
-            .DownloadAsync(
-                download.DownloadUrl,
-                cachePath,
-                expectedHash: expectedHash,
-                artifactKind: "MicrosoftUpdateCatalogFirmware",
-                cancellationToken: cancellationToken)
-            .ConfigureAwait(false);
-
-        CopyFile(cachePath, destinationPath);
+        ArtifactIdentity artifact = ArtifactIntegrityPolicy.FromMicrosoftUpdate(update, download, "MicrosoftUpdateCatalogFirmware");
+        string fallbackCacheRoot = Path.Combine(MicrosoftUpdateCatalogSupport.ResolveFallbackCacheRoot(stagingRoot), artifact.SourceId);
+        PayloadCachePlacement placement = await _placement.ResolveAsync(artifact, Path.Combine(cacheDirectory, artifact.SourceId),
+            fallbackCacheRoot, cancellationToken).ConfigureAwait(false);
+        ArtifactDownloadResult result = placement.CachedArtifact ?? await _artifactDownloadService.DownloadAsync(artifact, placement.Path, cancellationToken).ConfigureAwait(false);
+        CopyFile(result.DestinationPath, destinationPath);
     }
 
     private static string ResolveFileName(MicrosoftUpdateCatalogDownload download)

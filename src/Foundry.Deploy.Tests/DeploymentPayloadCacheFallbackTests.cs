@@ -17,20 +17,43 @@ namespace Foundry.Deploy.Tests;
 public sealed class DeploymentPayloadCacheFallbackTests
 {
     [Fact]
+    public async Task DownloadDriverPackStep_CatalogCompletionLogOmitsDownloadQuery()
+    {
+        using TempDeploymentWorkspace workspace = TempDeploymentWorkspace.Create();
+        var logs = new FakeDeploymentLogService();
+        using DeploymentStepExecutionContext context = CreateExecutionContext(workspace,
+            selectionKind: DriverPackSelectionKind.MicrosoftUpdateCatalog, logService: logs);
+        var downloadedDriver = new MicrosoftUpdateCatalogDownloadedDriver
+        {
+            UpdateId = "update-1", Title = "Network driver", Version = "1.0", Size = "1 MB",
+            DownloadUrl = "https://download.windowsupdate.com/driver.cab?token=PRIVATE_QUERY_SENTINEL"
+        };
+        var step = new DownloadDriverPackStep(new FakeMicrosoftUpdateCatalogDriverService(downloadedDriver), new CapturingArtifactDownloadService());
+
+        DeploymentStepResult result = await step.ExecuteAsync(context, TestContext.Current.CancellationToken);
+
+        Assert.Equal(DeploymentStepState.Succeeded, result.State);
+        Assert.DoesNotContain(logs.Messages, message => message.Contains("PRIVATE_QUERY_SENTINEL", StringComparison.Ordinal));
+        Assert.DoesNotContain(logs.Messages, message => message.Contains("?token=", StringComparison.Ordinal));
+        Assert.Contains(logs.Messages, message => message.Contains("SourceHost=download.windowsupdate.com", StringComparison.Ordinal) &&
+            message.Contains("UpdateId=update-1", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public async Task DownloadOperatingSystemImageStep_WhenUsbCacheHasInsufficientSpace_UsesTargetCache()
     {
         using TempDeploymentWorkspace workspace = TempDeploymentWorkspace.Create();
         var downloadService = new CapturingArtifactDownloadService();
         DeploymentStepExecutionContext context = CreateExecutionContext(
             workspace,
-            operatingSystemSizeBytes: long.MaxValue);
-        var step = new DownloadOperatingSystemImageStep(downloadService);
+            operatingSystemSizeBytes: 100);
+        var step = new DownloadOperatingSystemImageStep(downloadService, new PayloadCachePlacementService(downloadService, new TestStorageProbe()));
 
         DeploymentStepResult result = await step.ExecuteAsync(context, CancellationToken.None);
 
         Assert.Equal(DeploymentStepState.Succeeded, result.State);
         Assert.Equal(
-            Path.Combine(workspace.TargetFoundryRoot, "Cache", "OperatingSystems", "install.wim"),
+            Path.Combine(workspace.TargetFoundryRoot, "Cache", "OperatingSystems", downloadService.Artifact!.CacheKey, "install.wim"),
             downloadService.DestinationPath);
     }
 
@@ -42,13 +65,13 @@ public sealed class DeploymentPayloadCacheFallbackTests
         DeploymentStepExecutionContext context = CreateExecutionContext(
             workspace,
             operatingSystemSizeBytes: 1);
-        var step = new DownloadOperatingSystemImageStep(downloadService);
+        var step = new DownloadOperatingSystemImageStep(downloadService, new PayloadCachePlacementService(downloadService, new TestStorageProbe()));
 
         DeploymentStepResult result = await step.ExecuteAsync(context, CancellationToken.None);
 
         Assert.Equal(DeploymentStepState.Succeeded, result.State);
         Assert.Equal(
-            Path.Combine(workspace.UsbCacheRoot, "Cache", "OperatingSystems", "install.wim"),
+            Path.Combine(workspace.UsbCacheRoot, "Cache", "OperatingSystems", downloadService.Artifact!.CacheKey, "install.wim"),
             downloadService.DestinationPath);
     }
 
@@ -59,14 +82,14 @@ public sealed class DeploymentPayloadCacheFallbackTests
         var downloadService = new CapturingArtifactDownloadService();
         DeploymentStepExecutionContext context = CreateExecutionContext(
             workspace,
-            driverPackSizeBytes: long.MaxValue);
-        var step = new DownloadDriverPackStep(new FakeMicrosoftUpdateCatalogDriverService(), downloadService);
+            driverPackSizeBytes: 100);
+        var step = new DownloadDriverPackStep(new FakeMicrosoftUpdateCatalogDriverService(), downloadService, new PayloadCachePlacementService(downloadService, new TestStorageProbe()));
 
         DeploymentStepResult result = await step.ExecuteAsync(context, CancellationToken.None);
 
         Assert.Equal(DeploymentStepState.Succeeded, result.State);
         Assert.Equal(
-            Path.Combine(workspace.TargetFoundryRoot, "Cache", "DriverPacks", "Contoso", "drivers.cab"),
+            Path.Combine(workspace.TargetFoundryRoot, "Cache", "DriverPacks", "Contoso", downloadService.Artifact!.CacheKey, "drivers.cab"),
             downloadService.DestinationPath);
     }
 
@@ -78,20 +101,22 @@ public sealed class DeploymentPayloadCacheFallbackTests
         DeploymentStepExecutionContext context = CreateExecutionContext(
             workspace,
             driverPackSizeBytes: 1);
-        var step = new DownloadDriverPackStep(new FakeMicrosoftUpdateCatalogDriverService(), downloadService);
+        var step = new DownloadDriverPackStep(new FakeMicrosoftUpdateCatalogDriverService(), downloadService, new PayloadCachePlacementService(downloadService, new TestStorageProbe()));
 
         DeploymentStepResult result = await step.ExecuteAsync(context, CancellationToken.None);
 
         Assert.Equal(DeploymentStepState.Succeeded, result.State);
         Assert.Equal(
-            Path.Combine(workspace.UsbCacheRoot, "Cache", "DriverPacks", "Contoso", "drivers.cab"),
+            Path.Combine(workspace.UsbCacheRoot, "Cache", "DriverPacks", "Contoso", downloadService.Artifact!.CacheKey, "drivers.cab"),
             downloadService.DestinationPath);
     }
 
     private static DeploymentStepExecutionContext CreateExecutionContext(
         TempDeploymentWorkspace workspace,
         long operatingSystemSizeBytes = 1,
-        long driverPackSizeBytes = 1)
+        long driverPackSizeBytes = 1,
+        DriverPackSelectionKind selectionKind = DriverPackSelectionKind.OemCatalog,
+        IDeploymentLogService? logService = null)
     {
         var request = new DeploymentContext
         {
@@ -101,13 +126,19 @@ public sealed class DeploymentPayloadCacheFallbackTests
             TargetComputerName = "LAB01",
             OperatingSystem = new OperatingSystemCatalogItem
             {
+                CatalogRevision = "trusted-revision",
+                SourceId = "os-1",
+                Sha256 = new string('A', 64),
                 FileName = "install.wim",
                 Url = "https://example.test/install.wim",
                 SizeBytes = operatingSystemSizeBytes
             },
-            DriverPackSelectionKind = DriverPackSelectionKind.OemCatalog,
+            DriverPackSelectionKind = selectionKind,
             DriverPack = new DriverPackCatalogItem
             {
+                CatalogRevision = "trusted-revision",
+                Id = "driver-1",
+                Sha256 = new string('B', 64),
                 Manufacturer = "Contoso",
                 Name = "Contoso Driver Pack",
                 FileName = "drivers.cab",
@@ -120,6 +151,7 @@ public sealed class DeploymentPayloadCacheFallbackTests
         var runtimeState = new DeploymentRuntimeState
         {
             WorkspaceRoot = workspace.WorkspaceRoot,
+            HardwareProfile = new HardwareProfile(),
             Mode = DeploymentMode.Usb,
             TargetFoundryRoot = workspace.TargetFoundryRoot,
             ResolvedCache = new CacheResolution
@@ -134,7 +166,7 @@ public sealed class DeploymentPayloadCacheFallbackTests
             runtimeState,
             [],
             new FakeOperationProgressService(),
-            new FakeDeploymentLogService(),
+            logService ?? new FakeDeploymentLogService(),
             new FakeTargetDiskService(),
             _ => { });
     }
@@ -143,15 +175,15 @@ public sealed class DeploymentPayloadCacheFallbackTests
     {
         public string? DestinationPath { get; private set; }
 
+        public ArtifactIdentity? Artifact { get; private set; }
+        public Task<ArtifactDownloadResult?> TryUseCachedAsync(ArtifactIdentity artifact, string path, CancellationToken cancellationToken = default) => Task.FromResult<ArtifactDownloadResult?>(null);
         public Task<ArtifactDownloadResult> DownloadAsync(
-            string sourceUrl,
+            ArtifactIdentity artifact,
             string destinationPath,
-            string? expectedHash = null,
-            long? expectedSizeBytes = null,
-            string? artifactKind = null,
             CancellationToken cancellationToken = default,
             IProgress<DownloadProgress>? progress = null)
         {
+            Artifact = artifact;
             DestinationPath = destinationPath;
             return Task.FromResult(new ArtifactDownloadResult
             {
@@ -163,7 +195,12 @@ public sealed class DeploymentPayloadCacheFallbackTests
         }
     }
 
-    private sealed class FakeMicrosoftUpdateCatalogDriverService : IMicrosoftUpdateCatalogDriverService
+    private sealed class TestStorageProbe : IVolumeStorageProbe
+    {
+        public VolumeStorageStatus Inspect(string directory) => new(true, true, directory.Contains("TargetWindows", StringComparison.Ordinal) ? 1000 : 10);
+    }
+
+    private sealed class FakeMicrosoftUpdateCatalogDriverService(MicrosoftUpdateCatalogDownloadedDriver? downloadedDriver = null) : IMicrosoftUpdateCatalogDriverService
     {
         public Task<MicrosoftUpdateCatalogDriverResult> DownloadAsync(
             HardwareProfile hardwareProfile,
@@ -176,7 +213,8 @@ public sealed class DeploymentPayloadCacheFallbackTests
             return Task.FromResult(new MicrosoftUpdateCatalogDriverResult
             {
                 DestinationDirectory = destinationDirectory,
-                IsPayloadAvailable = false,
+                IsPayloadAvailable = downloadedDriver is not null,
+                DownloadedDrivers = downloadedDriver is null ? [] : [downloadedDriver],
                 Message = "No Microsoft Update Catalog payload."
             });
         }
@@ -233,6 +271,7 @@ public sealed class DeploymentPayloadCacheFallbackTests
 
     private sealed class FakeDeploymentLogService : IDeploymentLogService
     {
+        public List<string> Messages { get; } = [];
         public DeploymentLogSession Initialize(string rootPath)
         {
             return new DeploymentLogSession
@@ -250,6 +289,7 @@ public sealed class DeploymentPayloadCacheFallbackTests
             string message,
             CancellationToken cancellationToken = default)
         {
+            Messages.Add(message);
             return Task.CompletedTask;
         }
 

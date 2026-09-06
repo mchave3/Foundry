@@ -66,22 +66,6 @@ public sealed class MicrosoftUpdateCatalogSupportTests
         Assert.Equal("https://example.test/driver-generic.cab", download?.DownloadUrl);
     }
 
-    [Fact]
-    public void ResolvePreferredHash_PrefersSha256OverSha1()
-    {
-        var download = new MicrosoftUpdateCatalogDownload
-        {
-            DownloadUrl = "https://example.test/driver.cab",
-            FileName = "driver.cab",
-            Sha1 = new string('A', 40),
-            Sha256 = new string('B', 64)
-        };
-
-        string hash = MicrosoftUpdateCatalogSupport.ResolvePreferredHash(download);
-
-        Assert.Equal(new string('B', 64), hash);
-    }
-
     private static MicrosoftUpdateCatalogDownload CreateDownload(string url)
     {
         return new MicrosoftUpdateCatalogDownload

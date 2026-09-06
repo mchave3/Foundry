@@ -8,6 +8,9 @@ using System.Net.Http;
 using System.Xml.Linq;
 using Foundry.Deploy.Models;
 using Foundry.Deploy.Services.Http;
+using Foundry.Deploy.Services.Download;
+using Foundry.Utilities.Networking;
+using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 
 namespace Foundry.Deploy.Services.Catalog;
@@ -16,7 +19,7 @@ public sealed class OperatingSystemCatalogService : IOperatingSystemCatalogServi
 {
     private const int SupportedSchemaVersion = 4;
     private const string CatalogUri = "https://raw.githubusercontent.com/foundry-osd/catalog/refs/heads/main/Cache/OS/OperatingSystem.xml";
-    private static readonly HttpClient HttpClient = InsecureHttpClientFactory.Create(TimeSpan.FromMinutes(60));
+    private static readonly HttpClient HttpClient = AcquisitionHttpClientFactory.Create(TimeSpan.FromSeconds(20));
     private readonly ILogger<OperatingSystemCatalogService> _logger;
 
     public OperatingSystemCatalogService(ILogger<OperatingSystemCatalogService> logger)
@@ -63,14 +66,15 @@ public sealed class OperatingSystemCatalogService : IOperatingSystemCatalogServi
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Operating system catalog load failed from {CatalogUri}.", CatalogUri);
+            _logger.LogError("Operating system catalog load failed. FailureType={FailureType}", ex.GetType().Name);
             throw;
         }
     }
 
     internal static IReadOnlyList<OperatingSystemCatalogItem> ParseCatalog(string xmlContent)
     {
-        XDocument document = XDocument.Parse(xmlContent);
+        string revision = CatalogContentIdentity.Calculate(xmlContent);
+        XDocument document = CatalogContentIdentity.ParseXml(xmlContent);
         XElement root = document.Root
             ?? throw new InvalidDataException("Operating system catalog root element is missing.");
         if (!int.TryParse(root.Attribute("schemaVersion")?.Value, NumberStyles.Integer, CultureInfo.InvariantCulture, out int schemaVersion) ||
@@ -80,7 +84,7 @@ public sealed class OperatingSystemCatalogService : IOperatingSystemCatalogServi
                 $"Operating system catalog schema version {SupportedSchemaVersion} is required.");
         }
 
-        var sourcesById = new Dictionary<string, SourceMetadata>(StringComparer.OrdinalIgnoreCase);
+        var sourcesById = new Dictionary<string, SourceMetadata>(StringComparer.Ordinal);
         foreach (XElement source in root.Element("Sources")?.Elements("Source") ?? [])
         {
             string sourceId = (source.Attribute("id")?.Value ?? string.Empty).Trim();
@@ -114,7 +118,11 @@ public sealed class OperatingSystemCatalogService : IOperatingSystemCatalogServi
                         $"Operating system catalog item references unknown source '{sourceId}'.");
                 }
 
-                return ParseItem(item, source);
+                OperatingSystemCatalogItem parsed = ParseItem(item, source) with { CatalogRevision = revision };
+                ArtifactIntegrityPolicy.ValidateIdentity(new ArtifactIdentity(revision, parsed.SourceId, new Uri(parsed.Url), parsed.FileName,
+                    new FileIntegrity(string.IsNullOrEmpty(parsed.Sha256) ? null : new FileDigest(HashAlgorithmName.SHA256, parsed.Sha256), parsed.SizeBytes == 0 ? null : parsed.SizeBytes),
+                    "OperatingSystemImage", null));
+                return parsed;
             })
             .ToArray();
     }
@@ -151,9 +159,15 @@ public sealed class OperatingSystemCatalogService : IOperatingSystemCatalogServi
 
     private static long ParseLong(string value)
     {
-        return long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out long parsed)
-            ? parsed
-            : 0;
+        if (string.IsNullOrEmpty(value))
+        {
+            return 0;
+        }
+        if (!long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out long parsed) || parsed < 0)
+        {
+            throw new ArgumentException("Catalog size must be a nonnegative integer.");
+        }
+        return parsed;
     }
 
     private static string NormalizeArchitecture(string value)

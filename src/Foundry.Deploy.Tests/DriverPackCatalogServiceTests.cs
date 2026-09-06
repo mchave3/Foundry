@@ -10,6 +10,16 @@ namespace Foundry.Deploy.Tests;
 
 public sealed class DriverPackCatalogServiceTests
 {
+    [Theory]
+    [InlineData("../driver.exe", "1")]
+    [InlineData("driver.exe", "invalid")]
+    [InlineData("driver.exe", "-1")]
+    public void ParseItem_RejectsMalformedFileIdentity(string fileName, string size)
+    {
+        XElement element = XElement.Parse($"""<DriverPack id="driver-1" fileName="{fileName}" sizeBytes="{size}" downloadUrl="https://example.test/driver.exe" />""");
+        Assert.ThrowsAny<ArgumentException>(() => DriverPackCatalogService.ParseItem(element));
+    }
+
     [Fact]
     public void ParseItem_PreservesModelSystemIds()
     {
