@@ -15,6 +15,28 @@ namespace Foundry.Deploy.Tests;
 public sealed class PreparedDeploymentLifecycleTests
 {
     [Fact]
+    public async Task PrepareTargetDiskAsync_RejectsTruncatedPartitionJsonBeforeRetainingLayout()
+    {
+        string directory = Directory.CreateTempSubdirectory("foundry-partition-output-").FullName;
+        try
+        {
+            var runner = new LifecycleRunner(false, truncatePreparationOutput: true);
+            var service = new WindowsDeploymentService(runner, NullLogger<WindowsDeploymentService>.Instance,
+                () => WindowsFirmwareType.Uefi, _ => Assert.Fail("Partition attributes must not be changed after incomplete output."));
+            var expected = new TargetDiskIdentity(9, "confirmed-disk", "confirmed-serial", 137438953472, "NVMe");
+
+            await Assert.ThrowsAsync<InvalidDataException>(() => service.PrepareTargetDiskAsync(expected, directory, TestContext.Current.CancellationToken));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => service.ConfigureBootAsync(VolumePathDiagnosticTests.WindowsRoot,
+                VolumePathDiagnosticTests.SystemRoot, 26200, directory, TestContext.Current.CancellationToken));
+            Assert.Equal(["prepare"], runner.Events);
+        }
+        finally
+        {
+            Directory.Delete(directory, true);
+        }
+    }
+
+    [Fact]
     public async Task PublicBootFailure_RedactsDiagnosticCopyAndPreservesExecutionPaths()
     {
         string directory = Directory.CreateTempSubdirectory("foundry-boot-failure-").FullName;
@@ -75,17 +97,17 @@ public sealed class PreparedDeploymentLifecycleTests
         finally { Directory.Delete(directory, true); }
     }
 
-    private sealed class LifecycleRunner(bool rejectRecovery, bool failBoot = false) : IProcessRunner
+    private sealed class LifecycleRunner(bool rejectRecovery, bool failBoot = false, bool truncatePreparationOutput = false) : IProcessRunner
     {
         private int _storageCalls;
         public List<string> Events { get; } = [];
         public string[]? BootArguments { get; private set; }
         public string? BootExecutable { get; private set; }
-        public Task<ProcessExecutionResult> RunAsync(string fileName, string arguments, string workingDirectory, CancellationToken cancellationToken = default) => throw new InvalidOperationException("Expected token arguments.");
-        public Task<ProcessExecutionResult> RunAsync(string fileName, IEnumerable<string> arguments, string workingDirectory, CancellationToken cancellationToken = default) =>
+        public Task<ProcessExecutionResult> RunAsync(string fileName, string arguments, string workingDirectory, CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null) => throw new InvalidOperationException("Expected token arguments.");
+        public Task<ProcessExecutionResult> RunAsync(string fileName, IEnumerable<string> arguments, string workingDirectory, CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null) =>
             RunAsync(fileName, arguments, workingDirectory, null, null, cancellationToken);
         public Task<ProcessExecutionResult> RunAsync(string fileName, IEnumerable<string> arguments, string workingDirectory,
-            Action<string>? onOutputData, Action<string>? onErrorData, CancellationToken cancellationToken = default)
+            Action<string>? onOutputData, Action<string>? onErrorData, CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null)
         {
             string[] tokens = arguments.ToArray();
             if (!fileName.Equals("powershell.exe", StringComparison.Ordinal))
@@ -116,7 +138,12 @@ public sealed class PreparedDeploymentLifecycleTests
                 Windows = Partition(VolumePathDiagnosticTests.WindowsRoot, 100000000000, 'W'),
                 Recovery = Partition(VolumePathDiagnosticTests.RecoveryRoot, 5368709120, 'R')
             });
-            return Task.FromResult(new ProcessExecutionResult { ExitCode = rejectRecovery && call == 2 ? 5 : 0, StandardOutput = call == 1 ? json : "" });
+            return Task.FromResult(new ProcessExecutionResult
+            {
+                ExitCode = rejectRecovery && call == 2 ? 5 : 0,
+                StandardOutput = call == 1 ? json : "",
+                StandardOutputTruncated = truncatePreparationOutput && call == 1
+            });
         }
         private static JsonDocument ReadEncodedData(string line)
         {

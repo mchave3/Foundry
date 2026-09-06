@@ -200,8 +200,8 @@ public sealed class TargetDiskSafetyTests
 
     private sealed class RejectingRunner : Foundry.Deploy.Services.System.IProcessRunner
     {
-        public Task<ProcessExecutionResult> RunAsync(string fileName, string arguments, string workingDirectory, CancellationToken cancellationToken = default) => throw new Xunit.Sdk.XunitException("Unexpected process.");
-        public Task<ProcessExecutionResult> RunAsync(string fileName, IEnumerable<string> arguments, string workingDirectory, CancellationToken cancellationToken = default) => throw new Xunit.Sdk.XunitException("Unexpected process.");
-        public Task<ProcessExecutionResult> RunAsync(string fileName, IEnumerable<string> arguments, string workingDirectory, Action<string>? onOutputData, Action<string>? onErrorData, CancellationToken cancellationToken = default) => throw new Xunit.Sdk.XunitException("Unexpected process.");
+        public Task<ProcessExecutionResult> RunAsync(string fileName, string arguments, string workingDirectory, CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null) => throw new Xunit.Sdk.XunitException("Unexpected process.");
+        public Task<ProcessExecutionResult> RunAsync(string fileName, IEnumerable<string> arguments, string workingDirectory, CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null) => throw new Xunit.Sdk.XunitException("Unexpected process.");
+        public Task<ProcessExecutionResult> RunAsync(string fileName, IEnumerable<string> arguments, string workingDirectory, Action<string>? onOutputData, Action<string>? onErrorData, CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null) => throw new Xunit.Sdk.XunitException("Unexpected process.");
     }
 }

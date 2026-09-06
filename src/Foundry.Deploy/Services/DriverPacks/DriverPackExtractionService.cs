@@ -165,7 +165,8 @@ public sealed class DriverPackExtractionService : IDriverPackExtractionService
                     $"/e={extractedPath}"
                 ],
                 workingDirectory,
-                cancellationToken)
+                cancellationToken,
+                TimeSpan.FromHours(4))
             .ConfigureAwait(false);
 
         if (!execution.IsSuccess)

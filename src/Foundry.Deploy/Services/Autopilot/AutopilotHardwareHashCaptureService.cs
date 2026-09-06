@@ -82,7 +82,8 @@ public sealed class AutopilotHardwareHashCaptureService(
                 oa3ToolPath,
                 ["/Report", "/ConfigFile=.\\OA3.cfg", "/NoKeyCheck", "/LogTrace=.\\OA3.log"],
                 runtimeHashRoot,
-                cancellationToken)
+                cancellationToken,
+                TimeSpan.FromMinutes(2))
             .ConfigureAwait(false);
 
         if (!execution.IsSuccess)

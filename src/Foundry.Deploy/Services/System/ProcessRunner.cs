@@ -10,6 +10,7 @@ namespace Foundry.Deploy.Services.System;
 
 public sealed class ProcessRunner : IProcessRunner
 {
+    private static readonly TimeSpan DefaultExecutionTimeout = TimeSpan.FromHours(4);
     private readonly UtilityProcessRunner _processRunner;
     private readonly ILogger<ProcessRunner> _logger;
 
@@ -23,12 +24,12 @@ public sealed class ProcessRunner : IProcessRunner
         string fileName,
         string arguments,
         string workingDirectory,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null)
     {
         ProcessExecutionRequest request = ProcessExecutionRequest.FromRawArguments(
             fileName,
             arguments,
-            workingDirectory);
+            workingDirectory) with { ExecutionTimeout = executionTimeout ?? DefaultExecutionTimeout };
 
         return await RunAsync(request, arguments, cancellationToken).ConfigureAwait(false);
     }
@@ -37,7 +38,7 @@ public sealed class ProcessRunner : IProcessRunner
         string fileName,
         IEnumerable<string> arguments,
         string workingDirectory,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null)
     {
         return await RunAsync(
             fileName,
@@ -45,7 +46,8 @@ public sealed class ProcessRunner : IProcessRunner
             workingDirectory,
             onOutputData: null,
             onErrorData: null,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken,
+            executionTimeout).ConfigureAwait(false);
     }
 
     public async Task<ProcessExecutionResult> RunAsync(
@@ -54,13 +56,14 @@ public sealed class ProcessRunner : IProcessRunner
         string workingDirectory,
         Action<string>? onOutputData,
         Action<string>? onErrorData,
-        CancellationToken cancellationToken = default)
+        CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null)
     {
         ArgumentNullException.ThrowIfNull(arguments);
 
         string[] argumentList = [.. arguments];
         var request = new ProcessExecutionRequest(fileName, argumentList, workingDirectory)
         {
+            ExecutionTimeout = executionTimeout ?? DefaultExecutionTimeout,
             OnOutputData = WrapCallback(onOutputData),
             OnErrorData = WrapCallback(onErrorData)
         };

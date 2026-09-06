@@ -28,6 +28,8 @@ namespace Foundry.Deploy.Services.Deployment;
 /// </summary>
 public sealed class WindowsDeploymentService : IWindowsDeploymentService
 {
+    private static readonly TimeSpan MetadataExecutionTimeout = TimeSpan.FromMinutes(2);
+    private static readonly TimeSpan NativeExecutionTimeout = TimeSpan.FromHours(4);
     private const string WinReImageFileName = "winre.wim";
     private const string AdministratorActivationDescription = "Enable built-in Administrator account";
     private const string AdministratorActivationCommand =
@@ -90,7 +92,8 @@ public sealed class WindowsDeploymentService : IWindowsDeploymentService
         Directory.CreateDirectory(workingDirectory);
         ProcessExecutionResult result = await RunStorageScriptAsync(
             TargetDiskPreparationScript.Create(expectedDisk, systemLetter, windowsLetter, recoveryLetter),
-            workingDirectory, cancellationToken).ConfigureAwait(false);
+            workingDirectory, cancellationToken, NativeExecutionTimeout).ConfigureAwait(false);
+        result.EnsureCompleteOutput();
         PreparedPartitions partitions = JsonSerializer.Deserialize<PreparedPartitions>(result.StandardOutput)
             ?? throw new InvalidOperationException("The prepared partition layout is unavailable.");
         partitions.System.Validate();
@@ -117,11 +120,11 @@ public sealed class WindowsDeploymentService : IWindowsDeploymentService
 
     private sealed record PreparedPartitions(DeploymentPartitionIdentity System, DeploymentPartitionIdentity Windows, DeploymentPartitionIdentity Recovery);
 
-    private async Task<ProcessExecutionResult> RunStorageScriptAsync(string script, string workingDirectory, CancellationToken cancellationToken)
+    private async Task<ProcessExecutionResult> RunStorageScriptAsync(string script, string workingDirectory, CancellationToken cancellationToken, TimeSpan? executionTimeout = null)
     {
         ProcessExecutionResult result = await _processRunner.RunAsync("powershell.exe",
             new[] { "-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass" }.Concat(PowerShellCommand.CreateEncodedArguments(script)),
-            workingDirectory, cancellationToken).ConfigureAwait(false);
+            workingDirectory, cancellationToken, executionTimeout ?? MetadataExecutionTimeout).ConfigureAwait(false);
         if (!result.IsSuccess)
             throw new DeploymentProcessException("The confirmed disk or partition operation failed.", result.ExitCode);
         return result;
@@ -142,9 +145,10 @@ public sealed class WindowsDeploymentService : IWindowsDeploymentService
         ProcessExecutionResult execution = await _processRunner
             .RunAsync(
                 "dism.exe",
-                $"/English /Get-ImageInfo /ImageFile:\"{imagePath}\"",
+                ["/English", "/Get-ImageInfo", $"/ImageFile:{imagePath}"],
                 workingDirectory,
-                cancellationToken)
+                cancellationToken,
+                MetadataExecutionTimeout)
             .ConfigureAwait(false);
 
         if (!execution.IsSuccess)
@@ -155,6 +159,7 @@ public sealed class WindowsDeploymentService : IWindowsDeploymentService
                 execution.ExitCode);
         }
 
+        execution.EnsureCompleteOutput();
         IReadOnlyList<int> imageIndexes = ParseImageIndexes(execution.StandardOutput);
         if (imageIndexes.Count == 0)
         {
@@ -173,9 +178,10 @@ public sealed class WindowsDeploymentService : IWindowsDeploymentService
             ProcessExecutionResult detailedExecution = await _processRunner
                 .RunAsync(
                     "dism.exe",
-                    $"/English /Get-ImageInfo /ImageFile:\"{imagePath}\" /Index:{imageIndex}",
+                    ["/English", "/Get-ImageInfo", $"/ImageFile:{imagePath}", $"/Index:{imageIndex}"],
                     workingDirectory,
-                    cancellationToken)
+                    cancellationToken,
+                    MetadataExecutionTimeout)
                 .ConfigureAwait(false);
 
             if (!detailedExecution.IsSuccess)
@@ -190,6 +196,7 @@ public sealed class WindowsDeploymentService : IWindowsDeploymentService
                     detailedExecution.ExitCode);
             }
 
+            detailedExecution.EnsureCompleteOutput();
             imageMetadata.Add(new ImageIndexMetadata(imageIndex, ParseEditionId(detailedExecution.StandardOutput)));
         }
 
@@ -292,8 +299,9 @@ public sealed class WindowsDeploymentService : IWindowsDeploymentService
             arguments,
             workingDirectory,
             "Failed to query the applied Windows edition",
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken, MetadataExecutionTimeout).ConfigureAwait(false);
 
+        execution.EnsureCompleteOutput();
         Match editionMatch = Regex.Match(
             execution.StandardOutput,
             @"Current\s+Edition\s*:\s*(.+)",
@@ -1252,7 +1260,7 @@ public sealed class WindowsDeploymentService : IWindowsDeploymentService
                 if (unmountProgress is null)
                 {
                     unmountExecution = await _processRunner
-                        .RunAsync("dism.exe", unmountArguments, workingDirectory, cancellationToken)
+                        .RunAsync("dism.exe", unmountArguments, workingDirectory, cancellationToken, NativeExecutionTimeout)
                         .ConfigureAwait(false);
                 }
                 else
@@ -1265,7 +1273,8 @@ public sealed class WindowsDeploymentService : IWindowsDeploymentService
                             workingDirectory,
                             unmountProgressReporter.HandleOutput,
                             unmountProgressReporter.HandleOutput,
-                            cancellationToken)
+                            cancellationToken,
+                            NativeExecutionTimeout)
                         .ConfigureAwait(false);
                 }
 
@@ -1351,31 +1360,9 @@ public sealed class WindowsDeploymentService : IWindowsDeploymentService
             arguments,
             workingDirectory,
             "BCDBoot configuration failed",
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken, MetadataExecutionTimeout).ConfigureAwait(false);
 
         _logger.LogInformation("BCDBoot configuration completed successfully.");
-    }
-
-    private async Task<ProcessExecutionResult> RunRequiredProcessAsync(
-        string fileName,
-        string arguments,
-        string workingDirectory,
-        string failureSummary,
-        CancellationToken cancellationToken)
-    {
-        ProcessExecutionResult execution = await _processRunner
-            .RunAsync(fileName, arguments, workingDirectory, cancellationToken)
-            .ConfigureAwait(false);
-
-        if (!execution.IsSuccess)
-        {
-            _logger.LogError("{FailureSummary}. Diagnostic={Diagnostic}", failureSummary, VolumePathDiagnostics.Redact(execution.ToDiagnosticText()));
-            throw new DeploymentProcessException(
-                $"{failureSummary}.{Environment.NewLine}{VolumePathDiagnostics.Redact(execution.ToDiagnosticText())}",
-                execution.ExitCode);
-        }
-
-        return execution;
     }
 
     private async Task<ProcessExecutionResult> RunRequiredProcessAsync(
@@ -1383,7 +1370,8 @@ public sealed class WindowsDeploymentService : IWindowsDeploymentService
         IEnumerable<string> arguments,
         string workingDirectory,
         string failureSummary,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        TimeSpan? executionTimeout = null)
     {
         return await RunRequiredProcessAsync(
             fileName,
@@ -1392,7 +1380,8 @@ public sealed class WindowsDeploymentService : IWindowsDeploymentService
             failureSummary,
             cancellationToken,
             onOutputData: null,
-            onErrorData: null).ConfigureAwait(false);
+            onErrorData: null,
+            executionTimeout).ConfigureAwait(false);
     }
 
     private async Task<ProcessExecutionResult> RunRequiredProcessAsync(
@@ -1402,10 +1391,11 @@ public sealed class WindowsDeploymentService : IWindowsDeploymentService
         string failureSummary,
         CancellationToken cancellationToken,
         Action<string>? onOutputData,
-        Action<string>? onErrorData)
+        Action<string>? onErrorData,
+        TimeSpan? executionTimeout = null)
     {
         ProcessExecutionResult execution = await _processRunner
-            .RunAsync(fileName, arguments, workingDirectory, onOutputData, onErrorData, cancellationToken)
+            .RunAsync(fileName, arguments, workingDirectory, onOutputData, onErrorData, cancellationToken, executionTimeout ?? NativeExecutionTimeout)
             .ConfigureAwait(false);
 
         if (!execution.IsSuccess)
@@ -1434,7 +1424,8 @@ public sealed class WindowsDeploymentService : IWindowsDeploymentService
             ],
             workingDirectory,
             $"Failed to inspect Windows optional features in '{windowsPartitionRoot}'",
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken, MetadataExecutionTimeout).ConfigureAwait(false);
+        result.EnsureCompleteOutput();
         IReadOnlyDictionary<string, OfflineWindowsFeatureState> states = ParseOfflineWindowsFeatureStates(result.StandardOutput);
         if (states.Count == 0)
         {
@@ -1499,7 +1490,8 @@ public sealed class WindowsDeploymentService : IWindowsDeploymentService
             ["/English", "/Get-ImageInfo", $"/ImageFile:{imagePath}"],
             workingDirectory,
             $"Failed to inspect setup-media image '{imagePath}'",
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken, MetadataExecutionTimeout).ConfigureAwait(false);
+        summary.EnsureCompleteOutput();
         (int Index, string Name)[] matches = Regex.Matches(
                 summary.StandardOutput ?? string.Empty,
                 @"^\s*Index\s*:\s*(?<index>\d+)\s*$\s*^\s*Name\s*:\s*(?<name>.+?)\s*$",
@@ -1520,7 +1512,8 @@ public sealed class WindowsDeploymentService : IWindowsDeploymentService
             ["/English", "/Get-ImageInfo", $"/ImageFile:{imagePath}", $"/Index:{appliedImageIndex}"],
             workingDirectory,
             $"Failed to inspect applied Windows image index {appliedImageIndex}",
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken, MetadataExecutionTimeout).ConfigureAwait(false);
+        detail.EnsureCompleteOutput();
         return new OptionalFeatureSourceMetadata(
             matches[0].Index,
             appliedImageIndex,

@@ -452,8 +452,8 @@ public sealed class UnattendRuntimeTests
     private sealed class RecordingProcessRunner : IProcessRunner
     {
         public List<string> Arguments { get; } = [];
-        public Task<ProcessExecutionResult> RunAsync(string fileName, string arguments, string workingDirectory, CancellationToken cancellationToken = default) { Arguments.Add(arguments); return Task.FromResult(new ProcessExecutionResult { ExitCode = 0 }); }
-        public Task<ProcessExecutionResult> RunAsync(string fileName, IEnumerable<string> arguments, string workingDirectory, CancellationToken cancellationToken = default) => RunAsync(fileName, string.Join(" ", arguments), workingDirectory, cancellationToken);
-        public Task<ProcessExecutionResult> RunAsync(string fileName, IEnumerable<string> arguments, string workingDirectory, Action<string>? onOutputData, Action<string>? onErrorData, CancellationToken cancellationToken = default) => RunAsync(fileName, arguments, workingDirectory, cancellationToken);
+        public Task<ProcessExecutionResult> RunAsync(string fileName, string arguments, string workingDirectory, CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null) { Arguments.Add(arguments); return Task.FromResult(new ProcessExecutionResult { ExitCode = 0 }); }
+        public Task<ProcessExecutionResult> RunAsync(string fileName, IEnumerable<string> arguments, string workingDirectory, CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null) => RunAsync(fileName, string.Join(" ", arguments), workingDirectory, cancellationToken);
+        public Task<ProcessExecutionResult> RunAsync(string fileName, IEnumerable<string> arguments, string workingDirectory, Action<string>? onOutputData, Action<string>? onErrorData, CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null) => RunAsync(fileName, arguments, workingDirectory, cancellationToken);
     }
 }
