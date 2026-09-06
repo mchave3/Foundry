@@ -3007,7 +3007,7 @@
     <value>Inneholder kommandoer. Kontroller om de overlapper med Foundry-tilpasninger og installasjonshooks.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Bare innstillinger for specialize og oobeSystem støttes. Foundry styrer fortsatt disker, avbildninger, drivere, fjerning av AppX, KI-policyer, valgfrie funksjoner og nettverksroaming. Egendefinerte kommandoer kan komme i konflikt med disse operasjonene eller installasjonshooks. Valider med Windows SIM og test den aktuelle avbildningen i en virtuell maskin. Eksterne skriptfiler importeres ikke.</value>
+    <value>Bare innstillinger for specialize og oobeSystem støttes. Andre distribusjonsoperasjoner i Foundry forblir aktivert og kan komme i konflikt med egendefinerte innstillinger eller kommandoer. Valider med Windows SIM og test hele konfigurasjonen i en virtuell maskin. Eksterne skriptfiler importeres ikke.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>Operatøren kan velge Foundry-innstillinger eller én fil fra mediet på målsiden. Import av en fil endrer ikke standardvalget.</value>
@@ -3055,7 +3055,7 @@
     <value>Bruk Foundry-innstillinger</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>Den valgte svarfilen styrer Windows-navn, tidssone, kontoer, automatisk pålogging og OOBE. Foundry slår ikke sammen innstillinger eller fyller inn manglende verdier. Lagrede Foundry-innstillinger er fortsatt tilgjengelige og må være gyldige for valget som bruker Foundry-innstillinger.</value>
+    <value>Den valgte filen erstatter svarfilen som Foundry genererer. Innstillingene brukes som de er, uten sammenslåing eller utfylling av manglende verdier. Velg «Bruk Foundry-innstillinger» for å bruke den lagrede konfigurasjonen.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Egendefinerte filer krever passordbeskyttelse av distribusjonsmediet i den generelle konfigurasjonen. XML kan inneholde påloggingsinformasjon eller skript. Katalogen lagrer bare kildereferanser. Oppstartsavbildningen inneholder krypterte kopier.</value>

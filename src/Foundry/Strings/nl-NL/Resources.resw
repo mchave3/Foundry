@@ -3007,7 +3007,7 @@
     <value>Bevat opdrachten. Controleer op overlap met Foundry-aanpassingen en installatiehooks.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Alleen instellingen voor specialize en oobeSystem worden ondersteund. Foundry beheert nog steeds schijven, images, stuurprogramma's, AppX-verwijdering, AI-beleid, optionele functies en netwerkroaming. Aangepaste opdrachten kunnen conflicteren met deze bewerkingen of installatiehooks. Valideer met Windows SIM en test de beoogde image in een virtuele machine. Externe scriptbestanden worden niet geïmporteerd.</value>
+    <value>Alleen instellingen voor specialize en oobeSystem worden ondersteund. Andere implementatiebewerkingen van Foundry blijven ingeschakeld en kunnen conflicteren met aangepaste instellingen of opdrachten. Valideer met Windows SIM en test de volledige configuratie in een virtuele machine. Externe scriptbestanden worden niet geïmporteerd.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>De operator kan op de doelpagina Foundry-instellingen of één meegeleverd bestand kiezen. Het importeren van een bestand wijzigt de standaardkeuze niet.</value>
@@ -3055,7 +3055,7 @@
     <value>Foundry-instellingen gebruiken</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>Het geselecteerde antwoordbestand beheert de Windows-naam, tijdzone, accounts, automatische aanmelding en OOBE. Foundry voegt geen instellingen samen en vult ontbrekende waarden niet aan. Opgeslagen Foundry-instellingen blijven beschikbaar en moeten geldig zijn om de optie voor Foundry-instellingen te kunnen gebruiken.</value>
+    <value>Het geselecteerde bestand vervangt het antwoordbestand dat Foundry genereert. De instellingen worden ongewijzigd gebruikt, zonder samenvoeging of aanvulling van ontbrekende waarden. Kies ‘Foundry-instellingen gebruiken’ om uw opgeslagen configuratie te gebruiken.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Aangepaste bestanden vereisen wachtwoordbeveiliging voor implementatiemedia in de algemene configuratie. XML kan aanmeldingsgegevens of scripts bevatten. De catalogus slaat alleen bronverwijzingen op. De opstartimage bevat versleutelde kopieën.</value>

@@ -3007,7 +3007,7 @@
     <value>Vsebuje ukaze; preverite morebitna navzkrižja s prilagoditvami Foundry in sprožilci namestitve.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Podprte so samo nastavitve specialize in oobeSystem. Foundry še naprej upravlja diske, slike, gonilnike, odstranjevanje AppX, pravilnike UI, izbirne funkcije in prenos omrežnih profilov. Ukazi po meri so lahko v navzkrižju s temi postopki ali sprožilci namestitve. Preverite z Windows SIM in preizkusite želeno sliko v navideznem računalniku; zunanje skriptne datoteke se ne uvozijo.</value>
+    <value>Podprte so samo nastavitve specialize in oobeSystem. Drugi postopki uvajanja Foundry ostanejo omogočeni in so lahko v navzkrižju z nastavitvami ali ukazi po meri. Preverite z Windows SIM in preizkusite celotno konfiguracijo v navideznem računalniku. Zunanje skriptne datoteke se ne uvozijo.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>Uporabnik lahko na strani Ciljna naprava izbere nastavitve Foundry ali eno datoteko, vključeno na medij. Uvoz datoteke ne spremeni privzete izbire.</value>
@@ -3055,7 +3055,7 @@
     <value>Uporabi nastavitve Foundry</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>Izbrana datoteka odgovorov določa ime sistema Windows, časovni pas, račune, samodejno prijavo in OOBE. Foundry ne združuje nastavitev in ne dopolnjuje manjkajočih vrednosti. Shranjene nastavitve Foundry ostanejo na voljo in morajo biti veljavne za vgrajeno možnost.</value>
+    <value>Izbrana datoteka nadomesti datoteko odgovorov, ki jo ustvari Foundry. Njene nastavitve se uporabijo takšne, kot so, brez združevanja ali dopolnjevanja manjkajočih vrednosti. Za uporabo shranjene konfiguracije izberite »Uporabi nastavitve Foundry«.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Datoteke po meri zahtevajo zaščito medija za uvajanje z geslom v nastavitvah Splošno. XML lahko vsebuje poverilnice ali skripte. Katalog shrani samo sklice na vire; zagonska slika vsebuje šifrirane kopije.</value>

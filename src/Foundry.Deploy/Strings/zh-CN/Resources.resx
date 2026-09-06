@@ -1491,7 +1491,7 @@
     <value>上传哈希不保证能完成 Autopilot 注册。</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>请在此 Windows 映像上验证延迟驱动程序安装、网络配置文件和应用移除。</value>
+    <value>请使用选定的 Windows 映像和 Foundry 配置测试此应答文件。</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>选定的应答文件不可用、无效或与所选 Windows 体系结构不兼容。请选择其他文件或重新创建介质。</value>
@@ -1506,7 +1506,7 @@
     <value>使用 Foundry 设置</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>文件控制计算机名称、时区、帐户和 OOBE。</value>
+    <value>Windows 使用选定的应答文件。Foundry 不会合并或添加设置。</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>时区</value>

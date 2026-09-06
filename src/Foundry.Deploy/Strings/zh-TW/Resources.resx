@@ -1491,7 +1491,7 @@
     <value>上傳雜湊不保證能完成 Autopilot 註冊。</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>請在此 Windows 映像上驗證延後安裝驅動程式、網路設定檔及應用程式移除。</value>
+    <value>請使用選取的 Windows 映像與 Foundry 組態測試此回應檔案。</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>選取的回應檔案無法使用、無效或與所選 Windows 架構不相容。請選擇其他檔案或重新建立媒體。</value>
@@ -1506,7 +1506,7 @@
     <value>使用 Foundry 設定</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>檔案控制電腦名稱、時區、帳戶和 OOBE。</value>
+    <value>Windows 使用選取的回應檔案。Foundry 不會合併或新增設定。</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>時區</value>

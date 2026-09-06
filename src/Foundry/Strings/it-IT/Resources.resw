@@ -3007,7 +3007,7 @@
     <value>Contiene comandi; verifica eventuali sovrapposizioni con le personalizzazioni e le operazioni di installazione di Foundry.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Sono supportate solo le impostazioni specialize e oobeSystem. Foundry continua a gestire dischi, immagini, driver, rimozione di AppX, criteri IA, funzionalità facoltative e trasferimento dei profili di rete. I comandi personalizzati possono entrare in conflitto con queste operazioni o con quelle di installazione. Convalida con Windows SIM e prova l'immagine prevista in una macchina virtuale; i file di script esterni non vengono importati.</value>
+    <value>Sono supportate solo le impostazioni specialize e oobeSystem. Le altre operazioni di distribuzione di Foundry rimangono abilitate e possono entrare in conflitto con impostazioni o comandi personalizzati. Convalida con Windows SIM e prova la configurazione completa in una macchina virtuale. I file di script esterni non vengono importati.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>L'operatore può scegliere le impostazioni di Foundry o uno dei file inclusi nel supporto nella pagina Destinazione. L'importazione di un file non cambia la scelta predefinita.</value>
@@ -3055,7 +3055,7 @@
     <value>Usa le impostazioni di Foundry</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>Il file di risposte selezionato determina il nome del computer Windows, il fuso orario, gli account, l'accesso automatico e OOBE. Foundry non unisce le impostazioni né completa i valori mancanti. Le impostazioni di Foundry salvate rimangono disponibili e devono essere valide per usare la modalità integrata.</value>
+    <value>Il file selezionato sostituisce il file di risposte generato da Foundry. Le sue impostazioni vengono usate così come sono, senza unirle né completare i valori mancanti. Seleziona Usa le impostazioni di Foundry per usare la configurazione salvata.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>I file personalizzati richiedono la protezione del supporto di distribuzione tramite password nella configurazione generale. L'XML può contenere credenziali o script. Il catalogo salva solo i riferimenti alle origini; l'immagine di avvio contiene copie crittografate.</value>

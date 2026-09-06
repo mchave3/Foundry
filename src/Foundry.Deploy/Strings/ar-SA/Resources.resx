@@ -1491,7 +1491,7 @@
     <value>رفع التجزئة لا يضمن التسجيل في Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>تحقق من تثبيت برامج التشغيل المؤجل وملفات تعريف الشبكة وإزالة التطبيقات في صورة Windows هذه.</value>
+    <value>اختبر ملف الإجابات هذا مع صورة Windows وتكوين Foundry المحددين.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>ملف الإجابات المحدد غير متاح أو غير صالح أو غير متوافق مع بنية Windows المحددة. اختر ملفًا آخر أو أعد إنشاء الوسائط.</value>
@@ -1506,7 +1506,7 @@
     <value>استخدام إعدادات Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>يتحكم الملف في اسم الكمبيوتر والمنطقة الزمنية والحسابات وOOBE.</value>
+    <value>يستخدم Windows ملف الإجابات المحدد. لا يدمج Foundry الإعدادات ولا يضيف إليها.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>المنطقة الزمنية</value>

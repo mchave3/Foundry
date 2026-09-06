@@ -1491,7 +1491,7 @@ Sistema operativo: {4}
     <value>La carga del hash no garantiza la inscripción en Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Compruebe la instalación diferida de controladores, los perfiles de red y la eliminación de aplicaciones en esta imagen de Windows.</value>
+    <value>Pruebe este archivo de respuesta con la imagen de Windows y la configuración de Foundry seleccionadas.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>El archivo de respuesta seleccionado no está disponible, no es válido o no es compatible con la arquitectura de Windows seleccionada. Elija otro archivo o vuelva a crear el medio.</value>
@@ -1506,7 +1506,7 @@ Sistema operativo: {4}
     <value>Usar la configuración de Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>El archivo controla el nombre del equipo, la zona horaria, las cuentas y OOBE.</value>
+    <value>Windows usa el archivo de respuesta seleccionado. Foundry no combina ni añade opciones.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Zona horaria</value>

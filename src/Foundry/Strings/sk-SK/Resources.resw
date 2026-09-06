@@ -3007,7 +3007,7 @@
     <value>Obsahuje príkazy; skontrolujte možné konflikty s prispôsobením Foundry a spúšťacími bodmi inštalácie.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Podporované sú iba nastavenia specialize a oobeSystem. Foundry naďalej riadi disky, obrazy, ovládače, odstraňovanie AppX, politiky AI, voliteľné súčasti a prenos sieťových profilov. Vlastné príkazy môžu byť v konflikte s týmito operáciami alebo spúšťacími bodmi inštalácie. Overte súbor pomocou Windows SIM a otestujte požadovaný obraz vo virtuálnom počítači; externé súbory skriptov sa neimportujú.</value>
+    <value>Podporované sú iba nastavenia specialize a oobeSystem. Ostatné operácie nasadenia Foundry zostávajú zapnuté a môžu byť v konflikte s vlastnými nastaveniami alebo príkazmi. Overte súbor pomocou Windows SIM a otestujte celú konfiguráciu vo virtuálnom počítači. Externé súbory skriptov sa neimportujú.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>Operátor môže na stránke Cieľové zariadenie vybrať nastavenia Foundry alebo jeden súbor zahrnutý na médiu. Import súboru nezmení predvolenú voľbu.</value>
@@ -3055,7 +3055,7 @@
     <value>Použiť nastavenia Foundry</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>Vybraný súbor odpovedí riadi názov systému Windows, časové pásmo, kontá, automatické prihlasovanie a OOBE. Foundry nastavenia nezlučuje ani nedopĺňa vynechané hodnoty. Uložené nastavenia Foundry zostávajú dostupné a musia byť platné pre natívnu voľbu.</value>
+    <value>Vybraný súbor nahrádza súbor odpovedí vytvorený nástrojom Foundry. Jeho nastavenia sa použijú bez zmien, zlučovania či dopĺňania chýbajúcich hodnôt. Ak chcete použiť uloženú konfiguráciu, vyberte „Použiť nastavenia Foundry“.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Vlastné súbory vyžadujú ochranu média nasadenia heslom vo všeobecnej konfigurácii. XML môže obsahovať prihlasovacie údaje alebo skripty. Katalóg ukladá iba odkazy na zdroje; zavádzací obraz obsahuje šifrované kópie.</value>

@@ -1491,7 +1491,7 @@
     <value>Качването на хеша не гарантира записване в Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Проверете отложеното инсталиране на драйвери, мрежовите профили и премахването на приложения в този образ на Windows.</value>
+    <value>Тествайте този файл с отговори с избрания образ на Windows и конфигурация на Foundry.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Избраният файл с отговори е недостъпен, невалиден или несъвместим с избраната архитектура на Windows. Изберете друг файл или създайте носителя отново.</value>
@@ -1506,7 +1506,7 @@
     <value>Използване на настройките на Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Файлът управлява името на компютъра, часовата зона, акаунтите и OOBE.</value>
+    <value>Windows използва избрания файл с отговори. Foundry не обединява и не добавя настройки.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Часова зона</value>

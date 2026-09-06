@@ -3007,7 +3007,7 @@
     <value>包含命令；请检查是否与 Foundry 自定义设置及安装挂钩发生冲突。</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>仅支持 specialize 和 oobeSystem 设置。Foundry 仍负责磁盘、映像、驱动程序、AppX 移除、AI 策略、可选功能和网络配置文件漫游。自定义命令可能与这些操作或安装挂钩发生冲突。请使用 Windows SIM 验证，并在虚拟机中测试目标映像；不会导入外部脚本文件。</value>
+    <value>仅支持 specialize 和 oobeSystem 设置。Foundry 的其他部署操作仍保持启用，可能与自定义设置或命令冲突。请使用 Windows SIM 验证，并在虚拟机中测试完整配置。不会导入外部脚本文件。</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>操作员可以在“目标设备”页面选择 Foundry 设置或介质中包含的一个文件。导入文件不会更改默认选项。</value>
@@ -3055,7 +3055,7 @@
     <value>使用 Foundry 设置</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>选定的应答文件负责 Windows 命名、时区、帐户、自动登录和 OOBE。Foundry 不会合并设置或补充遗漏的值。已保存的 Foundry 设置仍然可用，并且必须有效，才能使用内置选项。</value>
+    <value>选定的文件将替代 Foundry 生成的应答文件。其中的设置将按原样使用，不会合并或补全缺失的值。选择“使用 Foundry 设置”可使用已保存的配置。</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>自定义文件要求在“一般”配置中启用部署介质密码保护。XML 可能包含凭据或脚本。目录仅保存源文件引用；启动映像中包含加密副本。</value>

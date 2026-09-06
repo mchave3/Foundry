@@ -1491,7 +1491,7 @@ Continue with deployment?</value>
     <value>Hash upload does not guarantee Autopilot enrollment.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Verify deferred drivers, network profiles, and app removal on this Windows image.</value>
+    <value>Test this answer file with the selected Windows image and Foundry configuration.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>The selected answer file is unavailable, invalid, or incompatible with the selected Windows architecture. Choose another file or rebuild the media.</value>
@@ -1506,7 +1506,7 @@ Continue with deployment?</value>
     <value>Use Foundry settings</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>The file controls naming, time zone, accounts, and OOBE.</value>
+    <value>Windows uses the selected answer file. Foundry does not merge or add settings.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Time zone</value>

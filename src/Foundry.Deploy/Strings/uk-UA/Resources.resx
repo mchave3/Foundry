@@ -1491,7 +1491,7 @@ ErrorCode=0x80070005
     <value>Передавання хешу не гарантує реєстрацію в Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Перевірте відкладене встановлення драйверів, мережеві профілі й видалення програм у цьому образі Windows.</value>
+    <value>Протестуйте цей файл відповідей із вибраним образом Windows і конфігурацією Foundry.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Вибраний файл відповідей недоступний, недійсний або несумісний із вибраною архітектурою Windows. Виберіть інший файл або створіть носій повторно.</value>
@@ -1506,7 +1506,7 @@ ErrorCode=0x80070005
     <value>Використовувати параметри Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Файл керує іменем комп’ютера, часовим поясом, обліковими записами й OOBE.</value>
+    <value>Windows використовує вибраний файл відповідей. Foundry не об’єднує й не додає параметри.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Часовий пояс</value>

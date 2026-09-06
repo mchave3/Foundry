@@ -1491,7 +1491,7 @@ Continuer le déploiement ?</value>
     <value>L’envoi du hachage ne garantit pas l’inscription à Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Vérifiez les pilotes différés, les profils réseau et la suppression des applications sur cette image Windows.</value>
+    <value>Testez ce fichier de réponses avec l’image Windows et la configuration Foundry sélectionnées.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Le fichier de réponses sélectionné est indisponible, invalide ou incompatible avec l’architecture Windows sélectionnée. Choisissez un autre fichier ou recréez le média.</value>
@@ -1506,7 +1506,7 @@ Continuer le déploiement ?</value>
     <value>Utiliser les paramètres de Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Le fichier gère le nom du PC, le fuseau horaire, les comptes et l’OOBE.</value>
+    <value>Windows utilise le fichier de réponses sélectionné. Foundry ne fusionne ni n’ajoute de paramètres.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Fuseau horaire</value>

@@ -22,7 +22,7 @@ public sealed class ConfigureTargetComputerNameStep : DeploymentStepBase
     {
         if (context.Request.UsesCustomUnattend)
         {
-            return DeploymentStepResult.Skipped("Computer name and time zone are managed by the custom answer file.");
+            return DeploymentStepResult.Skipped("Skipped because a custom answer file is selected.");
         }
 
         if (string.IsNullOrWhiteSpace(context.RuntimeState.TargetWindowsPartitionRoot))
@@ -52,7 +52,7 @@ public sealed class ConfigureTargetComputerNameStep : DeploymentStepBase
     {
         if (context.Request.UsesCustomUnattend)
         {
-            return DeploymentStepResult.Skipped("Computer name and time zone are managed by the custom answer file.");
+            return DeploymentStepResult.Skipped("Skipped because a custom answer file is selected.");
         }
 
         if (string.IsNullOrWhiteSpace(context.RuntimeState.TargetWindowsPartitionRoot))

@@ -3007,7 +3007,7 @@
     <value>Contient des commandes ; vérifiez les interactions avec la personnalisation de Foundry et les scripts d’installation.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Seuls les paramètres specialize et oobeSystem sont pris en charge. Foundry continue de gérer les disques, les images, les pilotes, la suppression AppX, les stratégies d’IA, les fonctionnalités facultatives et le transfert des profils réseau. Les commandes personnalisées peuvent entrer en conflit avec ces opérations ou les scripts d’installation. Validez le fichier avec Windows SIM et testez l’image prévue dans une machine virtuelle ; les fichiers de scripts externes ne sont pas importés.</value>
+    <value>Seuls les paramètres specialize et oobeSystem sont pris en charge. Les autres opérations de déploiement de Foundry restent activées et peuvent entrer en conflit avec des paramètres ou commandes personnalisés. Validez avec Windows SIM et testez la configuration complète dans une machine virtuelle. Les fichiers de scripts externes ne sont pas importés.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>L’opérateur peut choisir les paramètres de Foundry ou un fichier intégré sur la page Cible. L’importation d’un fichier ne modifie pas le choix par défaut.</value>
@@ -3055,7 +3055,7 @@
     <value>Utiliser les paramètres de Foundry</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>Le fichier de réponses sélectionné contrôle le nom Windows, le fuseau horaire, les comptes, la connexion automatique et OOBE. Foundry ne fusionne pas les paramètres et ne complète pas les omissions. Les paramètres Foundry enregistrés restent disponibles et doivent être valides pour le choix natif.</value>
+    <value>Le fichier sélectionné remplace le fichier de réponses généré par Foundry. Ses paramètres sont utilisés tels quels, sans fusion ni ajout des valeurs manquantes. Sélectionnez Utiliser les paramètres de Foundry pour utiliser votre configuration enregistrée.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Les fichiers personnalisés nécessitent la protection du média de déploiement par mot de passe dans la configuration générale. Le XML peut contenir des identifiants ou des scripts. Le catalogue ne conserve que les références aux sources ; l’image de démarrage contient des copies chiffrées.</value>

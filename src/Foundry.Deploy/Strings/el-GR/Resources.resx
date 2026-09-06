@@ -1491,7 +1491,7 @@
     <value>Η αποστολή του κατακερματισμού δεν εγγυάται την εγγραφή στο Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Ελέγξτε την αναβαλλόμενη εγκατάσταση οδηγών, τα προφίλ δικτύου και την κατάργηση εφαρμογών σε αυτή την εικόνα Windows.</value>
+    <value>Δοκιμάστε αυτό το αρχείο απαντήσεων με την επιλεγμένη εικόνα Windows και τη διαμόρφωση του Foundry.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Το επιλεγμένο αρχείο απαντήσεων δεν είναι διαθέσιμο, δεν είναι έγκυρο ή δεν είναι συμβατό με την επιλεγμένη αρχιτεκτονική των Windows. Επιλέξτε άλλο αρχείο ή δημιουργήστε ξανά το μέσο.</value>
@@ -1506,7 +1506,7 @@
     <value>Χρήση των ρυθμίσεων του Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Το αρχείο ελέγχει το όνομα υπολογιστή, τη ζώνη ώρας, τους λογαριασμούς και το OOBE.</value>
+    <value>Τα Windows χρησιμοποιούν το επιλεγμένο αρχείο απαντήσεων. Το Foundry δεν συγχωνεύει ούτε προσθέτει ρυθμίσεις.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Ζώνη ώρας</value>

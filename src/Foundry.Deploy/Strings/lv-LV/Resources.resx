@@ -1491,7 +1491,7 @@ Vai turpināt izvietošanu?</value>
     <value>Jaucējvērtības augšupielāde negarantē reģistrāciju pakalpojumā Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Šajā Windows attēlā pārbaudiet atlikto draiveru instalēšanu, tīkla profilus un lietotņu noņemšanu.</value>
+    <value>Testējiet šo atbilžu failu ar atlasīto Windows attēlu un Foundry konfigurāciju.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Atlasītais atbilžu fails nav pieejams, nav derīgs vai nav saderīgs ar atlasīto Windows arhitektūru. Izvēlieties citu failu vai izveidojiet datu nesēju no jauna.</value>
@@ -1506,7 +1506,7 @@ Vai turpināt izvietošanu?</value>
     <value>Izmantot Foundry iestatījumus</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Fails nosaka datora nosaukumu, laika joslu, kontus un OOBE.</value>
+    <value>Windows izmanto atlasīto atbilžu failu. Foundry neapvieno un nepievieno iestatījumus.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Laika josla</value>

@@ -3007,7 +3007,7 @@
     <value>Innehåller kommandon; kontrollera möjliga konflikter med Foundry-anpassningar och installationens körningspunkter.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Endast inställningar i specialize och oobeSystem stöds. Foundry styr fortfarande diskar, avbildningar, drivrutiner, AppX-borttagning, AI-principer, valfria funktioner och överföring av nätverksprofiler. Egna kommandon kan stå i konflikt med dessa åtgärder eller installationens körningspunkter. Validera med Windows SIM och testa den avsedda avbildningen i en virtuell dator; externa skriptfiler importeras inte.</value>
+    <value>Endast inställningar i specialize och oobeSystem stöds. Andra distributionsåtgärder i Foundry förblir aktiverade och kan stå i konflikt med egna inställningar eller kommandon. Validera med Windows SIM och testa hela konfigurationen i en virtuell dator. Externa skriptfiler importeras inte.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>Operatören kan välja Foundry-inställningar eller en fil som ingår på mediet på sidan Målenhet. Import av en fil ändrar inte standardvalet.</value>
@@ -3055,7 +3055,7 @@
     <value>Använd Foundry-inställningar</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>Den valda svarsfilen styr Windows-namn, tidszon, konton, automatisk inloggning och OOBE. Foundry slår inte samman inställningar och fyller inte i utelämnade värden. Sparade Foundry-inställningar förblir tillgängliga och måste vara giltiga för det inbyggda alternativet.</value>
+    <value>Den valda filen ersätter svarsfilen som Foundry genererar. Inställningarna används som de är, utan sammanslagning eller ifyllning av saknade värden. Välj ”Använd Foundry-inställningar” för att använda din sparade konfiguration.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Egna filer kräver lösenordsskydd för distributionsmediet under Allmänt. XML kan innehålla autentiseringsuppgifter eller skript. Katalogen sparar endast referenser till källorna; startavbildningen innehåller krypterade kopior.</value>

@@ -1491,7 +1491,7 @@ Ali želite nadaljevati z uvajanjem?</value>
     <value>Nalaganje zgoščene vrednosti ne zagotavlja vpisa v Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>V tej sliki Windows preverite odloženo namestitev gonilnikov, omrežne profile in odstranjevanje aplikacij.</value>
+    <value>Preizkusite to datoteko odgovorov z izbrano sliko Windows in konfiguracijo Foundry.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Izbrana datoteka odgovorov ni na voljo, ni veljavna ali ni združljiva z izbrano arhitekturo sistema Windows. Izberite drugo datoteko ali znova ustvarite medij.</value>
@@ -1506,7 +1506,7 @@ Ali želite nadaljevati z uvajanjem?</value>
     <value>Uporabi nastavitve Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Datoteka določa ime računalnika, časovni pas, račune in OOBE.</value>
+    <value>Windows uporabi izbrano datoteko odgovorov. Foundry ne združuje ali dodaja nastavitev.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Časovni pas</value>

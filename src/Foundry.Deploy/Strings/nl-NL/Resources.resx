@@ -1491,7 +1491,7 @@ Doorgaan met de implementatie?</value>
     <value>Het uploaden van de hash garandeert geen Autopilot-inschrijving.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Controleer uitgestelde stuurprogramma-installatie, netwerkprofielen en appverwijdering op deze Windows-image.</value>
+    <value>Test dit antwoordbestand met de geselecteerde Windows-image en Foundry-configuratie.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Het geselecteerde antwoordbestand is niet beschikbaar, ongeldig of niet compatibel met de geselecteerde Windows-architectuur. Kies een ander bestand of maak de media opnieuw.</value>
@@ -1506,7 +1506,7 @@ Doorgaan met de implementatie?</value>
     <value>Foundry-instellingen gebruiken</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Het bestand bepaalt de computernaam, tijdzone, accounts en OOBE.</value>
+    <value>Windows gebruikt het geselecteerde antwoordbestand. Foundry voegt geen instellingen samen of toe.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Tijdzone</value>

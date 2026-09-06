@@ -3007,7 +3007,7 @@
     <value>Komutlar içerir; Foundry özelleştirmeleri ve kurulum tetikleyicileriyle olası çakışmaları inceleyin.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Yalnızca specialize ve oobeSystem ayarları desteklenir. Foundry; diskleri, görüntüleri, sürücüleri, AppX kaldırmayı, yapay zekâ ilkelerini, isteğe bağlı özellikleri ve ağ profili dolaşımını yönetmeye devam eder. Özel komutlar bu işlemlerle veya kurulum tetikleyicileriyle çakışabilir. Windows SIM ile doğrulayın ve hedef görüntüyü bir sanal makinede test edin; harici betik dosyaları içe aktarılmaz.</value>
+    <value>Yalnızca specialize ve oobeSystem ayarları desteklenir. Diğer Foundry dağıtım işlemleri etkin kalır ve özel ayarlarla veya komutlarla çakışabilir. Windows SIM ile doğrulayın ve yapılandırmanın tamamını bir sanal makinede test edin. Harici betik dosyaları içe aktarılmaz.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>Operatör, Hedef cihaz sayfasında Foundry ayarlarını veya medyaya eklenen bir dosyayı seçebilir. Dosya içe aktarmak varsayılan seçimi değiştirmez.</value>
@@ -3055,7 +3055,7 @@
     <value>Foundry ayarlarını kullan</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>Seçilen yanıt dosyası Windows adını, saat dilimini, hesapları, otomatik oturum açmayı ve OOBE'yi yönetir. Foundry ayarları birleştirmez veya eksik değerleri tamamlamaz. Kaydedilen Foundry ayarları kullanılabilir kalır ve yerleşik seçenek için geçerli olmalıdır.</value>
+    <value>Seçilen dosya, Foundry'nin oluşturduğu yanıt dosyasının yerini alır. Ayarları birleştirilmeden veya eksik değerleri tamamlanmadan olduğu gibi kullanılır. Kayıtlı yapılandırmanızı kullanmak için “Foundry ayarlarını kullan” seçeneğini seçin.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Özel dosyalar, Genel yapılandırmada dağıtım medyasının parolayla korunmasını gerektirir. XML, kimlik bilgileri veya betikler içerebilir. Katalog yalnızca kaynak başvurularını kaydeder; önyükleme görüntüsü şifrelenmiş kopyalar içerir.</value>

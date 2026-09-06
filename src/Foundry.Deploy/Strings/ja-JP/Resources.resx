@@ -1491,7 +1491,7 @@
     <value>ハッシュのアップロードは Autopilot 登録を保証しません。</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>この Windows イメージで、遅延ドライバーインストール、ネットワークプロファイル、アプリ削除を確認してください。</value>
+    <value>選択した Windows イメージと Foundry の構成で、この応答ファイルをテストしてください。</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>選択した応答ファイルは利用できないか、無効か、選択した Windows アーキテクチャと互換性がありません。別のファイルを選択するか、メディアを再作成してください。</value>
@@ -1506,7 +1506,7 @@
     <value>Foundry の設定を使用する</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>ファイルがコンピューター名、タイムゾーン、アカウント、OOBE を制御します。</value>
+    <value>Windows は選択した応答ファイルを使用します。Foundry は設定を結合したり追加したりしません。</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>タイムゾーン</value>

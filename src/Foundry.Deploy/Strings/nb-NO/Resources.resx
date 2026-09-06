@@ -1491,7 +1491,7 @@ Vil du fortsette med distribusjonen?</value>
     <value>Hashopplasting garanterer ikke Autopilot-registrering.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Kontroller utsatt driverinstallasjon, nettverksprofiler og appfjerning på denne Windows-avbildningen.</value>
+    <value>Test denne svarfilen med den valgte Windows-avbildningen og Foundry-konfigurasjonen.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Den valgte svarfilen er utilgjengelig, ugyldig eller inkompatibel med den valgte Windows-arkitekturen. Velg en annen fil eller opprett mediet på nytt.</value>
@@ -1506,7 +1506,7 @@ Vil du fortsette med distribusjonen?</value>
     <value>Bruk Foundry-innstillinger</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Filen styrer datamaskinnavn, tidssone, kontoer og OOBE.</value>
+    <value>Windows bruker den valgte svarfilen. Foundry slår ikke sammen eller legger til innstillinger.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Tidssone</value>

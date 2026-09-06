@@ -3007,7 +3007,7 @@
     <value>コマンドが含まれています。Foundry のカスタマイズやセットアップ処理との競合を確認してください。</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>specialize と oobeSystem の設定のみサポートされています。ディスク、イメージ、ドライバー、AppX の削除、AI ポリシー、オプション機能、ネットワークプロファイルの引き継ぎは、引き続き Foundry が管理します。カスタムコマンドは、これらの操作やセットアップ処理と競合する可能性があります。Windows SIM で検証し、使用するイメージを仮想マシンでテストしてください。外部スクリプトファイルはインポートされません。</value>
+    <value>specialize と oobeSystem の設定のみサポートされています。Foundry の他の展開操作は引き続き有効で、カスタム設定やコマンドと競合する可能性があります。Windows SIM で検証し、構成全体を仮想マシンでテストしてください。外部スクリプトファイルはインポートされません。</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>オペレーターは「ターゲット」ページで、Foundry の設定またはメディアに含まれるファイルを 1 つ選択できます。ファイルをインポートしても既定の選択は変更されません。</value>
@@ -3055,7 +3055,7 @@
     <value>Foundry の設定を使用する</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>選択した応答ファイルが、Windows のコンピューター名、タイムゾーン、アカウント、自動ログオン、OOBE を管理します。Foundry は設定を結合したり、不足している値を補完したりしません。保存済みの Foundry 設定は引き続き利用できます。組み込みの設定を選択する場合は、それらの設定が有効である必要があります。</value>
+    <value>選択したファイルは、Foundry が生成する応答ファイルを置き換えます。設定の結合や不足する値の補完は行わず、そのまま使用します。保存済みの構成を使用するには、「Foundry の設定を使用する」を選択してください。</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>カスタムファイルを使用するには、「全般構成」で展開メディアのパスワード保護を有効にする必要があります。XML には資格情報やスクリプトが含まれている場合があります。カタログにはソースへの参照のみが保存され、ブートイメージには暗号化されたコピーが含まれます。</value>

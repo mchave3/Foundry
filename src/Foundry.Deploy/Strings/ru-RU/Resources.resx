@@ -1491,7 +1491,7 @@
     <value>Отправка хэша не гарантирует регистрацию в Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Проверьте отложенную установку драйверов, сетевые профили и удаление приложений на этом образе Windows.</value>
+    <value>Протестируйте этот файл ответов с выбранным образом Windows и конфигурацией Foundry.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Выбранный файл ответов недоступен, недопустим или несовместим с выбранной архитектурой Windows. Выберите другой файл или пересоздайте носитель.</value>
@@ -1506,7 +1506,7 @@
     <value>Использовать параметры Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Файл управляет именем компьютера, часовым поясом, учётными записями и OOBE.</value>
+    <value>Windows использует выбранный файл ответов. Foundry не объединяет и не добавляет параметры.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Часовой пояс</value>

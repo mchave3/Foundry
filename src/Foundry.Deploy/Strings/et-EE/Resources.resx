@@ -1491,7 +1491,7 @@ Kas jätkata juurutamisega?</value>
     <value>Räsi üleslaadimine ei taga Autopiloti registreerimist.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Kontrollige sellel Windowsi tõmmisel draiverite hilisemat installimist, võrguprofiile ja rakenduste eemaldamist.</value>
+    <value>Testige seda vastusefaili valitud Windowsi tõmmise ja Foundry konfiguratsiooniga.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Valitud vastusefail pole saadaval, on kehtetu või ei ühildu valitud Windowsi arhitektuuriga. Valige teine fail või looge andmekandja uuesti.</value>
@@ -1506,7 +1506,7 @@ Kas jätkata juurutamisega?</value>
     <value>Kasuta Foundry sätteid</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Fail määrab arvutinime, ajavööndi, kontod ja OOBE.</value>
+    <value>Windows kasutab valitud vastusefaili. Foundry ei ühenda ega lisa sätteid.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Ajavöönd</value>

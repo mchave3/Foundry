@@ -3007,7 +3007,7 @@
     <value>Contiene comandos; revise las interacciones con la personalización y los scripts de instalación de Foundry.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Solo se admiten las opciones de specialize y oobeSystem. Foundry sigue controlando discos, imágenes, controladores, eliminación de AppX, directivas de IA, características opcionales y transferencia de perfiles de red. Los comandos personalizados pueden entrar en conflicto con estas operaciones o los scripts de instalación. Valide el archivo con Windows SIM y pruebe la imagen prevista en una máquina virtual; no se importan archivos de scripts externos.</value>
+    <value>Solo se admiten las opciones de specialize y oobeSystem. Las demás operaciones de implementación de Foundry siguen habilitadas y pueden entrar en conflicto con opciones o comandos personalizados. Valide con Windows SIM y pruebe la configuración completa en una máquina virtual. No se importan archivos de scripts externos.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>El operador puede elegir la configuración de Foundry o un archivo incluido en la página Destino. Importar un archivo no cambia la opción predeterminada.</value>
@@ -3055,7 +3055,7 @@
     <value>Usar la configuración de Foundry</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>El archivo de respuesta seleccionado controla el nombre de Windows, la zona horaria, las cuentas, el inicio de sesión automático y OOBE. Foundry no combina opciones ni completa los valores omitidos. La configuración guardada de Foundry sigue disponible y debe ser válida para la opción nativa.</value>
+    <value>El archivo seleccionado reemplaza el archivo de respuesta generado por Foundry. Sus opciones se usan tal cual, sin combinarlas ni completar los valores que faltan. Seleccione Usar la configuración de Foundry para utilizar su configuración guardada.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Los archivos personalizados requieren protección mediante contraseña del medio de implementación en la configuración general. El XML puede contener credenciales o scripts. El catálogo solo guarda referencias a los orígenes; la imagen de arranque contiene copias cifradas.</value>

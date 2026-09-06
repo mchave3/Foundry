@@ -1491,7 +1491,7 @@
     <value>การอัปโหลดแฮชไม่รับประกันการลงทะเบียนกับ Autopilot</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>ตรวจสอบการติดตั้งไดรเวอร์แบบเลื่อนเวลา โปรไฟล์เครือข่าย และการลบแอปบนอิมเมจ Windows นี้</value>
+    <value>ทดสอบไฟล์คำตอบนี้กับอิมเมจ Windows และการกำหนดค่า Foundry ที่เลือก</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>ไฟล์คำตอบที่เลือกไม่พร้อมใช้งาน ไม่ถูกต้อง หรือเข้ากันไม่ได้กับสถาปัตยกรรม Windows ที่เลือก โปรดเลือกไฟล์อื่นหรือสร้างสื่อใหม่</value>
@@ -1506,7 +1506,7 @@
     <value>ใช้การตั้งค่าของ Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>ไฟล์ควบคุมชื่อคอมพิวเตอร์ เขตเวลา บัญชี และ OOBE</value>
+    <value>Windows ใช้ไฟล์คำตอบที่เลือก Foundry จะไม่ผสานหรือเพิ่มการตั้งค่า</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>เขตเวลา</value>

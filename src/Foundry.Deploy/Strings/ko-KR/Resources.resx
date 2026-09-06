@@ -1491,7 +1491,7 @@
     <value>해시 업로드가 Autopilot 등록을 보장하지는 않습니다.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>이 Windows 이미지에서 지연된 드라이버 설치, 네트워크 프로필 및 앱 제거를 확인하세요.</value>
+    <value>선택한 Windows 이미지와 Foundry 구성으로 이 응답 파일을 테스트하세요.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>선택한 응답 파일을 사용할 수 없거나 파일이 유효하지 않거나 선택한 Windows 아키텍처와 호환되지 않습니다. 다른 파일을 선택하거나 미디어를 다시 만드세요.</value>
@@ -1506,7 +1506,7 @@
     <value>Foundry 설정 사용</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>파일이 컴퓨터 이름, 표준 시간대, 계정 및 OOBE를 제어합니다.</value>
+    <value>Windows는 선택한 응답 파일을 사용합니다. Foundry는 설정을 병합하거나 추가하지 않습니다.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>표준 시간대</value>

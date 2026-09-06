@@ -3007,7 +3007,7 @@
     <value>Contém comandos; verifique possíveis conflitos com a personalização do Foundry e os pontos de execução da configuração.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Apenas são suportadas definições de specialize e oobeSystem. O Foundry continua a controlar discos, imagens, controladores, remoção de AppX, políticas de IA, funcionalidades opcionais e transferência de perfis de rede. Os comandos personalizados podem entrar em conflito com estas operações ou com os pontos de execução da configuração. Valide com o Windows SIM e teste a imagem pretendida numa máquina virtual; os ficheiros de scripts externos não são importados.</value>
+    <value>Apenas são suportadas definições de specialize e oobeSystem. As outras operações de implementação do Foundry permanecem ativas e podem entrar em conflito com definições ou comandos personalizados. Valide com o Windows SIM e teste a configuração completa numa máquina virtual. Os ficheiros de scripts externos não são importados.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>O operador pode escolher as definições do Foundry ou um ficheiro incluído no suporte na página Dispositivo de destino. A importação de um ficheiro não altera a opção predefinida.</value>
@@ -3055,7 +3055,7 @@
     <value>Usar definições do Foundry</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>O ficheiro de resposta selecionado controla o nome do Windows, o fuso horário, as contas, o início de sessão automático e o OOBE. O Foundry não combina definições nem preenche omissões. As definições guardadas do Foundry permanecem disponíveis e têm de ser válidas para a opção nativa.</value>
+    <value>O ficheiro selecionado substitui o ficheiro de resposta gerado pelo Foundry. As suas definições são usadas tal como estão, sem combinar nem preencher valores em falta. Selecione «Usar definições do Foundry» para usar a configuração guardada.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Os ficheiros personalizados exigem proteção por palavra-passe do suporte de implementação na configuração Geral. O XML pode conter credenciais ou scripts. O catálogo guarda apenas referências às origens; a imagem de arranque contém cópias encriptadas.</value>

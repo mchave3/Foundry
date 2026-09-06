@@ -3007,7 +3007,7 @@
     <value>Sisältää komentoja. Tarkista niiden yhteisvaikutukset Foundryn mukautusten ja asennuskomentosarjojen kanssa.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Vain specialize- ja oobeSystem-asetuksia tuetaan. Foundry hallitsee edelleen levyjä, näköistiedostoja, ohjaimia, AppX-poistoa, tekoälykäytäntöjä, valinnaisia ominaisuuksia ja verkkoprofiilien siirtoa. Mukautetut komennot voivat olla ristiriidassa näiden toimintojen tai asennuskomentosarjojen kanssa. Vahvista tiedosto Windows SIM -työkalulla ja testaa aiottu näköistiedosto virtuaalikoneessa. Ulkoisia komentosarjatiedostoja ei tuoda.</value>
+    <value>Vain specialize- ja oobeSystem-asetuksia tuetaan. Muut Foundryn käyttöönottotoiminnot pysyvät käytössä ja voivat olla ristiriidassa mukautettujen asetusten tai komentojen kanssa. Vahvista Windows SIM -työkalulla ja testaa koko kokoonpano virtuaalikoneessa. Ulkoisia komentosarjatiedostoja ei tuoda.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>Käyttäjä voi valita Kohde-sivulla Foundryn asetukset tai yhden mukaan pakatun tiedoston. Tiedoston tuominen ei muuta oletusvalintaa.</value>
@@ -3055,7 +3055,7 @@
     <value>Käytä Foundryn asetuksia</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>Valittu vastaustiedosto hallitsee Windowsin nimeä, aikavyöhykettä, tilejä, automaattista kirjautumista ja OOBE:tä. Foundry ei yhdistä asetuksia eikä täytä puuttuvia arvoja. Tallennetut Foundryn asetukset pysyvät käytettävissä, ja niiden on oltava kelvollisia sisäistä vaihtoehtoa varten.</value>
+    <value>Valittu tiedosto korvaa Foundryn luoman vastaustiedoston. Sen asetuksia käytetään sellaisinaan yhdistämättä niitä tai täydentämättä puuttuvia arvoja. Valitse Käytä Foundryn asetuksia, jos haluat käyttää tallennettua kokoonpanoasi.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Mukautetut tiedostot edellyttävät käyttöönottotietovälineen salasanasuojausta yleisissä asetuksissa. XML voi sisältää tunnistetietoja tai komentosarjoja. Luettelo tallentaa vain lähdeviitteet; käynnistysnäköistiedosto sisältää salatut kopiot.</value>

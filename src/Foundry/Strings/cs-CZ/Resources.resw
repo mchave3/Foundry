@@ -3007,7 +3007,7 @@
     <value>Obsahuje příkazy. Zkontrolujte, zda se nepřekrývají s přizpůsobením a instalačními skripty Foundry.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Podporována jsou pouze nastavení specialize a oobeSystem. Foundry nadále řídí disky, bitové kopie, ovladače, odebírání AppX, zásady AI, volitelné funkce a síťový roaming. Vlastní příkazy mohou být v konfliktu s těmito operacemi nebo instalačními skripty. Ověřte soubor pomocí Windows SIM a otestujte zamýšlenou bitovou kopii ve virtuálním počítači. Externí soubory skriptů se neimportují.</value>
+    <value>Podporována jsou pouze nastavení specialize a oobeSystem. Ostatní operace nasazení Foundry zůstávají povoleny a mohou být v konfliktu s vlastními nastaveními nebo příkazy. Ověřte soubor pomocí Windows SIM a otestujte celou konfiguraci ve virtuálním počítači. Externí soubory skriptů se neimportují.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>Obsluha může na stránce cíle vybrat nastavení Foundry nebo jeden z přiložených souborů. Import souboru nemění výchozí volbu.</value>
@@ -3055,7 +3055,7 @@
     <value>Použít nastavení Foundry</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>Vybraný soubor odpovědí řídí název počítače s Windows, časové pásmo, účty, automatické přihlašování a OOBE. Foundry neslučuje nastavení ani nedoplňuje chybějící hodnoty. Uložená nastavení Foundry zůstávají dostupná a musí být platná, aby bylo možné zvolit jejich použití.</value>
+    <value>Vybraný soubor nahrazuje soubor odpovědí vygenerovaný Foundry. Jeho nastavení se použijí beze změn, bez slučování nebo doplňování chybějících hodnot. Chcete-li použít uloženou konfiguraci, vyberte Použít nastavení Foundry.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Vlastní soubory vyžadují ochranu média pro nasazení heslem v obecné konfiguraci. XML může obsahovat přihlašovací údaje nebo skripty. Katalog ukládá pouze odkazy na zdroje. Spouštěcí bitová kopie obsahuje zašifrované kopie.</value>

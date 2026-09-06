@@ -3007,7 +3007,7 @@
     <value>Zawiera polecenia. Sprawdź, czy nie powielają dostosowań i procedur instalacyjnych Foundry.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Obsługiwane są tylko ustawienia specialize i oobeSystem. Foundry nadal zarządza dyskami, obrazami, sterownikami, usuwaniem AppX, zasadami AI, funkcjami opcjonalnymi i roamingiem sieciowym. Polecenia niestandardowe mogą kolidować z tymi operacjami lub procedurami instalacyjnymi. Sprawdź poprawność w Windows SIM i przetestuj docelowy obraz na maszynie wirtualnej. Zewnętrzne pliki skryptów nie są importowane.</value>
+    <value>Obsługiwane są tylko ustawienia specialize i oobeSystem. Inne operacje wdrażania Foundry pozostają włączone i mogą kolidować z niestandardowymi ustawieniami lub poleceniami. Sprawdź poprawność w Windows SIM i przetestuj całą konfigurację na maszynie wirtualnej. Zewnętrzne pliki skryptów nie są importowane.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>Operator może wybrać ustawienia Foundry lub jeden z dołączonych plików na stronie celu. Import pliku nie zmienia wyboru domyślnego.</value>
@@ -3055,7 +3055,7 @@
     <value>Użyj ustawień Foundry</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>Wybrany plik odpowiedzi zarządza nazwą komputera z systemem Windows, strefą czasową, kontami, logowaniem automatycznym i OOBE. Foundry nie scala ustawień ani nie uzupełnia brakujących wartości. Zapisane ustawienia Foundry pozostają dostępne i muszą być poprawne, aby można było wybrać ich użycie.</value>
+    <value>Wybrany plik zastępuje plik odpowiedzi wygenerowany przez Foundry. Jego ustawienia są używane bez zmian, scalania ani uzupełniania brakujących wartości. Wybierz „Użyj ustawień Foundry”, aby użyć zapisanej konfiguracji.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Pliki niestandardowe wymagają ochrony nośnika wdrożeniowego hasłem w konfiguracji ogólnej. XML może zawierać poświadczenia lub skrypty. Katalog zapisuje tylko odwołania do źródeł. Obraz rozruchowy zawiera zaszyfrowane kopie.</value>

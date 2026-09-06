@@ -3007,7 +3007,7 @@
     <value>Sisaldab käske. Kontrollige kattuvust Foundry kohanduste ja installiskriptidega.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Toetatud on ainult specialize- ja oobeSystem-sätted. Foundry haldab endiselt kettaid, tõmmiseid, draivereid, AppX-i eemaldamist, tehisintellekti poliitikaid, valikulisi funktsioone ja võrguprofiilide ülekandmist. Kohandatud käsud võivad nende toimingute või installiskriptidega vastuollu minna. Valideerige fail Windows SIM-iga ja katsetage kavandatud tõmmist virtuaalmasinas. Väliseid skriptifaile ei impordita.</value>
+    <value>Toetatud on ainult specialize- ja oobeSystem-sätted. Muud Foundry juurutustoimingud jäävad lubatuks ning võivad kohandatud sätete või käskudega vastuollu minna. Valideerige Windows SIM-iga ja testige kogu konfiguratsiooni virtuaalmasinas. Väliseid skriptifaile ei impordita.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>Operaator saab lehel Siht valida Foundry sätted või ühe kaasatud faili. Faili importimine ei muuda vaikevalikut.</value>
@@ -3055,7 +3055,7 @@
     <value>Kasuta Foundry sätteid</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>Valitud vastusefail määrab Windowsi nime, ajavööndi, kontod, automaatse sisselogimise ja OOBE. Foundry ei ühenda sätteid ega täida puuduvaid väärtusi. Salvestatud Foundry sätted jäävad saadavale ja peavad sisseehitatud valiku jaoks kehtima.</value>
+    <value>Valitud fail asendab Foundry loodud vastusefaili. Selle sätteid kasutatakse muutmata kujul, neid ühendamata ja puuduvaid väärtusi lisamata. Salvestatud konfiguratsiooni kasutamiseks valige Kasuta Foundry sätteid.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Kohandatud failid nõuavad üldkonfiguratsioonis juurutusandmekandja paroolikaitset. XML võib sisaldada identimisteavet või skripte. Kataloog salvestab ainult allikaviited; alglaadimistõmmis sisaldab krüptitud koopiaid.</value>

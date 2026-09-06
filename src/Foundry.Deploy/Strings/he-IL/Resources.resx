@@ -1491,7 +1491,7 @@ ErrorCode=0x80070005
     <value>העלאת הגיבוב אינה מבטיחה רישום ל-Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>בדקו התקנת מנהלי התקנים נדחית, פרופילי רשת והסרת יישומים בתמונת Windows זו.</value>
+    <value>בדקו קובץ תשובות זה עם תמונת Windows ותצורת Foundry שנבחרו.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>קובץ התשובות שנבחר אינו זמין, אינו תקין או אינו תואם לארכיטקטורת Windows שנבחרה. בחרו קובץ אחר או צרו מחדש את המדיה.</value>
@@ -1506,7 +1506,7 @@ ErrorCode=0x80070005
     <value>שימוש בהגדרות Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>הקובץ קובע את שם המחשב, אזור הזמן, החשבונות ו-OOBE.</value>
+    <value>Windows משתמש בקובץ התשובות שנבחר. Foundry אינו ממזג או מוסיף הגדרות.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>אזור זמן</value>

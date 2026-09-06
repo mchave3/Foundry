@@ -3007,7 +3007,7 @@
     <value>Sadrži naredbe; provjerite preklapanje s prilagodbama i instalacijskim radnjama sustava Foundry.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Podržane su samo postavke specialize i oobeSystem. Foundry i dalje upravlja diskovima, slikama sustava, upravljačkim programima, uklanjanjem AppX aplikacija, pravilima umjetne inteligencije, neobaveznim značajkama i prijenosom mrežnih profila. Prilagođene naredbe mogu biti u sukobu s tim postupcima ili instalacijskim radnjama. Provjerite valjanost u alatu Windows SIM i testirajte predviđenu sliku u virtualnom računalu; vanjske datoteke skripti ne uvoze se.</value>
+    <value>Podržane su samo postavke specialize i oobeSystem. Ostali postupci implementacije sustava Foundry ostaju omogućeni i mogu biti u sukobu s prilagođenim postavkama ili naredbama. Provjerite valjanost u alatu Windows SIM i testirajte cijelu konfiguraciju u virtualnom računalu. Vanjske datoteke skripti ne uvoze se.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>Operater može na stranici Cilj odabrati postavke sustava Foundry ili jednu datoteku uključenu u medij. Uvoz datoteke ne mijenja zadani odabir.</value>
@@ -3055,7 +3055,7 @@
     <value>Koristi postavke sustava Foundry</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>Odabrana datoteka odgovora određuje naziv računala u sustavu Windows, vremensku zonu, račune, automatsku prijavu i OOBE. Foundry ne spaja postavke niti dopunjuje izostavljene vrijednosti. Spremljene postavke sustava Foundry ostaju dostupne i moraju biti valjane za ugrađeni način rada.</value>
+    <value>Odabrana datoteka zamjenjuje datoteku odgovora koju generira Foundry. Njezine se postavke koriste neizmijenjene, bez spajanja ili dopunjavanja nedostajućih vrijednosti. Odaberite Koristi postavke sustava Foundry za korištenje spremljene konfiguracije.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Prilagođene datoteke zahtijevaju zaštitu medija za implementaciju lozinkom u općoj konfiguraciji. XML može sadržavati vjerodajnice ili skripte. Katalog sprema samo reference na izvore; slika za pokretanje sadrži šifrirane kopije.</value>

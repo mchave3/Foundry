@@ -1491,7 +1491,7 @@ Pokračovat v nasazování?</value>
     <value>Nahrání hashe nezaručuje registraci do Autopilotu.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Ověřte odloženou instalaci ovladačů, síťové profily a odebírání aplikací v této bitové kopii Windows.</value>
+    <value>Otestujte tento soubor odpovědí s vybranou bitovou kopií Windows a konfigurací Foundry.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Vybraný soubor odpovědí je nedostupný, neplatný nebo nekompatibilní s vybranou architekturou systému Windows. Vyberte jiný soubor nebo znovu vytvořte médium.</value>
@@ -1506,7 +1506,7 @@ Pokračovat v nasazování?</value>
     <value>Použít nastavení Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Soubor řídí název počítače, časové pásmo, účty a OOBE.</value>
+    <value>Windows používá vybraný soubor odpovědí. Foundry neslučuje ani nepřidává nastavení.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Časové pásmo</value>

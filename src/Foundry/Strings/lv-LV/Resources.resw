@@ -3007,7 +3007,7 @@
     <value>Satur komandas; pārbaudiet, vai tās nepārklājas ar Foundry pielāgojumiem un uzstādīšanas darbībām.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Tiek atbalstīti tikai specialize un oobeSystem iestatījumi. Foundry joprojām pārvalda diskus, attēlus, draiverus, AppX noņemšanu, MI politikas, neobligātos līdzekļus un tīkla profilu pārnešanu. Pielāgotas komandas var konfliktēt ar šīm operācijām vai uzstādīšanas darbībām. Validējiet ar Windows SIM un pārbaudiet paredzēto attēlu virtuālajā mašīnā; ārējie skriptu faili netiek importēti.</value>
+    <value>Tiek atbalstīti tikai specialize un oobeSystem iestatījumi. Citas Foundry izvietošanas operācijas paliek iespējotas un var konfliktēt ar pielāgotajiem iestatījumiem vai komandām. Validējiet ar Windows SIM un testējiet visu konfigurāciju virtuālajā mašīnā. Ārējie skriptu faili netiek importēti.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>Operators lapā Mērķis var izvēlēties Foundry iestatījumus vai vienu datu nesējā iekļautu failu. Faila importēšana nemaina noklusējuma izvēli.</value>
@@ -3055,7 +3055,7 @@
     <value>Izmantot Foundry iestatījumus</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>Atlasītais atbilžu fails nosaka Windows datora nosaukumu, laika joslu, kontus, automātisko pieteikšanos un OOBE. Foundry neapvieno iestatījumus un neaizpilda trūkstošās vērtības. Saglabātie Foundry iestatījumi paliek pieejami, un tiem jābūt derīgiem, lai izmantotu iebūvēto režīmu.</value>
+    <value>Atlasītais fails aizstāj Foundry ģenerēto atbilžu failu. Tā iestatījumi tiek izmantoti tādi, kādi tie ir, tos neapvienojot un neaizpildot trūkstošās vērtības. Lai izmantotu saglabāto konfigurāciju, atlasiet “Izmantot Foundry iestatījumus”.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Pielāgotiem failiem nepieciešama izvietošanas datu nesēja aizsardzība ar paroli vispārīgajā konfigurācijā. XML var saturēt akreditācijas datus vai skriptus. Katalogā tiek saglabātas tikai atsauces uz avotiem; sāknēšanas attēlā ir šifrētas kopijas.</value>

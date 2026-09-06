@@ -3007,7 +3007,7 @@
     <value>Yra komandų; patikrinkite, ar jos nesidubliuoja su „Foundry“ tinkinimais ir diegimo veiksmais.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Palaikomi tik specialize ir oobeSystem parametrai. „Foundry“ ir toliau valdo diskus, atvaizdus, tvarkykles, AppX šalinimą, DI strategijas, pasirinktines funkcijas ir tinklo profilių perkėlimą. Pasirinktinės komandos gali konfliktuoti su šiomis operacijomis ar diegimo veiksmais. Patikrinkite naudodami „Windows SIM“ ir išbandykite numatytą atvaizdą virtualiojoje mašinoje; išoriniai scenarijų failai neimportuojami.</value>
+    <value>Palaikomi tik specialize ir oobeSystem parametrai. Kitos „Foundry“ diegimo operacijos lieka įgalintos ir gali konfliktuoti su pasirinktiniais parametrais ar komandomis. Patikrinkite naudodami „Windows SIM“ ir išbandykite visą konfigūraciją virtualiojoje mašinoje. Išoriniai scenarijų failai neimportuojami.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>Operatorius puslapyje „Paskirties įrenginys“ gali pasirinkti „Foundry“ parametrus arba vieną laikmenoje esantį failą. Importavus failą numatytasis pasirinkimas nesikeičia.</value>
@@ -3055,7 +3055,7 @@
     <value>Naudoti „Foundry“ parametrus</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>Pasirinktas atsakymų failas nustato „Windows“ kompiuterio pavadinimą, laiko juostą, paskyras, automatinį prisijungimą ir OOBE. „Foundry“ nesujungia parametrų ir neužpildo praleistų reikšmių. Išsaugoti „Foundry“ parametrai lieka pasiekiami ir turi būti tinkami norint naudoti integruotą režimą.</value>
+    <value>Pasirinktas failas pakeičia „Foundry“ sugeneruotą atsakymų failą. Jo parametrai naudojami tokie, kokie yra, jų nesujungiant ir neužpildant trūkstamų reikšmių. Norėdami naudoti išsaugotą konfigūraciją, pasirinkite „Naudoti „Foundry“ parametrus“.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Pasirinktiniams failams reikia diegimo laikmenos apsaugos slaptažodžiu bendrojoje konfigūracijoje. XML gali būti kredencialų arba scenarijų. Kataloge išsaugomos tik nuorodos į šaltinius; įkrovos atvaizde yra užšifruotos kopijos.</value>

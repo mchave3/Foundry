@@ -3007,7 +3007,7 @@
     <value>Contém comandos. Verifique se há sobreposição com as personalizações e os hooks de instalação do Foundry.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Somente as configurações de specialize e oobeSystem são compatíveis. O Foundry continua controlando discos, imagens, drivers, remoção de AppX, políticas de IA, recursos opcionais e roaming de rede. Comandos personalizados podem entrar em conflito com essas operações ou com hooks de instalação. Valide com o Windows SIM e teste a imagem desejada em uma máquina virtual. Arquivos de script externos não são importados.</value>
+    <value>Somente as configurações de specialize e oobeSystem são compatíveis. As outras operações de implantação do Foundry permanecem habilitadas e podem entrar em conflito com configurações ou comandos personalizados. Valide com o Windows SIM e teste a configuração completa em uma máquina virtual. Arquivos de script externos não são importados.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>O operador pode escolher as configurações do Foundry ou um arquivo incluído na mídia na página de destino. Importar um arquivo não altera a opção padrão.</value>
@@ -3055,7 +3055,7 @@
     <value>Usar configurações do Foundry</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>O arquivo de resposta selecionado controla o nome do computador Windows, fuso horário, contas, logon automático e OOBE. O Foundry não mescla configurações nem preenche valores ausentes. As configurações salvas do Foundry permanecem disponíveis e devem ser válidas para que a opção de usá-las funcione.</value>
+    <value>O arquivo selecionado substitui o arquivo de resposta gerado pelo Foundry. Suas configurações são usadas como estão, sem mesclar ou preencher valores ausentes. Selecione “Usar configurações do Foundry” para usar sua configuração salva.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Arquivos personalizados exigem proteção por senha da mídia de implantação na configuração geral. O XML pode conter credenciais ou scripts. O catálogo salva apenas referências às origens. A imagem de inicialização contém cópias criptografadas.</value>

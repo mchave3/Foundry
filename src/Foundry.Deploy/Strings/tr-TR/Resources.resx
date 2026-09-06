@@ -1491,7 +1491,7 @@ Dağıtıma devam edilsin mi?</value>
     <value>Karma yüklemek Autopilot kaydını garanti etmez.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Bu Windows görüntüsünde ertelenen sürücü kurulumunu, ağ profillerini ve uygulama kaldırmayı doğrulayın.</value>
+    <value>Bu yanıt dosyasını seçilen Windows görüntüsü ve Foundry yapılandırmasıyla test edin.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Seçilen yanıt dosyası kullanılamıyor, geçersiz veya seçilen Windows mimarisiyle uyumsuz. Başka bir dosya seçin ya da medyayı yeniden oluşturun.</value>
@@ -1506,7 +1506,7 @@ Dağıtıma devam edilsin mi?</value>
     <value>Foundry ayarlarını kullan</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Dosya bilgisayar adını, saat dilimini, hesapları ve OOBE'yi yönetir.</value>
+    <value>Windows seçilen yanıt dosyasını kullanır. Foundry ayarları birleştirmez veya eklemez.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Saat dilimi</value>

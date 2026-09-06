@@ -1491,7 +1491,7 @@ Continuare con la distribuzione?</value>
     <value>Il caricamento dell'hash non garantisce la registrazione in Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Verifica l'installazione differita dei driver, i profili di rete e la rimozione delle app su questa immagine Windows.</value>
+    <value>Prova questo file di risposte con l'immagine Windows e la configurazione di Foundry selezionate.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Il file di risposte selezionato non è disponibile, non è valido o non è compatibile con l'architettura di Windows selezionata. Scegli un altro file o ricrea il supporto.</value>
@@ -1506,7 +1506,7 @@ Continuare con la distribuzione?</value>
     <value>Usa le impostazioni di Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Il file gestisce nome del PC, fuso orario, account e OOBE.</value>
+    <value>Windows usa il file di risposte selezionato. Foundry non unisce né aggiunge impostazioni.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Fuso orario</value>

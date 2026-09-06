@@ -1491,7 +1491,7 @@ Mit der Bereitstellung fortfahren?</value>
     <value>Das Hochladen des Hashs garantiert keine Autopilot-Registrierung.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Prüfen Sie verzögerte Treiberinstallation, Netzwerkprofile und App-Entfernung auf diesem Windows-Image.</value>
+    <value>Testen Sie diese Antwortdatei mit dem ausgewählten Windows-Image und der Foundry-Konfiguration.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Die ausgewählte Antwortdatei ist nicht verfügbar, ungültig oder mit der ausgewählten Windows-Architektur inkompatibel. Wählen Sie eine andere Datei oder erstellen Sie das Medium neu.</value>
@@ -1506,7 +1506,7 @@ Mit der Bereitstellung fortfahren?</value>
     <value>Foundry-Einstellungen verwenden</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Die Datei steuert Computernamen, Zeitzone, Konten und OOBE.</value>
+    <value>Windows verwendet die ausgewählte Antwortdatei. Foundry führt keine Einstellungen zusammen und fügt keine hinzu.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Zeitzone</value>

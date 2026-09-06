@@ -1491,7 +1491,7 @@ Kontynuować wdrażanie?</value>
     <value>Przesłanie skrótu nie gwarantuje rejestracji w Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Sprawdź odroczoną instalację sterowników, profile sieciowe i usuwanie aplikacji w tym obrazie Windows.</value>
+    <value>Przetestuj ten plik odpowiedzi z wybranym obrazem Windows i konfiguracją Foundry.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Wybrany plik odpowiedzi jest niedostępny, nieprawidłowy lub niezgodny z wybraną architekturą systemu Windows. Wybierz inny plik lub ponownie utwórz nośnik.</value>
@@ -1506,7 +1506,7 @@ Kontynuować wdrażanie?</value>
     <value>Użyj ustawień Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Plik określa nazwę komputera, strefę czasową, konta i OOBE.</value>
+    <value>Windows używa wybranego pliku odpowiedzi. Foundry nie scala ani nie dodaje ustawień.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Strefa czasowa</value>

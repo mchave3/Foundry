@@ -1491,7 +1491,7 @@ Vil du fortsætte med implementeringen?</value>
     <value>Upload af hash garanterer ikke Autopilot-tilmelding.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Kontrollér udskudt driverinstallation, netværksprofiler og fjernelse af programmer i denne Windows-afbildning.</value>
+    <value>Test denne svarfil med den valgte Windows-afbildning og Foundry-konfiguration.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Den valgte svarfil er utilgængelig, ugyldig eller inkompatibel med den valgte Windows-arkitektur. Vælg en anden fil, eller opret mediet igen.</value>
@@ -1506,7 +1506,7 @@ Vil du fortsætte med implementeringen?</value>
     <value>Brug Foundry-indstillinger</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Filen styrer computernavn, tidszone, konti og OOBE.</value>
+    <value>Windows bruger den valgte svarfil. Foundry sammenfletter eller tilføjer ikke indstillinger.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Tidszone</value>

@@ -3007,7 +3007,7 @@
     <value>包含命令；請檢查是否與 Foundry 自訂設定及安裝掛鉤發生衝突。</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>僅支援 specialize 和 oobeSystem 設定。Foundry 仍負責磁碟、映像、驅動程式、AppX 移除、AI 原則、選用功能及網路設定檔漫遊。自訂命令可能與這些作業或安裝掛鉤發生衝突。請使用 Windows SIM 驗證，並在虛擬機器中測試目標映像；不會匯入外部指令碼檔案。</value>
+    <value>僅支援 specialize 和 oobeSystem 設定。Foundry 的其他部署作業仍保持啟用，可能與自訂設定或命令衝突。請使用 Windows SIM 驗證，並在虛擬機器中測試完整組態。不會匯入外部指令碼檔案。</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>操作人員可在「目標裝置」頁面選擇 Foundry 設定或媒體內含的一個檔案。匯入檔案不會變更預設選項。</value>
@@ -3055,7 +3055,7 @@
     <value>使用 Foundry 設定</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>選取的回應檔案負責 Windows 命名、時區、帳戶、自動登入和 OOBE。Foundry 不會合併設定或補上遺漏的值。已儲存的 Foundry 設定仍然可用，而且必須有效，才能使用內建選項。</value>
+    <value>選取的檔案會取代 Foundry 產生的回應檔案。其中的設定將依原樣使用，不會合併或補上缺少的值。選取「使用 Foundry 設定」即可使用已儲存的組態。</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>自訂檔案需要在「一般」設定中啟用部署媒體密碼保護。XML 可能包含認證或指令碼。目錄僅儲存來源參照；開機映像包含加密副本。</value>

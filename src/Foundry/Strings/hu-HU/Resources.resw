@@ -3007,7 +3007,7 @@
     <value>Parancsokat tartalmaz; ellenőrizze, hogy nem ütköznek-e a Foundry testreszabásaival és telepítési műveleteivel.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Csak a specialize és az oobeSystem beállítások támogatottak. A lemezeket, rendszerképeket, illesztőprogramokat, AppX-eltávolítást, AI-házirendeket, választható szolgáltatásokat és hálózati profilok átvitelét továbbra is a Foundry kezeli. Az egyéni parancsok ütközhetnek ezekkel a műveletekkel vagy a telepítési műveletekkel. Ellenőrizze az érvényességet a Windows SIM eszközzel, és tesztelje a kívánt rendszerképet egy virtuális gépen; a külső szkriptfájlokat a rendszer nem importálja.</value>
+    <value>Csak a specialize és az oobeSystem beállítások támogatottak. A Foundry többi telepítési művelete engedélyezve marad, és ütközhet az egyéni beállításokkal vagy parancsokkal. Ellenőrizze az érvényességet a Windows SIM eszközzel, és tesztelje a teljes konfigurációt egy virtuális gépen. A külső szkriptfájlokat a rendszer nem importálja.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>Az operátor a Cél oldalon választhatja ki a Foundry beállításait vagy az adathordozón szereplő fájlok egyikét. A fájl importálása nem módosítja az alapértelmezést.</value>
@@ -3055,7 +3055,7 @@
     <value>A Foundry beállításainak használata</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>A kiválasztott válaszfájl határozza meg a Windows számítógépnevét, időzónáját, fiókjait, automatikus bejelentkezését és OOBE-beállításait. A Foundry nem egyesíti a beállításokat és nem pótolja a kihagyott értékeket. A mentett Foundry-beállítások elérhetők maradnak, és a beépített mód használatához érvényesnek kell lenniük.</value>
+    <value>A kiválasztott fájl felváltja a Foundry által létrehozott válaszfájlt. Beállításai változtatás nélkül érvényesülnek, egyesítés és a hiányzó értékek pótlása nélkül. A mentett konfiguráció használatához válassza A Foundry beállításainak használata lehetőséget.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Az egyéni fájlok használatához az Általános konfigurációban engedélyezni kell a telepítési adathordozó jelszavas védelmét. Az XML hitelesítő adatokat vagy szkripteket tartalmazhat. A katalógus csak a forráshivatkozásokat menti; a rendszerindító lemezkép titkosított másolatokat tartalmaz.</value>

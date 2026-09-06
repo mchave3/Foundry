@@ -3007,7 +3007,7 @@
     <value>Conține comenzi; verificați posibilele conflicte cu personalizările Foundry și punctele de execuție ale instalării.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Sunt acceptate numai setările din specialize și oobeSystem. Foundry controlează în continuare discurile, imaginile, driverele, eliminarea AppX, politicile IA, caracteristicile opționale și transferul profilurilor de rețea. Comenzile personalizate pot intra în conflict cu aceste operațiuni sau cu punctele de execuție ale instalării. Validați cu Windows SIM și testați imaginea dorită într-o mașină virtuală; fișierele script externe nu sunt importate.</value>
+    <value>Sunt acceptate numai setările din specialize și oobeSystem. Celelalte operațiuni de implementare Foundry rămân activate și pot intra în conflict cu setările sau comenzile personalizate. Validați cu Windows SIM și testați configurația completă într-o mașină virtuală. Fișierele script externe nu sunt importate.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>Operatorul poate alege setările Foundry sau un fișier inclus pe suport în pagina Dispozitiv țintă. Importarea unui fișier nu schimbă opțiunea implicită.</value>
@@ -3055,7 +3055,7 @@
     <value>Folosește setările Foundry</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>Fișierul de răspuns selectat controlează numele Windows, fusul orar, conturile, conectarea automată și OOBE. Foundry nu îmbină setările și nu completează omisiunile. Setările Foundry salvate rămân disponibile și trebuie să fie valide pentru opțiunea nativă.</value>
+    <value>Fișierul selectat înlocuiește fișierul de răspuns generat de Foundry. Setările sale sunt folosite ca atare, fără îmbinare sau completarea valorilor lipsă. Selectați „Folosește setările Foundry” pentru a utiliza configurația salvată.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Fișierele personalizate necesită protejarea prin parolă a suportului de implementare în configurația generală. XML-ul poate conține acreditări sau scripturi. Catalogul salvează doar referințe la surse; imaginea de pornire conține copii criptate.</value>

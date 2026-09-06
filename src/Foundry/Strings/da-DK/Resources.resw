@@ -3007,7 +3007,7 @@
     <value>Indeholder kommandoer. Kontrollér, om de overlapper med Foundry-tilpasninger og installationshooks.</value>
   </data>
   <data name="Unattend.CompatibilityDescription" xml:space="preserve">
-    <value>Kun indstillinger for specialize og oobeSystem understøttes. Foundry styrer fortsat diske, afbildninger, drivere, fjernelse af AppX, AI-politikker, valgfrie funktioner og netværksroaming. Brugerdefinerede kommandoer kan være i konflikt med disse handlinger eller installationshooks. Validér med Windows SIM, og test den ønskede afbildning på en virtuel maskine. Eksterne scriptfiler importeres ikke.</value>
+    <value>Kun indstillinger for specialize og oobeSystem understøttes. Andre udrulningshandlinger i Foundry forbliver aktiveret og kan være i konflikt med brugerdefinerede indstillinger eller kommandoer. Validér med Windows SIM, og test hele konfigurationen på en virtuel maskine. Eksterne scriptfiler importeres ikke.</value>
   </data>
   <data name="Unattend.DefaultDescription" xml:space="preserve">
     <value>Operatøren kan vælge Foundry-indstillinger eller en af de medfølgende filer på målsiden. Import af en fil ændrer ikke standardvalget.</value>
@@ -3055,7 +3055,7 @@
     <value>Brug Foundry-indstillinger</value>
   </data>
   <data name="Unattend.OwnershipDescription" xml:space="preserve">
-    <value>Den valgte svarfil styrer Windows-navn, tidszone, konti, automatisk logon og OOBE. Foundry sammenfletter ikke indstillinger og udfylder ikke manglende værdier. Gemte Foundry-indstillinger er fortsat tilgængelige og skal være gyldige, hvis de vælges til udrulningen.</value>
+    <value>Den valgte fil erstatter svarfilen, som Foundry genererer. Dens indstillinger bruges uændret uden sammenfletning eller udfyldning af manglende værdier. Vælg Brug Foundry-indstillinger for at bruge din gemte konfiguration.</value>
   </data>
   <data name="Unattend.ProtectionDescription" xml:space="preserve">
     <value>Brugerdefinerede filer kræver adgangskodebeskyttelse af udrulningsmediet i den generelle konfiguration. XML kan indeholde legitimationsoplysninger eller scripts. Kataloget gemmer kun referencer til kilderne. Startafbildningen indeholder krypterede kopier.</value>

@@ -13,7 +13,7 @@ public sealed record DeploymentLaunchRequest
     /// <summary>Gets the selected custom file; null retains native Foundry customization.</summary>
     public UnattendSelection? Unattend { get; init; }
 
-    /// <summary>Gets whether the answer file exclusively owns naming, time zone and OOBE.</summary>
+    /// <summary>Gets whether a custom answer file replaces the Foundry-generated answer file without merging settings.</summary>
     public bool UsesCustomUnattend => Unattend is not null;
 
     public required DeploymentMode Mode { get; init; }
