@@ -8,6 +8,56 @@ namespace Foundry.Telemetry.Tests;
 
 public sealed class TelemetryEventPropertyPolicyTests
 {
+    [Theory]
+    [InlineData(TelemetryEvents.OsdBootMediaFinished, "unattend_default_mode", "native")]
+    [InlineData(TelemetryEvents.OsdBootMediaFinished, "unattend_default_mode", "custom")]
+    [InlineData(TelemetryEvents.DeploySessionFinished, "deploy_unattend_mode", "native")]
+    [InlineData(TelemetryEvents.DeploySessionFinished, "deploy_unattend_mode", "custom")]
+    public void Sanitize_RetainsUnattendModeButDropsFileMetadata(string eventName, string modeProperty, string mode)
+    {
+        var properties = new Dictionary<string, object?>
+        {
+            [modeProperty] = mode,
+            ["unattend_enabled"] = true,
+            ["unattend_file_count"] = 2,
+            ["unattend_file_name"] = "private.xml",
+            ["unattend_display_name"] = "Private deployment",
+            ["unattend_file_id"] = "private-id",
+            ["unattend_source_path"] = @"C:\private.xml",
+            ["unattend_content_hash"] = "private-hash",
+            ["unattend_xml"] = "<password>private</password>"
+        };
+
+        IReadOnlyDictionary<string, object?> result = TelemetryEventPropertyPolicy.Sanitize(eventName, properties);
+
+        Assert.Equal(mode, result[modeProperty]);
+        Assert.Equal(eventName == TelemetryEvents.OsdBootMediaFinished ? 3 : 1, result.Count);
+        Assert.DoesNotContain(result.Values, value => value?.ToString()?.Contains("private", StringComparison.OrdinalIgnoreCase) == true);
+    }
+
+    [Theory]
+    [InlineData(TelemetryEvents.OsdBootMediaFinished, "unattend_default_mode", "private.xml")]
+    [InlineData(TelemetryEvents.DeploySessionFinished, "deploy_unattend_mode", "private.xml")]
+    [InlineData(TelemetryEvents.OsdBootMediaFinished, "unattend_enabled", "private.xml")]
+    [InlineData(TelemetryEvents.OsdBootMediaFinished, "unattend_file_count", "private.xml")]
+    [InlineData(TelemetryEvents.ConnectSessionReady, "deploy_unattend_mode", "custom")]
+    public void Sanitize_DropsInvalidOrMisplacedUnattendValues(string eventName, string property, string value)
+    {
+        IReadOnlyDictionary<string, object?> result = TelemetryEventPropertyPolicy.Sanitize(
+            eventName, new Dictionary<string, object?> { [property] = value });
+
+        Assert.Empty(result);
+    }
+
+    [Theory]
+    [InlineData(-1)]
+    [InlineData(101)]
+    public void Sanitize_DropsOutOfRangeUnattendFileCounts(int count)
+    {
+        Assert.Empty(TelemetryEventPropertyPolicy.Sanitize(TelemetryEvents.OsdBootMediaFinished,
+            new Dictionary<string, object?> { ["unattend_file_count"] = count }));
+    }
+
     [Fact]
     public void Sanitize_ForDailyActive_AllowsOnlyNonSensitiveProxyConfiguration()
     {

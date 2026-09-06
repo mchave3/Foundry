@@ -13,6 +13,90 @@ namespace Foundry.Core.Tests;
 
 public sealed class BootMediaTelemetryPropertyBuilderTests
 {
+    [Theory]
+    [InlineData(false, null, "native")]
+    [InlineData(false, "private-file-id", "native")]
+    [InlineData(true, null, "native")]
+    [InlineData(true, "private-file-id", "custom")]
+    public void Build_ReportsUnattendConfigurationWithoutFileMetadata(bool enabled, string? defaultFileId, string expectedMode)
+    {
+        var document = new FoundryConfigurationDocument
+        {
+            Unattend = new UnattendSettings
+            {
+                IsEnabled = enabled,
+                DefaultFileId = defaultFileId,
+                Files =
+                [
+                    new UnattendFileSettings
+                    {
+                        Id = "private-file-id",
+                        DisplayName = "private-file-label",
+                        SourcePath = @"C:\private-file-source.xml",
+                        ContentHash = "private-file-hash"
+                    }
+                ]
+            },
+            Customization = new CustomizationSettings
+            {
+                MachineNaming = new MachineNamingSettings { IsEnabled = true },
+                Oobe = new OobeSettings { IsEnabled = true }
+            }
+        };
+
+        IReadOnlyDictionary<string, object?> result = BootMediaTelemetryPropertyBuilder.Build(
+            TelemetryBootMediaTargets.Iso,
+            TelemetryBootMediaUsbOperations.None,
+            new MediaPreflightOptions(),
+            document,
+            success: true,
+            failedStepName: null,
+            duration: TimeSpan.Zero,
+            connectRuntimePayloadSource: TelemetryRuntimePayloadSources.None,
+            deployRuntimePayloadSource: TelemetryRuntimePayloadSources.None);
+
+        Assert.Equal(enabled, result["unattend_enabled"]);
+        Assert.Equal(expectedMode, result["unattend_default_mode"]);
+        Assert.Equal(enabled ? 1 : 0, result["unattend_file_count"]);
+        Assert.True((bool)result["customization_machine_naming_enabled"]!);
+        Assert.True((bool)result["customization_oobe_enabled"]!);
+        Assert.DoesNotContain(result.Values, value => value?.ToString()?.Contains("private-file", StringComparison.Ordinal) == true);
+        IReadOnlyDictionary<string, object?> sanitized = TelemetryEventPropertyPolicy.Sanitize(TelemetryEvents.OsdBootMediaFinished, result);
+        Assert.Equal(enabled, sanitized["unattend_enabled"]);
+        Assert.Equal(expectedMode, sanitized["unattend_default_mode"]);
+        Assert.Equal(enabled ? 1 : 0, sanitized["unattend_file_count"]);
+    }
+
+    [Theory]
+    [InlineData(false, 150, 0)]
+    [InlineData(true, 150, 100)]
+    [InlineData(true, 0, 0)]
+    public void Build_CountsOnlyActiveUnattendFilesWithinTelemetryBound(bool enabled, int fileCount, int expectedCount)
+    {
+        var document = new FoundryConfigurationDocument
+        {
+            Unattend = new UnattendSettings
+            {
+                IsEnabled = enabled,
+                Files = Enumerable.Range(0, fileCount).Select(_ => new UnattendFileSettings()).ToArray()
+            }
+        };
+
+        IReadOnlyDictionary<string, object?> result = BootMediaTelemetryPropertyBuilder.Build(
+            TelemetryBootMediaTargets.Iso,
+            TelemetryBootMediaUsbOperations.None,
+            new MediaPreflightOptions(),
+            document,
+            success: false,
+            failedStepName: null,
+            duration: TimeSpan.Zero,
+            connectRuntimePayloadSource: TelemetryRuntimePayloadSources.None,
+            deployRuntimePayloadSource: TelemetryRuntimePayloadSources.None);
+
+        Assert.Equal(expectedCount, result["unattend_file_count"]);
+        Assert.Equal(enabled, result["customization_any_enabled"]);
+    }
+
     [Fact]
     public void Build_WhenCreationFails_IncludesStableFailureTaxonomy()
     {

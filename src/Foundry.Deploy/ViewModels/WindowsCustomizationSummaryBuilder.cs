@@ -15,11 +15,17 @@ internal static class WindowsCustomizationSummaryBuilder
         DeployAiComponentRemovalSettings aiComponentRemoval,
         DeployWindowsOptionalFeatureSettings optionalFeatures,
         Func<string, string> getString,
-        CultureInfo culture)
+        CultureInfo culture,
+        bool usesCustomUnattend = false)
     {
         var rows = new List<DeploymentSummaryRowViewModel>();
 
-        if (oobe.IsEnabled)
+        if (usesCustomUnattend)
+        {
+            rows.Add(new(getString("Summary.Oobe"), getString("Unattend.Managed")));
+        }
+
+        if (!usesCustomUnattend && oobe.IsEnabled)
         {
             AddSection(rows, getString("Summary.Oobe"));
             rows.Add(new(getString("Summary.DiagnosticData"), GetDiagnosticDataText(oobe.DiagnosticDataLevel, getString)));

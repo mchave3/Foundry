@@ -11,6 +11,11 @@ namespace Foundry.Deploy.Services.Startup;
 
 public sealed record DeploymentStartupSnapshot
 {
+    /// <summary>Locates the protected answer-file catalog relative to the loaded runtime configuration.</summary>
+    public string ConfigurationPath { get; init; } = Services.Configuration.DeployConfigurationService.DefaultConfigurationPath;
+    /// <summary>Preserves a configuration failure instead of falling back to native customization.</summary>
+    public string? ConfigurationFailureMessage { get; init; }
+
     public required string CacheRootPath { get; init; }
     public required FoundryDeployConfigurationDocument? DeployConfigurationDocument { get; init; }
     public required bool IsBootMediaUpdateRecommended { get; init; }

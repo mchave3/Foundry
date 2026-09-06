@@ -39,6 +39,7 @@ public static class NavigationRouteCatalog
         CreatePrimary<AutopilotZeroTouchPage>("Nav_AutopilotZeroTouchKey", "E753", NavigationSection.WindowsAutopilot),
         CreatePrimary<AutopilotInteractiveHashUploadPage>("Nav_AutopilotInteractiveHashUploadKey", "E928", NavigationSection.WindowsAutopilot),
         CreatePrimary<OsSelectionPage>("Nav_OsSelectionKey", "EC77", NavigationSection.Customization),
+        CreatePrimary<UnattendPage>("Nav_UnattendKey", "E8A5", NavigationSection.Customization),
         CreatePrimary<MachineNamingPage>("Nav_MachineNamingKey", "E8AC", NavigationSection.Customization),
         CreatePrimary<OobePage>("Nav_OobeKey", "F133", NavigationSection.Customization),
         CreatePrimary<OptionalFeaturesPage>("Nav_OptionalFeaturesKey", "E74C", NavigationSection.Customization),

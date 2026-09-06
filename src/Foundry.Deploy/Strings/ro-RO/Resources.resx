@@ -665,8 +665,14 @@ Continuați cu implementarea?</value>
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>Sigilează partiția de recuperare</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>Pregătește fișierul de răspuns personalizat</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>Pregătește personalizările</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>Validează fișierul de răspuns personalizat</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>Validează configurația</value>
@@ -1474,6 +1480,39 @@ Continuați cu implementarea?</value>
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>Deschideți fișierul jurnal</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>Acest fișier de răspuns intră în conflict cu modul de înscriere Autopilot configurat. Alegeți alt fișier sau modificați configurația suportului.</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Comenzile personalizate pot intra în conflict cu Foundry. Testați această configurație.</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>Încărcarea hashului nu garantează înscrierea în Autopilot.</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>Testați acest fișier de răspuns cu imaginea Windows și configurația Foundry selectate.</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>Fișierul de răspuns selectat este indisponibil, nevalid sau incompatibil cu arhitectura Windows selectată. Alegeți alt fișier sau recreați suportul.</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>Gestionat de fișierul de răspuns</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>Fișierul de răspuns implicit configurat lipsește. Recreați suportul de pornire.</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>Folosește setările Foundry</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>Windows folosește fișierul de răspuns selectat. Foundry nu îmbină și nu adaugă setări.</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>Fus orar</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>Fișier de răspuns</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>Reveniți la rezumat</value>

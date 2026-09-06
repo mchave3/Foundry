@@ -53,6 +53,11 @@ public sealed record FoundryDeployConfigurationDocument
     public DeployCustomizationSettings Customization { get; init; } = new();
 
     /// <summary>
+    /// Gets the manifest of protected custom answer-file choices.
+    /// </summary>
+    public DeployUnattendSettings Unattend { get; init; } = new();
+
+    /// <summary>
     /// Gets Autopilot provisioning settings.
     /// </summary>
     public DeployAutopilotSettings Autopilot { get; init; } = new();

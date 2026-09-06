@@ -85,6 +85,8 @@ public sealed class DeploymentStartupCoordinator : IDeploymentStartupCoordinator
 
         return new DeploymentStartupSnapshot
         {
+            ConfigurationPath = deployConfigLoadResult.ConfigurationPath,
+            ConfigurationFailureMessage = deployConfigLoadResult.FailureMessage,
             CacheRootPath = cacheRootPath,
             DeployConfigurationDocument = deployConfigurationDocument,
             IsBootMediaUpdateRecommended = deployConfigLoadResult.IsBootMediaUpdateRecommended,

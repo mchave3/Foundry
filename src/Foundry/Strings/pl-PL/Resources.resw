@@ -2091,6 +2091,12 @@
   <data name="Nav_StartKey.Title" xml:space="preserve">
     <value>Zacznij</value>
   </data>
+  <data name="Nav_UnattendKey.Description" xml:space="preserve">
+    <value>Importuj pliki odpowiedzi systemu Windows i wybierz ustawienia używane podczas wdrażania.</value>
+  </data>
+  <data name="Nav_UnattendKey.Title" xml:space="preserve">
+    <value>Unattend</value>
+  </data>
   <data name="Nav_WifiKey.Description" xml:space="preserve">
     <value>Skonfiguruj aprowizację i profile Wi-Fi.</value>
   </data>
@@ -2984,6 +2990,117 @@
   </data>
   <data name="ThemeSetting_MicaItem.Content" xml:space="preserve">
     <value>Mika</value>
+  </data>
+  <data name="Unattend.AutopilotWarning" xml:space="preserve">
+    <value>Zawiera ustawienia, które mogą uniemożliwić rejestrację w Autopilot. Niezgodne tryby rejestracji zostaną zablokowane podczas wdrażania.</value>
+  </data>
+  <data name="Unattend.CatalogDescription" xml:space="preserve">
+    <value>Wybierz plik, aby zmienić jego nazwę, odświeżyć go lub usunąć. Pliki źródłowe muszą być dostępne do czasu utworzenia nośnika. Zmienione źródła wymagają odświeżenia.</value>
+  </data>
+  <data name="Unattend.CatalogLabel" xml:space="preserve">
+    <value>Pliki odpowiedzi</value>
+  </data>
+  <data name="Unattend.CheckSourcesLabel" xml:space="preserve">
+    <value>Sprawdź źródła</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Zawiera polecenia. Sprawdź, czy nie powielają dostosowań i procedur instalacyjnych Foundry.</value>
+  </data>
+  <data name="Unattend.CompatibilityDescription" xml:space="preserve">
+    <value>Obsługiwane są tylko ustawienia specialize i oobeSystem. Inne operacje wdrażania Foundry pozostają włączone i mogą kolidować z niestandardowymi ustawieniami lub poleceniami. Sprawdź poprawność w Windows SIM i przetestuj całą konfigurację na maszynie wirtualnej. Zewnętrzne pliki skryptów nie są importowane.</value>
+  </data>
+  <data name="Unattend.DefaultDescription" xml:space="preserve">
+    <value>Operator może wybrać ustawienia Foundry lub jeden z dołączonych plików na stronie celu. Import pliku nie zmienia wyboru domyślnego.</value>
+  </data>
+  <data name="Unattend.DefaultLabel" xml:space="preserve">
+    <value>Domyślny wybór dla wdrożenia</value>
+  </data>
+  <data name="Unattend.DisplayNameLabel" xml:space="preserve">
+    <value>Nazwa wyświetlana</value>
+  </data>
+  <data name="Unattend.DuplicateMessage" xml:space="preserve">
+    <value>Pominięto pliki już obecne w katalogu: {0}.</value>
+  </data>
+  <data name="Unattend.EmptyCatalogMessage" xml:space="preserve">
+    <value>Zaimportuj co najmniej jeden plik odpowiedzi, aby używać tej funkcji.</value>
+  </data>
+  <data name="Unattend.EnableDescription" xml:space="preserve">
+    <value>Dołącz zaimportowane pliki do obrazu rozruchowego. Wyłączenie tej opcji zachowuje katalog, ale pomija jego pliki na nowych nośnikach.</value>
+  </data>
+  <data name="Unattend.EnableLabel" xml:space="preserve">
+    <value>Włącz niestandardowe pliki odpowiedzi</value>
+  </data>
+  <data name="Unattend.ImportLabel" xml:space="preserve">
+    <value>Importuj pliki</value>
+  </data>
+  <data name="Unattend.ImportPickerTitle" xml:space="preserve">
+    <value>Importuj pliki odpowiedzi systemu Windows</value>
+  </data>
+  <data name="Unattend.InvalidArchitectureMessage" xml:space="preserve">
+    <value>Plik musi określać obsługiwaną architekturę i zawierać ustawienia składników mające do niej zastosowanie.</value>
+  </data>
+  <data name="Unattend.InvalidCatalogMessage" xml:space="preserve">
+    <value>Katalog zawiera nieprawidłowe lub zduplikowane wpisy. Odśwież lub usuń odpowiednie pliki.</value>
+  </data>
+  <data name="Unattend.InvalidFileMessage" xml:space="preserve">
+    <value>Użyj poprawnego pliku odpowiedzi systemu Windows w formacie XML o rozmiarze do 4 MiB, bez deklaracji DTD i encji zewnętrznych. Sprawdź plik w Windows SIM.</value>
+  </data>
+  <data name="Unattend.InvalidSourcesMessage" xml:space="preserve">
+    <value>Niektóre źródła są niedostępne, zmienione lub nieprawidłowe. Odśwież lub usuń te wpisy przed utworzeniem nośnika.</value>
+  </data>
+  <data name="Unattend.MissingDefaultOption" xml:space="preserve">
+    <value>Brak wyboru domyślnego — wybierz inny</value>
+  </data>
+  <data name="Unattend.NativeOption" xml:space="preserve">
+    <value>Użyj ustawień Foundry</value>
+  </data>
+  <data name="Unattend.OwnershipDescription" xml:space="preserve">
+    <value>Wybrany plik zastępuje plik odpowiedzi wygenerowany przez Foundry. Jego ustawienia są używane bez zmian, scalania ani uzupełniania brakujących wartości. Wybierz „Użyj ustawień Foundry”, aby użyć zapisanej konfiguracji.</value>
+  </data>
+  <data name="Unattend.ProtectionDescription" xml:space="preserve">
+    <value>Pliki niestandardowe wymagają ochrony nośnika wdrożeniowego hasłem w konfiguracji ogólnej. XML może zawierać poświadczenia lub skrypty. Katalog zapisuje tylko odwołania do źródeł. Obraz rozruchowy zawiera zaszyfrowane kopie.</value>
+  </data>
+  <data name="Unattend.ProtectionRequiredMessage" xml:space="preserve">
+    <value>Włącz ochronę nośnika wdrożeniowego hasłem w konfiguracji ogólnej, aby używać niestandardowych plików odpowiedzi.</value>
+  </data>
+  <data name="Unattend.RefreshDuplicateMessage" xml:space="preserve">
+    <value>To źródło jest teraz kopią innego zaimportowanego pliku. Usuń ten wpis i wybierz istniejący plik.</value>
+  </data>
+  <data name="Unattend.RefreshLabel" xml:space="preserve">
+    <value>Odśwież źródło</value>
+  </data>
+  <data name="Unattend.RemoveLabel" xml:space="preserve">
+    <value>Usuń</value>
+  </data>
+  <data name="Unattend.RenameLabel" xml:space="preserve">
+    <value>Zmień nazwę</value>
+  </data>
+  <data name="Unattend.SaveFailedMessage" xml:space="preserve">
+    <value>Nie udało się zapisać konfiguracji. Sprawdź dostęp do folderu konfiguracji Foundry i spróbuj ponownie.</value>
+  </data>
+  <data name="Unattend.SelectedFileLabel" xml:space="preserve">
+    <value>Wybrany plik</value>
+  </data>
+  <data name="Unattend.SourceChangedMessage" xml:space="preserve">
+    <value>Źródło uległo zmianie. Użyj Odśwież źródło, aby zaakceptować zaktualizowany plik przed utworzeniem nośnika.</value>
+  </data>
+  <data name="Unattend.SourceChecksBusyMessage" xml:space="preserve">
+    <value>Dwie kontrole źródeł nadal oczekują na dostęp do plików. Przywróć dostęp do niedostępnych lokalizacji źródłowych, a następnie ponownie sprawdź źródła.</value>
+  </data>
+  <data name="Unattend.SourceNotCheckedMessage" xml:space="preserve">
+    <value>Źródło oczekuje na sprawdzenie. Wybierz Sprawdź źródła, aby zweryfikować bieżący plik bez akceptowania zmian zawartości.</value>
+  </data>
+  <data name="Unattend.SourceReadFailedMessage" xml:space="preserve">
+    <value>Nie udało się odczytać źródła. Sprawdź, czy plik nadal istnieje i jest dostępny.</value>
+  </data>
+  <data name="Unattend.SourceTimeoutMessage" xml:space="preserve">
+    <value>Upłynął limit czasu weryfikacji źródła. Sprawdź dostęp do lokalizacji źródłowej i spróbuj ponownie.</value>
+  </data>
+  <data name="Unattend.UnsupportedSettingsMessage" xml:space="preserve">
+    <value>Obsługiwane są tylko ustawienia specialize i oobeSystem. Usuń inne niepuste przebiegi konfiguracji, instrukcje obsługi w trybie offline lub ponowne zamykanie systemu w trybie inspekcji.</value>
+  </data>
+  <data name="Unattend.ValidSource" xml:space="preserve">
+    <value>Źródło zostało zweryfikowane.</value>
   </data>
   <data name="Update.Badge.New" xml:space="preserve">
     <value>Nowy</value>

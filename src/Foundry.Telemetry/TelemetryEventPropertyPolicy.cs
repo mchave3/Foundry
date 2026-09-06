@@ -78,6 +78,9 @@ public static class TelemetryEventPropertyPolicy
                 "autopilot_enabled",
                 "autopilot_provisioning_mode",
                 "deployment_protection_enabled",
+                "unattend_enabled",
+                "unattend_default_mode",
+                "unattend_file_count",
                 "deployment_reboot_mode",
                 "deployment_reboot_delay_seconds",
                 "customization_any_enabled",
@@ -173,6 +176,7 @@ public static class TelemetryEventPropertyPolicy
                 "deploy_session_failure_code",
                 "deploy_session_failure_reason",
                 "deploy_session_mode",
+                "deploy_unattend_mode",
                 "deploy_session_dry_run_enabled",
                 "deploy_hardware_vendor",
                 "deploy_hardware_model",
@@ -225,7 +229,7 @@ public static class TelemetryEventPropertyPolicy
         Dictionary<string, object?> sanitized = new(StringComparer.Ordinal);
         foreach ((string key, object? value) in properties)
         {
-            if (!allowedProperties.Contains(key) || IsSensitiveKey(key))
+            if (!allowedProperties.Contains(key) || IsSensitiveKey(key) || !IsAllowedUnattendValue(key, value))
             {
                 continue;
             }
@@ -235,6 +239,14 @@ public static class TelemetryEventPropertyPolicy
 
         return sanitized;
     }
+
+    private static bool IsAllowedUnattendValue(string key, object? value) => key switch
+    {
+        "unattend_enabled" => value is bool,
+        "unattend_default_mode" or "deploy_unattend_mode" => value is "native" or "custom",
+        "unattend_file_count" => value is int and >= 0 and <= 100,
+        _ => true
+    };
 
     private static bool IsSensitiveKey(string key)
     {

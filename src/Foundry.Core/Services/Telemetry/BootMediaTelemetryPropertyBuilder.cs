@@ -45,6 +45,7 @@ public static class BootMediaTelemetryPropertyBuilder
         ArgumentNullException.ThrowIfNull(options);
         ArgumentNullException.ThrowIfNull(document);
 
+        UnattendSettings unattend = document.Unattend ?? new UnattendSettings();
         DeploymentRebootTelemetryValue rebootPolicy = DeploymentRebootTelemetryValueResolver.Resolve(
             document.General.AutomaticRebootEnabled,
             document.General.AutomaticRebootDelaySeconds);
@@ -82,6 +83,9 @@ public static class BootMediaTelemetryPropertyBuilder
             ["autopilot_enabled"] = options.IsAutopilotEnabled,
             ["autopilot_provisioning_mode"] = ResolveAutopilotProvisioningMode(options),
             ["deployment_protection_enabled"] = document.General.DeploymentProtection.IsEnabled,
+            ["unattend_enabled"] = unattend.IsEnabled,
+            ["unattend_default_mode"] = unattend.IsEnabled && unattend.DefaultFileId is not null ? "custom" : "native",
+            ["unattend_file_count"] = unattend.IsEnabled ? Math.Clamp(unattend.Files?.Count ?? 0, 0, 100) : 0,
             ["deployment_reboot_mode"] = rebootPolicy.Mode
         };
 
@@ -93,7 +97,7 @@ public static class BootMediaTelemetryPropertyBuilder
         AddCustomizationTelemetryProperties(properties, document.Customization);
         AddOperatingSystemSelectionTelemetryProperties(properties, document.OperatingSystemSelection);
         properties["customization_any_enabled"] =
-            (bool)properties["customization_any_enabled"]! || document.OperatingSystemSelection.IsEnabled;
+            (bool)properties["customization_any_enabled"]! || document.OperatingSystemSelection.IsEnabled || unattend.IsEnabled;
         AddLocalizationTelemetryProperties(properties, document.Localization);
         AddNetworkTelemetryProperties(properties, document.Network, options.AreRequiredSecretsReady);
 

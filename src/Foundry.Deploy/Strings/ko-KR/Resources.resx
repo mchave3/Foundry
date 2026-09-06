@@ -665,8 +665,14 @@
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>복구 파티션 봉인</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>사용자 지정 응답 파일 배치</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>사용자 지정 준비</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>사용자 지정 응답 파일 유효성 검사</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>구성 검증</value>
@@ -1474,6 +1480,39 @@
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>로그 파일 열기</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>이 응답 파일이 구성된 Autopilot 등록 모드와 충돌합니다. 다른 파일을 선택하거나 미디어 구성을 변경하세요.</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>사용자 지정 명령이 Foundry와 충돌할 수 있습니다. 이 구성을 테스트하세요.</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>해시 업로드가 Autopilot 등록을 보장하지는 않습니다.</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>선택한 Windows 이미지와 Foundry 구성으로 이 응답 파일을 테스트하세요.</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>선택한 응답 파일을 사용할 수 없거나 파일이 유효하지 않거나 선택한 Windows 아키텍처와 호환되지 않습니다. 다른 파일을 선택하거나 미디어를 다시 만드세요.</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>응답 파일에서 관리</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>구성된 기본 응답 파일이 없습니다. 부팅 미디어를 다시 만드세요.</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>Foundry 설정 사용</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>Windows는 선택한 응답 파일을 사용합니다. Foundry는 설정을 병합하거나 추가하지 않습니다.</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>표준 시간대</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>응답 파일</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>요약으로 돌아가기</value>

@@ -29,7 +29,7 @@ public sealed class ConfigureOobeSettingsStep : DeploymentStepBase
     /// <inheritdoc />
     protected override async Task<DeploymentStepResult> ExecuteLiveAsync(DeploymentStepExecutionContext context, CancellationToken cancellationToken)
     {
-        bool shouldConfigureOobe = context.RuntimeState.Oobe.IsEnabled;
+        bool shouldConfigureOobe = !context.Request.UsesCustomUnattend && context.RuntimeState.Oobe.IsEnabled;
         bool shouldConfigureAiPolicies = HasAnyAiPolicyOptionEnabled(context.RuntimeState.AiComponentRemoval);
         if (!shouldConfigureOobe && !shouldConfigureAiPolicies)
         {
@@ -82,7 +82,7 @@ public sealed class ConfigureOobeSettingsStep : DeploymentStepBase
     /// <inheritdoc />
     protected override async Task<DeploymentStepResult> ExecuteDryRunAsync(DeploymentStepExecutionContext context, CancellationToken cancellationToken)
     {
-        bool shouldConfigureOobe = context.RuntimeState.Oobe.IsEnabled;
+        bool shouldConfigureOobe = !context.Request.UsesCustomUnattend && context.RuntimeState.Oobe.IsEnabled;
         bool shouldConfigureAiPolicies = HasAnyAiPolicyOptionEnabled(context.RuntimeState.AiComponentRemoval);
         if (!shouldConfigureOobe && !shouldConfigureAiPolicies)
         {

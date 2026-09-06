@@ -20,6 +20,11 @@ public sealed class ConfigureTargetComputerNameStep : DeploymentStepBase
 
     protected override async Task<DeploymentStepResult> ExecuteLiveAsync(DeploymentStepExecutionContext context, CancellationToken cancellationToken)
     {
+        if (context.Request.UsesCustomUnattend)
+        {
+            return DeploymentStepResult.Skipped("Skipped because a custom answer file is selected.");
+        }
+
         if (string.IsNullOrWhiteSpace(context.RuntimeState.TargetWindowsPartitionRoot))
         {
             return CreateMissingTargetPartitionFailure();
@@ -45,6 +50,11 @@ public sealed class ConfigureTargetComputerNameStep : DeploymentStepBase
 
     protected override async Task<DeploymentStepResult> ExecuteDryRunAsync(DeploymentStepExecutionContext context, CancellationToken cancellationToken)
     {
+        if (context.Request.UsesCustomUnattend)
+        {
+            return DeploymentStepResult.Skipped("Skipped because a custom answer file is selected.");
+        }
+
         if (string.IsNullOrWhiteSpace(context.RuntimeState.TargetWindowsPartitionRoot))
         {
             return CreateMissingTargetPartitionFailure();

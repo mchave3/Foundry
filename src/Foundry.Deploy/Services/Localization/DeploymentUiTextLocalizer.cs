@@ -26,6 +26,8 @@ public static partial class DeploymentUiTextLocalizer
             "Resolve cache strategy" => LocalizationText.GetString("Step.ResolveCacheStrategy"),
             "Prepare target disk layout" => LocalizationText.GetString("Step.PrepareTargetDiskLayout"),
             "Download operating system image" => LocalizationText.GetString("Step.DownloadOperatingSystemImage"),
+            "Validate custom answer file" => LocalizationText.GetString("Step.ValidateCustomUnattend"),
+            "Stage custom answer file" => LocalizationText.GetString("Step.StageCustomUnattend"),
             "Apply operating system image" => LocalizationText.GetString("Step.ApplyOperatingSystemImage"),
             "Configure target computer name" => LocalizationText.GetString("Step.ConfigureTargetComputerName"),
             "Configure OOBE settings" => LocalizationText.GetString("Step.ConfigureOobeSettings"),

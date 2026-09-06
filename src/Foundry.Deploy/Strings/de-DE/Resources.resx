@@ -665,8 +665,14 @@ Mit der Bereitstellung fortfahren?</value>
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>Wiederherstellungspartition versiegeln</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>Benutzerdefinierte Antwortdatei bereitstellen</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>Anpassungen vorbereiten</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>Benutzerdefinierte Antwortdatei validieren</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>Konfiguration validieren</value>
@@ -1474,6 +1480,39 @@ Mit der Bereitstellung fortfahren?</value>
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>Protokolldatei öffnen</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>Diese Antwortdatei steht im Konflikt mit dem konfigurierten Autopilot-Registrierungsmodus. Wählen Sie eine andere Datei oder ändern Sie die Medienkonfiguration.</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Benutzerdefinierte Befehle können mit Foundry in Konflikt stehen. Testen Sie diese Konfiguration.</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>Das Hochladen des Hashs garantiert keine Autopilot-Registrierung.</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>Testen Sie diese Antwortdatei mit dem ausgewählten Windows-Image und der Foundry-Konfiguration.</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>Die ausgewählte Antwortdatei ist nicht verfügbar, ungültig oder mit der ausgewählten Windows-Architektur inkompatibel. Wählen Sie eine andere Datei oder erstellen Sie das Medium neu.</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>Von der Antwortdatei verwaltet</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>Die konfigurierte Standardantwortdatei fehlt. Erstellen Sie das Startmedium neu.</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>Foundry-Einstellungen verwenden</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>Windows verwendet die ausgewählte Antwortdatei. Foundry führt keine Einstellungen zusammen und fügt keine hinzu.</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>Zeitzone</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>Antwortdatei</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>Zurück zur Zusammenfassung</value>

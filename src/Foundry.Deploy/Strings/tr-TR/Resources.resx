@@ -665,8 +665,14 @@ Dağıtıma devam edilsin mi?</value>
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>Kurtarma bölümünü mühürle</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>Özel yanıt dosyasını hazırla</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>Özelleştirmeleri hazırla</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>Özel yanıt dosyasını doğrula</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>Yapılandırmayı doğrula</value>
@@ -1474,6 +1480,39 @@ Dağıtıma devam edilsin mi?</value>
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>Günlük dosyasını aç</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>Bu yanıt dosyası, yapılandırılmış Autopilot kayıt moduyla çakışıyor. Başka bir dosya seçin veya medya yapılandırmasını değiştirin.</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Özel komutlar Foundry ile çakışabilir. Bu yapılandırmayı test edin.</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>Karma yüklemek Autopilot kaydını garanti etmez.</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>Bu yanıt dosyasını seçilen Windows görüntüsü ve Foundry yapılandırmasıyla test edin.</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>Seçilen yanıt dosyası kullanılamıyor, geçersiz veya seçilen Windows mimarisiyle uyumsuz. Başka bir dosya seçin ya da medyayı yeniden oluşturun.</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>Yanıt dosyası tarafından yönetilir</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>Yapılandırılmış varsayılan yanıt dosyası eksik. Önyükleme medyasını yeniden oluşturun.</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>Foundry ayarlarını kullan</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>Windows seçilen yanıt dosyasını kullanır. Foundry ayarları birleştirmez veya eklemez.</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>Saat dilimi</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>Yanıt dosyası</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>Özete dön</value>

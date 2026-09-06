@@ -34,6 +34,10 @@ internal sealed class FoundryConfigurationStateService : IFoundryConfigurationSt
     private readonly IAutopilotHardwareHashSessionState autopilotHardwareHashSessionState;
     private readonly AppSettingsService appSettingsService;
     private readonly ILogger logger;
+    private UnattendSettings? validatedUnattendSettings;
+    private IReadOnlyList<UnattendSourceValidation> unattendSourceValidations = [];
+    private readonly List<(UnattendSettings Settings, Task<IReadOnlyList<UnattendSourceValidation>> Read)> unattendSourceReads = [];
+    private long unattendRefreshRevision;
 
     public FoundryConfigurationStateService(
         IFoundryConfigurationService foundryConfigurationService,
@@ -76,6 +80,11 @@ internal sealed class FoundryConfigurationStateService : IFoundryConfigurationSt
     {
         get
         {
+            if (!IsUnattendConfigurationReady)
+            {
+                return false;
+            }
+
             if (Current.General.DeploymentProtection.IsEnabled &&
                 !deploymentProtectionSecretStateService.IsValid)
             {
@@ -124,6 +133,18 @@ internal sealed class FoundryConfigurationStateService : IFoundryConfigurationSt
             {
                 return false;
             }
+            catch (IOException)
+            {
+                return false;
+            }
+            catch (InvalidDataException)
+            {
+                return false;
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return false;
+            }
         }
     }
 
@@ -138,6 +159,114 @@ internal sealed class FoundryConfigurationStateService : IFoundryConfigurationSt
 
     /// <inheritdoc />
     public bool IsAutopilotConfigurationReady => AutopilotConfigurationValidation.IsReady;
+
+    /// <inheritdoc />
+    public bool IsUnattendConfigurationReady
+    {
+        get
+        {
+            try
+            {
+                UnattendFileService.ValidateSettings(Current.Unattend, Current.General.DeploymentProtection.IsEnabled);
+                return !Current.Unattend.IsEnabled ||
+                    (ReferenceEquals(validatedUnattendSettings, Current.Unattend) &&
+                     unattendSourceValidations.Count == Current.Unattend.Files.Count &&
+                     unattendSourceValidations.All(result => result.Inspection is not null));
+            }
+            catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException or InvalidOperationException or ArgumentException)
+            {
+                return false;
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public IReadOnlyList<UnattendSourceValidation> UnattendSourceValidations =>
+        ReferenceEquals(validatedUnattendSettings, Current.Unattend) ? unattendSourceValidations : [];
+
+    /// <inheritdoc />
+    public async Task RefreshUnattendSourcesAsync()
+    {
+        UnattendSettings settings = Current.Unattend;
+        long revision = ++unattendRefreshRevision;
+        validatedUnattendSettings = null;
+        StateChanged?.Invoke(this, EventArgs.Empty);
+
+        try
+        {
+            if (!ReferenceEquals(Current.Unattend, settings))
+            {
+                return;
+            }
+
+            // Keep one replacement slot so removing a hung source can recover without spawning unlimited workers.
+            unattendSourceReads.RemoveAll(scan => scan.Read.IsCompleted);
+            Task<IReadOnlyList<UnattendSourceValidation>>? sourceRead = unattendSourceReads
+                .FirstOrDefault(scan => ReferenceEquals(scan.Settings, settings)).Read;
+            if (sourceRead is null)
+            {
+                if (unattendSourceReads.Count >= 2)
+                {
+                    PublishUnattendSourceResults(settings, revision, (settings.Files ?? []).Select(file => new UnattendSourceValidation(
+                        file, null, "Two source checks are still waiting for file access. Restore the unavailable source locations, then check sources again.")).ToArray());
+                    return;
+                }
+
+                sourceRead = Task.Run(() => InspectUnattendSources(settings));
+                unattendSourceReads.Add((settings, sourceRead));
+            }
+
+            IReadOnlyList<UnattendSourceValidation> results = await sourceRead.WaitAsync(TimeSpan.FromSeconds(15));
+            PublishUnattendSourceResults(settings, revision, results);
+        }
+        catch (TimeoutException)
+        {
+            PublishUnattendSourceResults(settings, revision, (settings.Files ?? []).Select(file => new UnattendSourceValidation(
+                file, null, "Source validation timed out. Check the source location and refresh again.")).ToArray());
+        }
+    }
+
+    private void PublishUnattendSourceResults(UnattendSettings settings, long revision, IReadOnlyList<UnattendSourceValidation> results)
+    {
+        if (revision != unattendRefreshRevision || !ReferenceEquals(Current.Unattend, settings))
+        {
+            return;
+        }
+
+        validatedUnattendSettings = settings;
+        unattendSourceValidations = results;
+        StateChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private static IReadOnlyList<UnattendSourceValidation> InspectUnattendSources(UnattendSettings settings)
+    {
+        List<UnattendSourceValidation> results = [];
+        foreach (UnattendFileSettings file in settings.Files ?? [])
+        {
+            byte[]? content = null;
+            try
+            {
+                content = UnattendFileService.ReadValidated(file);
+                results.Add(new UnattendSourceValidation(file, UnattendFileService.Inspect(content), null));
+            }
+            catch (Exception ex) when (ex is IOException or InvalidDataException or UnauthorizedAccessException or InvalidOperationException or ArgumentException)
+            {
+                string message = ex is InvalidDataException or InvalidOperationException
+                    ? ex.Message
+                    : "The answer-file source could not be read. Check its location and access permissions.";
+                results.Add(new UnattendSourceValidation(file, null, message));
+            }
+            finally
+            {
+                if (content is not null)
+                {
+                    CryptographicOperations.ZeroMemory(content);
+                }
+            }
+        }
+
+        return results;
+    }
 
     /// <inheritdoc />
     public AutopilotConfigurationValidationResult AutopilotConfigurationValidation =>
@@ -210,6 +339,15 @@ internal sealed class FoundryConfigurationStateService : IFoundryConfigurationSt
     {
         ArgumentNullException.ThrowIfNull(settings);
         Current = Current with { Autopilot = SanitizeAutopilotForPersistence(settings) };
+        Save();
+        StateChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    /// <inheritdoc />
+    public void UpdateUnattend(UnattendSettings settings)
+    {
+        ArgumentNullException.ThrowIfNull(settings);
+        Current = Current with { Unattend = settings };
         Save();
         StateChanged?.Invoke(this, EventArgs.Empty);
     }

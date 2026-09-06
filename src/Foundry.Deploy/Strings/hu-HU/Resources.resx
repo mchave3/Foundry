@@ -665,8 +665,14 @@ Folytatja a telepítést?</value>
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>Helyreállítási partíció lezárása</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>Egyéni válaszfájl előkészítése</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>Testreszabások előkészítése</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>Egyéni válaszfájl ellenőrzése</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>Konfiguráció ellenőrzése</value>
@@ -1474,6 +1480,39 @@ Folytatja a telepítést?</value>
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>Nyissa meg a naplófájlt</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>Ez a válaszfájl ütközik a beállított Autopilot-regisztrációs móddal. Válasszon másik fájlt, vagy módosítsa az adathordozó konfigurációját.</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Az egyéni parancsok ütközhetnek a Foundryval. Tesztelje ezt a konfigurációt.</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>A kivonat feltöltése nem garantálja az Autopilot-regisztrációt.</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>Tesztelje ezt a válaszfájlt a kiválasztott Windows-rendszerképpel és Foundry-konfigurációval.</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>A kiválasztott válaszfájl nem érhető el, érvénytelen, vagy nem kompatibilis a kiválasztott Windows-architektúrával. Válasszon másik fájlt, vagy hozza létre újra az adathordozót.</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>A válaszfájl kezeli</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>A beállított alapértelmezett válaszfájl hiányzik. Hozza létre újra a rendszerindító adathordozót.</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>A Foundry beállításainak használata</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>A Windows a kiválasztott válaszfájlt használja. A Foundry nem egyesít és nem ad hozzá beállításokat.</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>Időzóna</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>Válaszfájl</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>Vissza az összefoglalóhoz</value>

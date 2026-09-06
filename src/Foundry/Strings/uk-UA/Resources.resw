@@ -2091,6 +2091,12 @@
   <data name="Nav_StartKey.Title" xml:space="preserve">
     <value>старт</value>
   </data>
+  <data name="Nav_UnattendKey.Description" xml:space="preserve">
+    <value>Імпортуйте файли відповідей Windows і виберіть параметри для розгортання.</value>
+  </data>
+  <data name="Nav_UnattendKey.Title" xml:space="preserve">
+    <value>Unattend</value>
+  </data>
   <data name="Nav_WifiKey.Description" xml:space="preserve">
     <value>Налаштуйте підготовку та профілі Wi-Fi.</value>
   </data>
@@ -2984,6 +2990,117 @@
   </data>
   <data name="ThemeSetting_MicaItem.Content" xml:space="preserve">
     <value>Слюда</value>
+  </data>
+  <data name="Unattend.AutopilotWarning" xml:space="preserve">
+    <value>Містить параметри, які можуть перешкодити реєстрації в Autopilot; несумісні режими реєстрації буде заблоковано під час розгортання.</value>
+  </data>
+  <data name="Unattend.CatalogDescription" xml:space="preserve">
+    <value>Виберіть файл, щоб перейменувати, оновити або видалити його. Вихідні файли мають залишатися доступними до створення носія; змінені джерела потрібно оновити.</value>
+  </data>
+  <data name="Unattend.CatalogLabel" xml:space="preserve">
+    <value>Файли відповідей</value>
+  </data>
+  <data name="Unattend.CheckSourcesLabel" xml:space="preserve">
+    <value>Перевірити джерела</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Містить команди; перевірте можливі конфлікти з налаштуваннями Foundry та обробниками інсталяції.</value>
+  </data>
+  <data name="Unattend.CompatibilityDescription" xml:space="preserve">
+    <value>Підтримуються лише параметри specialize та oobeSystem. Інші операції розгортання Foundry залишаються ввімкненими й можуть конфліктувати з власними параметрами або командами. Перевірте файл у Windows SIM і протестуйте повну конфігурацію у віртуальній машині. Зовнішні файли сценаріїв не імпортуються.</value>
+  </data>
+  <data name="Unattend.DefaultDescription" xml:space="preserve">
+    <value>На сторінці «Цільовий пристрій» оператор може вибрати параметри Foundry або один файл, включений до носія. Імпорт файлу не змінює вибір за замовчуванням.</value>
+  </data>
+  <data name="Unattend.DefaultLabel" xml:space="preserve">
+    <value>Вибір за замовчуванням для розгортання</value>
+  </data>
+  <data name="Unattend.DisplayNameLabel" xml:space="preserve">
+    <value>Відображуване ім’я</value>
+  </data>
+  <data name="Unattend.DuplicateMessage" xml:space="preserve">
+    <value>Пропущено файлів, які вже є в каталозі: {0}.</value>
+  </data>
+  <data name="Unattend.EmptyCatalogMessage" xml:space="preserve">
+    <value>Імпортуйте принаймні один файл відповідей, щоб використовувати цю функцію.</value>
+  </data>
+  <data name="Unattend.EnableDescription" xml:space="preserve">
+    <value>Включити імпортовані файли до завантажувального образу. Якщо вимкнути цю функцію, каталог збережеться, але його файли не включатимуться до нових носіїв.</value>
+  </data>
+  <data name="Unattend.EnableLabel" xml:space="preserve">
+    <value>Увімкнути власні файли відповідей</value>
+  </data>
+  <data name="Unattend.ImportLabel" xml:space="preserve">
+    <value>Імпортувати файли</value>
+  </data>
+  <data name="Unattend.ImportPickerTitle" xml:space="preserve">
+    <value>Імпорт файлів відповідей Windows</value>
+  </data>
+  <data name="Unattend.InvalidArchitectureMessage" xml:space="preserve">
+    <value>Файл має вказувати підтримувану архітектуру та містити застосовні до неї параметри компонентів.</value>
+  </data>
+  <data name="Unattend.InvalidCatalogMessage" xml:space="preserve">
+    <value>Каталог містить недійсні або повторювані записи. Оновіть або видаліть відповідні файли.</value>
+  </data>
+  <data name="Unattend.InvalidFileMessage" xml:space="preserve">
+    <value>Використовуйте коректний XML файлу відповідей Windows розміром до 4 MiB, без DTD і зовнішніх сутностей. Перевірте файл у Windows SIM.</value>
+  </data>
+  <data name="Unattend.InvalidSourcesMessage" xml:space="preserve">
+    <value>Деякі джерела відсутні, змінені або недійсні. Оновіть або видаліть ці записи перед створенням носія.</value>
+  </data>
+  <data name="Unattend.MissingDefaultOption" xml:space="preserve">
+    <value>Файл за замовчуванням відсутній — виберіть заміну</value>
+  </data>
+  <data name="Unattend.NativeOption" xml:space="preserve">
+    <value>Використовувати параметри Foundry</value>
+  </data>
+  <data name="Unattend.OwnershipDescription" xml:space="preserve">
+    <value>Вибраний файл замінює файл відповідей, створений Foundry. Його параметри використовуються як є, без об’єднання чи заповнення відсутніх значень. Виберіть «Використовувати параметри Foundry», щоб застосувати збережену конфігурацію.</value>
+  </data>
+  <data name="Unattend.ProtectionDescription" xml:space="preserve">
+    <value>Для власних файлів потрібен захист носія розгортання паролем у загальних налаштуваннях. XML може містити облікові дані або сценарії. Каталог зберігає лише посилання на джерела; завантажувальний образ містить зашифровані копії.</value>
+  </data>
+  <data name="Unattend.ProtectionRequiredMessage" xml:space="preserve">
+    <value>Щоб використовувати власні файли відповідей, увімкніть захист носія розгортання паролем у загальних налаштуваннях.</value>
+  </data>
+  <data name="Unattend.RefreshDuplicateMessage" xml:space="preserve">
+    <value>Тепер це джерело дублює інший імпортований файл. Видаліть цей запис і виберіть наявний файл.</value>
+  </data>
+  <data name="Unattend.RefreshLabel" xml:space="preserve">
+    <value>Оновити джерело</value>
+  </data>
+  <data name="Unattend.RemoveLabel" xml:space="preserve">
+    <value>Видалити</value>
+  </data>
+  <data name="Unattend.RenameLabel" xml:space="preserve">
+    <value>Перейменувати</value>
+  </data>
+  <data name="Unattend.SaveFailedMessage" xml:space="preserve">
+    <value>Не вдалося зберегти конфігурацію. Перевірте доступ до папки конфігурації Foundry та повторіть спробу.</value>
+  </data>
+  <data name="Unattend.SelectedFileLabel" xml:space="preserve">
+    <value>Вибраний файл</value>
+  </data>
+  <data name="Unattend.SourceChangedMessage" xml:space="preserve">
+    <value>Джерело змінено. Виберіть «Оновити джерело», щоб прийняти оновлений файл перед створенням носія.</value>
+  </data>
+  <data name="Unattend.SourceChecksBusyMessage" xml:space="preserve">
+    <value>Дві перевірки джерел досі очікують доступу до файлів. Відновіть доступ до недоступних розташувань і повторіть перевірку джерел.</value>
+  </data>
+  <data name="Unattend.SourceNotCheckedMessage" xml:space="preserve">
+    <value>Перевірка джерела очікується. Виберіть «Перевірити джерела», щоб перевірити поточний файл, не приймаючи зміни вмісту.</value>
+  </data>
+  <data name="Unattend.SourceReadFailedMessage" xml:space="preserve">
+    <value>Не вдалося прочитати джерело. Переконайтеся, що файл існує та доступний.</value>
+  </data>
+  <data name="Unattend.SourceTimeoutMessage" xml:space="preserve">
+    <value>Час перевірки джерела минув. Перевірте доступ до розташування джерела та повторіть спробу.</value>
+  </data>
+  <data name="Unattend.UnsupportedSettingsMessage" xml:space="preserve">
+    <value>Підтримуються лише параметри specialize та oobeSystem. Видаліть інші непорожні етапи налаштування, інструкції автономного обслуговування або вказівки на перезавантаження в режимі аудиту.</value>
+  </data>
+  <data name="Unattend.ValidSource" xml:space="preserve">
+    <value>Джерело перевірено.</value>
   </data>
   <data name="Update.Badge.New" xml:space="preserve">
     <value>новий</value>

@@ -2091,6 +2091,12 @@
   <data name="Nav_StartKey.Title" xml:space="preserve">
     <value>Indítsa el</value>
   </data>
+  <data name="Nav_UnattendKey.Description" xml:space="preserve">
+    <value>Importáljon Windows-válaszfájlokat, és válassza ki a központi telepítéshez használt beállításokat.</value>
+  </data>
+  <data name="Nav_UnattendKey.Title" xml:space="preserve">
+    <value>Unattend</value>
+  </data>
   <data name="Nav_WifiKey.Description" xml:space="preserve">
     <value>Konfigurálja a Wi-Fi kiépítését és profiljait.</value>
   </data>
@@ -2984,6 +2990,117 @@
   </data>
   <data name="ThemeSetting_MicaItem.Content" xml:space="preserve">
     <value>Mica</value>
+  </data>
+  <data name="Unattend.AutopilotWarning" xml:space="preserve">
+    <value>Az Autopilot-regisztrációt megakadályozó beállításokat tartalmaz; a nem kompatibilis regisztrációs módokat a rendszer letiltja a telepítés során.</value>
+  </data>
+  <data name="Unattend.CatalogDescription" xml:space="preserve">
+    <value>Válasszon ki egy fájlt az átnevezéshez, frissítéshez vagy eltávolításhoz. A forrásfájloknak az adathordozó létrehozásáig elérhetőnek kell maradniuk; a módosult forrásokat frissíteni kell.</value>
+  </data>
+  <data name="Unattend.CatalogLabel" xml:space="preserve">
+    <value>Válaszfájlok</value>
+  </data>
+  <data name="Unattend.CheckSourcesLabel" xml:space="preserve">
+    <value>Források ellenőrzése</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Parancsokat tartalmaz; ellenőrizze, hogy nem ütköznek-e a Foundry testreszabásaival és telepítési műveleteivel.</value>
+  </data>
+  <data name="Unattend.CompatibilityDescription" xml:space="preserve">
+    <value>Csak a specialize és az oobeSystem beállítások támogatottak. A Foundry többi telepítési művelete engedélyezve marad, és ütközhet az egyéni beállításokkal vagy parancsokkal. Ellenőrizze az érvényességet a Windows SIM eszközzel, és tesztelje a teljes konfigurációt egy virtuális gépen. A külső szkriptfájlokat a rendszer nem importálja.</value>
+  </data>
+  <data name="Unattend.DefaultDescription" xml:space="preserve">
+    <value>Az operátor a Cél oldalon választhatja ki a Foundry beállításait vagy az adathordozón szereplő fájlok egyikét. A fájl importálása nem módosítja az alapértelmezést.</value>
+  </data>
+  <data name="Unattend.DefaultLabel" xml:space="preserve">
+    <value>Telepítési alapértelmezés</value>
+  </data>
+  <data name="Unattend.DisplayNameLabel" xml:space="preserve">
+    <value>Megjelenítendő név</value>
+  </data>
+  <data name="Unattend.DuplicateMessage" xml:space="preserve">
+    <value>A rendszer kihagyott {0}, a katalógusban már szereplő fájlt.</value>
+  </data>
+  <data name="Unattend.EmptyCatalogMessage" xml:space="preserve">
+    <value>A funkció használatához importáljon legalább egy válaszfájlt.</value>
+  </data>
+  <data name="Unattend.EnableDescription" xml:space="preserve">
+    <value>Az importált fájlok beillesztése a rendszerindító lemezképbe. Kikapcsoláskor a katalógus megmarad, de a fájljai nem kerülnek az új adathordozókra.</value>
+  </data>
+  <data name="Unattend.EnableLabel" xml:space="preserve">
+    <value>Egyéni válaszfájlok engedélyezése</value>
+  </data>
+  <data name="Unattend.ImportLabel" xml:space="preserve">
+    <value>Fájlok importálása</value>
+  </data>
+  <data name="Unattend.ImportPickerTitle" xml:space="preserve">
+    <value>Windows-válaszfájlok importálása</value>
+  </data>
+  <data name="Unattend.InvalidArchitectureMessage" xml:space="preserve">
+    <value>A fájlnak támogatott architektúrát és az arra alkalmazható összetevő-beállításokat kell tartalmaznia.</value>
+  </data>
+  <data name="Unattend.InvalidCatalogMessage" xml:space="preserve">
+    <value>A katalógus érvénytelen vagy ismétlődő bejegyzéseket tartalmaz. Frissítse vagy távolítsa el az érintett fájlokat.</value>
+  </data>
+  <data name="Unattend.InvalidFileMessage" xml:space="preserve">
+    <value>Használjon érvényes, legfeljebb 4 MiB méretű Windows-válaszfájl XML-t DTD-k és külső entitások nélkül. Ellenőrizze a fájlt a Windows SIM eszközzel.</value>
+  </data>
+  <data name="Unattend.InvalidSourcesMessage" xml:space="preserve">
+    <value>Egyes források hiányoznak, módosultak vagy érvénytelenek. Az adathordozó létrehozása előtt frissítse vagy távolítsa el ezeket a bejegyzéseket.</value>
+  </data>
+  <data name="Unattend.MissingDefaultOption" xml:space="preserve">
+    <value>Hiányzó alapértelmezés – válasszon másikat</value>
+  </data>
+  <data name="Unattend.NativeOption" xml:space="preserve">
+    <value>A Foundry beállításainak használata</value>
+  </data>
+  <data name="Unattend.OwnershipDescription" xml:space="preserve">
+    <value>A kiválasztott fájl felváltja a Foundry által létrehozott válaszfájlt. Beállításai változtatás nélkül érvényesülnek, egyesítés és a hiányzó értékek pótlása nélkül. A mentett konfiguráció használatához válassza A Foundry beállításainak használata lehetőséget.</value>
+  </data>
+  <data name="Unattend.ProtectionDescription" xml:space="preserve">
+    <value>Az egyéni fájlok használatához az Általános konfigurációban engedélyezni kell a telepítési adathordozó jelszavas védelmét. Az XML hitelesítő adatokat vagy szkripteket tartalmazhat. A katalógus csak a forráshivatkozásokat menti; a rendszerindító lemezkép titkosított másolatokat tartalmaz.</value>
+  </data>
+  <data name="Unattend.ProtectionRequiredMessage" xml:space="preserve">
+    <value>Az egyéni válaszfájlok használatához engedélyezze a telepítési adathordozó jelszavas védelmét az Általános konfigurációban.</value>
+  </data>
+  <data name="Unattend.RefreshDuplicateMessage" xml:space="preserve">
+    <value>Ez a forrás most megegyezik egy másik importált fájllal. Távolítsa el ezt a bejegyzést, és válassza a meglévő fájlt.</value>
+  </data>
+  <data name="Unattend.RefreshLabel" xml:space="preserve">
+    <value>Forrás frissítése</value>
+  </data>
+  <data name="Unattend.RemoveLabel" xml:space="preserve">
+    <value>Eltávolítás</value>
+  </data>
+  <data name="Unattend.RenameLabel" xml:space="preserve">
+    <value>Átnevezés</value>
+  </data>
+  <data name="Unattend.SaveFailedMessage" xml:space="preserve">
+    <value>A konfiguráció mentése sikertelen. Ellenőrizze a Foundry konfigurációs mappájához való hozzáférést, majd próbálja újra.</value>
+  </data>
+  <data name="Unattend.SelectedFileLabel" xml:space="preserve">
+    <value>Kiválasztott fájl</value>
+  </data>
+  <data name="Unattend.SourceChangedMessage" xml:space="preserve">
+    <value>A forrás módosult. Az adathordozó létrehozása előtt a Forrás frissítése művelettel fogadja el a frissített fájlt.</value>
+  </data>
+  <data name="Unattend.SourceChecksBusyMessage" xml:space="preserve">
+    <value>Két forrásellenőrzés még fájlhozzáférésre vár. Állítsa helyre a nem elérhető forráshelyeket, majd ellenőrizze újra a forrásokat.</value>
+  </data>
+  <data name="Unattend.SourceNotCheckedMessage" xml:space="preserve">
+    <value>A forrás ellenőrzésre vár. Válassza a Források ellenőrzése lehetőséget az aktuális fájl ellenőrzéséhez a tartalom változásainak elfogadása nélkül.</value>
+  </data>
+  <data name="Unattend.SourceReadFailedMessage" xml:space="preserve">
+    <value>A forrás nem olvasható. Ellenőrizze, hogy a fájl még létezik és elérhető-e.</value>
+  </data>
+  <data name="Unattend.SourceTimeoutMessage" xml:space="preserve">
+    <value>A forrás ellenőrzése túllépte az időkorlátot. Ellenőrizze a forrás helyének elérhetőségét, majd próbálja újra.</value>
+  </data>
+  <data name="Unattend.UnsupportedSettingsMessage" xml:space="preserve">
+    <value>Csak a specialize és az oobeSystem beállítások támogatottak. Távolítsa el a többi nem üres konfigurációs fázist, az offline karbantartási utasításokat és az audit módba való visszaállítást.</value>
+  </data>
+  <data name="Unattend.ValidSource" xml:space="preserve">
+    <value>A forrás ellenőrizve.</value>
   </data>
   <data name="Update.Badge.New" xml:space="preserve">
     <value>Új</value>

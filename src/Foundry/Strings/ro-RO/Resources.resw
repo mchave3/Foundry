@@ -2091,6 +2091,12 @@
   <data name="Nav_StartKey.Title" xml:space="preserve">
     <value>Începeți</value>
   </data>
+  <data name="Nav_UnattendKey.Description" xml:space="preserve">
+    <value>Importați fișiere de răspuns Windows și alegeți setările folosite la implementare.</value>
+  </data>
+  <data name="Nav_UnattendKey.Title" xml:space="preserve">
+    <value>Unattend</value>
+  </data>
   <data name="Nav_WifiKey.Description" xml:space="preserve">
     <value>Configurați furnizarea și profilurile Wi-Fi.</value>
   </data>
@@ -2984,6 +2990,117 @@
   </data>
   <data name="ThemeSetting_MicaItem.Content" xml:space="preserve">
     <value>Mica</value>
+  </data>
+  <data name="Unattend.AutopilotWarning" xml:space="preserve">
+    <value>Conține setări care pot împiedica înscrierea în Autopilot; modurile de înscriere incompatibile vor fi blocate în timpul implementării.</value>
+  </data>
+  <data name="Unattend.CatalogDescription" xml:space="preserve">
+    <value>Selectați un fișier pentru a-l redenumi, actualiza sau elimina. Fișierele sursă trebuie să rămână disponibile până la crearea suportului; sursele modificate trebuie actualizate.</value>
+  </data>
+  <data name="Unattend.CatalogLabel" xml:space="preserve">
+    <value>Fișiere de răspuns</value>
+  </data>
+  <data name="Unattend.CheckSourcesLabel" xml:space="preserve">
+    <value>Verifică sursele</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Conține comenzi; verificați posibilele conflicte cu personalizările Foundry și punctele de execuție ale instalării.</value>
+  </data>
+  <data name="Unattend.CompatibilityDescription" xml:space="preserve">
+    <value>Sunt acceptate numai setările din specialize și oobeSystem. Celelalte operațiuni de implementare Foundry rămân activate și pot intra în conflict cu setările sau comenzile personalizate. Validați cu Windows SIM și testați configurația completă într-o mașină virtuală. Fișierele script externe nu sunt importate.</value>
+  </data>
+  <data name="Unattend.DefaultDescription" xml:space="preserve">
+    <value>Operatorul poate alege setările Foundry sau un fișier inclus pe suport în pagina Dispozitiv țintă. Importarea unui fișier nu schimbă opțiunea implicită.</value>
+  </data>
+  <data name="Unattend.DefaultLabel" xml:space="preserve">
+    <value>Opțiune implicită pentru implementare</value>
+  </data>
+  <data name="Unattend.DisplayNameLabel" xml:space="preserve">
+    <value>Nume afișat</value>
+  </data>
+  <data name="Unattend.DuplicateMessage" xml:space="preserve">
+    <value>Au fost omise {0} fișiere deja existente în catalog.</value>
+  </data>
+  <data name="Unattend.EmptyCatalogMessage" xml:space="preserve">
+    <value>Importați cel puțin un fișier de răspuns pentru a folosi această funcționalitate.</value>
+  </data>
+  <data name="Unattend.EnableDescription" xml:space="preserve">
+    <value>Includeți fișierele importate în imaginea de pornire. Dezactivarea păstrează catalogul, dar exclude fișierele sale de pe suporturile noi.</value>
+  </data>
+  <data name="Unattend.EnableLabel" xml:space="preserve">
+    <value>Activează fișierele de răspuns personalizate</value>
+  </data>
+  <data name="Unattend.ImportLabel" xml:space="preserve">
+    <value>Importă fișiere</value>
+  </data>
+  <data name="Unattend.ImportPickerTitle" xml:space="preserve">
+    <value>Importă fișiere de răspuns Windows</value>
+  </data>
+  <data name="Unattend.InvalidArchitectureMessage" xml:space="preserve">
+    <value>Fișierul trebuie să declare o arhitectură acceptată și să conțină setări de componente aplicabile acesteia.</value>
+  </data>
+  <data name="Unattend.InvalidCatalogMessage" xml:space="preserve">
+    <value>Catalogul conține intrări nevalide sau duplicate. Actualizați sau eliminați fișierele afectate.</value>
+  </data>
+  <data name="Unattend.InvalidFileMessage" xml:space="preserve">
+    <value>Folosiți XML valid pentru un fișier de răspuns Windows de cel mult 4 MiB, fără DTD-uri sau entități externe. Validați fișierul cu Windows SIM.</value>
+  </data>
+  <data name="Unattend.InvalidSourcesMessage" xml:space="preserve">
+    <value>Unele surse lipsesc, au fost modificate sau sunt nevalide. Actualizați sau eliminați aceste intrări înainte de a crea suportul.</value>
+  </data>
+  <data name="Unattend.MissingDefaultOption" xml:space="preserve">
+    <value>Opțiunea implicită lipsește — alegeți un înlocuitor</value>
+  </data>
+  <data name="Unattend.NativeOption" xml:space="preserve">
+    <value>Folosește setările Foundry</value>
+  </data>
+  <data name="Unattend.OwnershipDescription" xml:space="preserve">
+    <value>Fișierul selectat înlocuiește fișierul de răspuns generat de Foundry. Setările sale sunt folosite ca atare, fără îmbinare sau completarea valorilor lipsă. Selectați „Folosește setările Foundry” pentru a utiliza configurația salvată.</value>
+  </data>
+  <data name="Unattend.ProtectionDescription" xml:space="preserve">
+    <value>Fișierele personalizate necesită protejarea prin parolă a suportului de implementare în configurația generală. XML-ul poate conține acreditări sau scripturi. Catalogul salvează doar referințe la surse; imaginea de pornire conține copii criptate.</value>
+  </data>
+  <data name="Unattend.ProtectionRequiredMessage" xml:space="preserve">
+    <value>Activați protejarea prin parolă a suportului de implementare în configurația generală pentru a folosi fișiere de răspuns personalizate.</value>
+  </data>
+  <data name="Unattend.RefreshDuplicateMessage" xml:space="preserve">
+    <value>Această sursă dublează acum un alt fișier importat. Eliminați această intrare și alegeți fișierul existent.</value>
+  </data>
+  <data name="Unattend.RefreshLabel" xml:space="preserve">
+    <value>Actualizează sursa</value>
+  </data>
+  <data name="Unattend.RemoveLabel" xml:space="preserve">
+    <value>Elimină</value>
+  </data>
+  <data name="Unattend.RenameLabel" xml:space="preserve">
+    <value>Redenumește</value>
+  </data>
+  <data name="Unattend.SaveFailedMessage" xml:space="preserve">
+    <value>Configurația nu a putut fi salvată. Verificați accesul la folderul de configurare Foundry și încercați din nou.</value>
+  </data>
+  <data name="Unattend.SelectedFileLabel" xml:space="preserve">
+    <value>Fișier selectat</value>
+  </data>
+  <data name="Unattend.SourceChangedMessage" xml:space="preserve">
+    <value>Sursa a fost modificată. Folosiți Actualizează sursa pentru a accepta fișierul actualizat înainte de a crea suportul.</value>
+  </data>
+  <data name="Unattend.SourceChecksBusyMessage" xml:space="preserve">
+    <value>Două verificări ale surselor încă așteaptă accesul la fișiere. Restabiliți accesul la locațiile indisponibile, apoi verificați din nou sursele.</value>
+  </data>
+  <data name="Unattend.SourceNotCheckedMessage" xml:space="preserve">
+    <value>Verificarea sursei este în așteptare. Alegeți Verifică sursele pentru a valida fișierul curent fără a accepta modificări ale conținutului.</value>
+  </data>
+  <data name="Unattend.SourceReadFailedMessage" xml:space="preserve">
+    <value>Sursa nu a putut fi citită. Verificați dacă fișierul mai există și este accesibil.</value>
+  </data>
+  <data name="Unattend.SourceTimeoutMessage" xml:space="preserve">
+    <value>Validarea sursei a expirat. Verificați accesul la locația sursei și încercați din nou.</value>
+  </data>
+  <data name="Unattend.UnsupportedSettingsMessage" xml:space="preserve">
+    <value>Sunt acceptate numai setările din specialize și oobeSystem. Eliminați celelalte etape nevide, instrucțiunile de întreținere offline sau pregătirea pentru repornire în modul audit.</value>
+  </data>
+  <data name="Unattend.ValidSource" xml:space="preserve">
+    <value>Sursă validată.</value>
   </data>
   <data name="Update.Badge.New" xml:space="preserve">
     <value>Nou</value>

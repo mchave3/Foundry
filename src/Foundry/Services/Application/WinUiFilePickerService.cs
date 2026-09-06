@@ -53,6 +53,24 @@ public sealed class WinUiFilePickerService : IFilePickerService
     }
 
     /// <inheritdoc />
+    public async Task<IReadOnlyList<string>> PickOpenFilesAsync(FileOpenPickerRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var picker = new FileOpenPicker(App.MainWindow.AppWindow.Id)
+        {
+            Title = request.Title
+        };
+        foreach (string filter in NormalizeFileTypeFilters(request.FileTypeFilters))
+        {
+            picker.FileTypeFilter.Add(filter);
+        }
+
+        var results = await picker.PickMultipleFilesAsync();
+        return results.Select(result => result.Path).ToArray();
+    }
+
+    /// <inheritdoc />
     public async Task<string?> PickFolderAsync(FolderPickerRequest request)
     {
         ArgumentNullException.ThrowIfNull(request);

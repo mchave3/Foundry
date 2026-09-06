@@ -25,6 +25,7 @@ public enum ConfigurationOverviewItem
     AutopilotZeroTouch,
     AutopilotInteractive,
     OperatingSystemSelection,
+    Unattend,
     MachineNaming,
     Oobe,
     OptionalFeatures,
@@ -84,6 +85,11 @@ public sealed record ConfigurationOverviewContext
     /// Gets a value indicating whether the active Autopilot provisioning mode is valid.
     /// </summary>
     public bool IsAutopilotConfigurationReady { get; init; }
+
+    /// <summary>
+    /// Gets whether enabled answer-file sources, references, and media protection are ready.
+    /// </summary>
+    public bool IsUnattendConfigurationReady { get; init; } = true;
 }
 
 /// <summary>
@@ -132,6 +138,11 @@ public static class ConfigurationOverviewEvaluator
 
         var states = new Dictionary<ConfigurationOverviewItem, ConfigurationOverviewState>
         {
+            [ConfigurationOverviewItem.Unattend] = !configuration.Unattend.IsEnabled
+                ? ConfigurationOverviewState.Disabled
+                : context.IsUnattendConfigurationReady
+                    ? ConfigurationOverviewState.Configured
+                    : ConfigurationOverviewState.NeedsAttention,
             [ConfigurationOverviewItem.Architecture] = general.Architecture == WinPeArchitecture.X64
                 ? ConfigurationOverviewState.Default
                 : ConfigurationOverviewState.Configured,

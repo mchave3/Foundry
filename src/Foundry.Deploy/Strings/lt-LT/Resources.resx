@@ -665,8 +665,14 @@ Tęsti diegimą?</value>
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>Užfiksuok atkūrimo skaidinį</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>Parengti pasirinktinį atsakymų failą</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>Paruošk tinkinimus</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>Patikrinti pasirinktinį atsakymų failą</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>Patikrink konfigūraciją</value>
@@ -1474,6 +1480,39 @@ Tęsti diegimą?</value>
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>Atidaryti žurnalo failą</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>Šis atsakymų failas konfliktuoja su sukonfigūruotu „Autopilot“ registravimo režimu. Pasirinkite kitą failą arba pakeiskite laikmenos konfigūraciją.</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Pasirinktinės komandos gali prieštarauti „Foundry“ veiksmams. Išbandykite šią konfigūraciją.</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>Maišos įkėlimas negarantuoja registracijos „Autopilot“.</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>Išbandykite šį atsakymų failą su pasirinktu „Windows“ atvaizdu ir „Foundry“ konfigūracija.</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>Pasirinktas atsakymų failas nepasiekiamas, netinkamas arba nesuderinamas su pasirinkta „Windows“ architektūra. Pasirinkite kitą failą arba iš naujo sukurkite laikmeną.</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>Valdoma atsakymų failu</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>Trūksta sukonfigūruoto numatytojo atsakymų failo. Iš naujo sukurkite įkrovos laikmeną.</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>Naudoti „Foundry“ parametrus</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>„Windows“ naudoja pasirinktą atsakymų failą. „Foundry“ parametrų nesujungia ir neprideda.</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>Laiko juosta</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>Atsakymų failas</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>Grįžti į santrauką</value>

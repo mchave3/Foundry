@@ -150,6 +150,7 @@ public static class ServiceCollectionExtensions
 
         services.AddTransient<MainViewModel>();
         services.AddTransient<GeneralConfigurationViewModel>();
+        services.AddTransient<UnattendConfigurationViewModel>();
         services.AddTransient<NetworkConfigurationViewModel>();
         services.AddTransient<AutopilotConfigurationViewModel>();
         services.AddTransient<CustomizationConfigurationViewModel>();

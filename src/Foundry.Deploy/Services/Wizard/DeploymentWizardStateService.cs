@@ -24,7 +24,7 @@ public sealed class DeploymentWizardStateService : IDeploymentWizardStateService
         if (snapshot.CurrentStepId == DeploymentWizardStepId.TargetDevice)
         {
             return !snapshot.IsCatalogLoading &&
-                   snapshot.IsOperatingSystemCatalogReadyForNavigation;
+                   snapshot.IsOperatingSystemCatalogReadyForNavigation && snapshot.IsUnattendSelectionValid;
         }
 
         if (snapshot.CurrentStepId == DeploymentWizardStepId.Autopilot)
@@ -52,6 +52,7 @@ public sealed class DeploymentWizardStateService : IDeploymentWizardStateService
                !snapshot.IsTargetDiskLoading &&
                snapshot.CurrentStepId == DeploymentWizardStepId.Summary &&
                snapshot.IsTargetComputerNameValid &&
+               snapshot.IsUnattendSelectionValid &&
                snapshot.HasSelectedOperatingSystem &&
                hasTargetDisk &&
                snapshot.HasValidDriverPackSelection &&

@@ -9,6 +9,8 @@ namespace Foundry.Deploy.Services.Deployment;
 /// </summary>
 public static class DeploymentStepNames
 {
+    public const string ValidateCustomUnattend = "Validate custom answer file";
+    public const string StageCustomUnattend = "Stage custom answer file";
     public const string GatherDeploymentVariables = "Gather deployment variables";
     public const string InitializeDeploymentWorkspace = "Initialize deployment workspace";
     public const string ValidateTargetConfiguration = "Validate target configuration";
@@ -38,11 +40,13 @@ public static class DeploymentStepNames
     [
         GatherDeploymentVariables,
         InitializeDeploymentWorkspace,
+        ValidateCustomUnattend,
         ValidateTargetConfiguration,
         ResolveCacheStrategy,
         PrepareTargetDiskLayout,
         DownloadOperatingSystemImage,
         ApplyOperatingSystemImage,
+        StageCustomUnattend,
         DownloadDriverPack,
         ExtractDriverPack,
         ApplyDriverPack,

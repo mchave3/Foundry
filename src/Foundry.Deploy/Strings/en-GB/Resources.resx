@@ -665,8 +665,14 @@ Continue with deployment?</value>
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>Seal recovery partition</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>Stage custom answer file</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>Stage customisations</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>Validate custom answer file</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>Validate configuration</value>
@@ -1474,6 +1480,39 @@ Continue with deployment?</value>
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>Open log file</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>This answer file conflicts with the configured Autopilot enrollment mode. Choose another file or change the media configuration.</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Custom commands may conflict with Foundry. Test this configuration.</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>Hash upload does not guarantee Autopilot enrollment.</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>Test this answer file with the selected Windows image and Foundry configuration.</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>The selected answer file is unavailable, invalid, or incompatible with the selected Windows architecture. Choose another file or rebuild the media.</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>Managed by answer file</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>The configured default answer file is missing. Rebuild the boot media.</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>Use Foundry settings</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>Windows uses the selected answer file. Foundry does not merge or add settings.</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>Time zone</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>Answer file</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>Return to summary</value>

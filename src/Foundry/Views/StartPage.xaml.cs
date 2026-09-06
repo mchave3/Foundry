@@ -102,6 +102,9 @@ public sealed partial class StartPage : Page
             case ConfigurationNavigationTarget.MachineNaming:
                 App.Current.NavigationService.NavigateTo(typeof(MachineNamingPage));
                 break;
+            case ConfigurationNavigationTarget.Unattend:
+                App.Current.NavigationService.NavigateTo(typeof(UnattendPage));
+                break;
             case ConfigurationNavigationTarget.Oobe:
                 App.Current.NavigationService.NavigateTo(typeof(OobePage));
                 break;

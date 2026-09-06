@@ -665,8 +665,14 @@ Nastaviti s implementacijom?</value>
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>Zapečati particiju za oporavak</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>Pripremi prilagođenu datoteku odgovora</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>Pripremi prilagodbe</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>Provjeri prilagođenu datoteku odgovora</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>Provjeri konfiguraciju</value>
@@ -1474,6 +1480,39 @@ Nastaviti s implementacijom?</value>
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>Otvori datoteku dnevnika</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>Ova je datoteka odgovora u sukobu s konfiguriranim načinom upisa u Autopilot. Odaberite drugu datoteku ili promijenite konfiguraciju medija.</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Prilagođene naredbe mogu biti u sukobu s Foundryjem. Testirajte ovu konfiguraciju.</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>Prijenos sažetka ne jamči upis u Autopilot.</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>Testirajte ovu datoteku odgovora s odabranom slikom sustava Windows i konfiguracijom sustava Foundry.</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>Odabrana datoteka odgovora nije dostupna, nije valjana ili nije kompatibilna s odabranom arhitekturom sustava Windows. Odaberite drugu datoteku ili ponovno stvorite medij.</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>Upravlja datoteka odgovora</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>Konfigurirana zadana datoteka odgovora nedostaje. Ponovno stvorite medij za pokretanje.</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>Koristi postavke sustava Foundry</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>Windows koristi odabranu datoteku odgovora. Foundry ne spaja niti dodaje postavke.</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>Vremenska zona</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>Datoteka odgovora</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>Povratak na sažetak</value>

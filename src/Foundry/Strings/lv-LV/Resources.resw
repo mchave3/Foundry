@@ -2091,6 +2091,12 @@
   <data name="Nav_StartKey.Title" xml:space="preserve">
     <value>Sākt</value>
   </data>
+  <data name="Nav_UnattendKey.Description" xml:space="preserve">
+    <value>Importējiet Windows atbilžu failus un izvēlieties izvietošanā izmantojamos iestatījumus.</value>
+  </data>
+  <data name="Nav_UnattendKey.Title" xml:space="preserve">
+    <value>Unattend</value>
+  </data>
   <data name="Nav_WifiKey.Description" xml:space="preserve">
     <value>Konfigurējiet Wi-Fi nodrošināšanu un profilus.</value>
   </data>
@@ -2984,6 +2990,117 @@
   </data>
   <data name="ThemeSetting_MicaItem.Content" xml:space="preserve">
     <value>Vizla</value>
+  </data>
+  <data name="Unattend.AutopilotWarning" xml:space="preserve">
+    <value>Satur iestatījumus, kas var liegt reģistrāciju pakalpojumā Autopilot; nesaderīgi reģistrācijas režīmi izvietošanas laikā tiks bloķēti.</value>
+  </data>
+  <data name="Unattend.CatalogDescription" xml:space="preserve">
+    <value>Atlasiet failu, ko vēlaties pārdēvēt, atsvaidzināt vai noņemt. Avota failiem jāpaliek pieejamiem līdz datu nesēja izveidei; mainīti avoti ir jāatsvaidzina.</value>
+  </data>
+  <data name="Unattend.CatalogLabel" xml:space="preserve">
+    <value>Atbilžu faili</value>
+  </data>
+  <data name="Unattend.CheckSourcesLabel" xml:space="preserve">
+    <value>Pārbaudīt avotus</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Satur komandas; pārbaudiet, vai tās nepārklājas ar Foundry pielāgojumiem un uzstādīšanas darbībām.</value>
+  </data>
+  <data name="Unattend.CompatibilityDescription" xml:space="preserve">
+    <value>Tiek atbalstīti tikai specialize un oobeSystem iestatījumi. Citas Foundry izvietošanas operācijas paliek iespējotas un var konfliktēt ar pielāgotajiem iestatījumiem vai komandām. Validējiet ar Windows SIM un testējiet visu konfigurāciju virtuālajā mašīnā. Ārējie skriptu faili netiek importēti.</value>
+  </data>
+  <data name="Unattend.DefaultDescription" xml:space="preserve">
+    <value>Operators lapā Mērķis var izvēlēties Foundry iestatījumus vai vienu datu nesējā iekļautu failu. Faila importēšana nemaina noklusējuma izvēli.</value>
+  </data>
+  <data name="Unattend.DefaultLabel" xml:space="preserve">
+    <value>Izvietošanas noklusējuma izvēle</value>
+  </data>
+  <data name="Unattend.DisplayNameLabel" xml:space="preserve">
+    <value>Parādāmais nosaukums</value>
+  </data>
+  <data name="Unattend.DuplicateMessage" xml:space="preserve">
+    <value>Izlaisti {0} faili, kas jau ir katalogā.</value>
+  </data>
+  <data name="Unattend.EmptyCatalogMessage" xml:space="preserve">
+    <value>Lai izmantotu šo līdzekli, importējiet vismaz vienu atbilžu failu.</value>
+  </data>
+  <data name="Unattend.EnableDescription" xml:space="preserve">
+    <value>Iekļaujiet importētos failus sāknēšanas attēlā. Izslēdzot šo iespēju, katalogs tiek saglabāts, taču tā faili netiek iekļauti jaunos datu nesējos.</value>
+  </data>
+  <data name="Unattend.EnableLabel" xml:space="preserve">
+    <value>Iespējot pielāgotus atbilžu failus</value>
+  </data>
+  <data name="Unattend.ImportLabel" xml:space="preserve">
+    <value>Importēt failus</value>
+  </data>
+  <data name="Unattend.ImportPickerTitle" xml:space="preserve">
+    <value>Importēt Windows atbilžu failus</value>
+  </data>
+  <data name="Unattend.InvalidArchitectureMessage" xml:space="preserve">
+    <value>Failā jābūt norādītai atbalstītai arhitektūrai un uz to attiecināmiem komponentu iestatījumiem.</value>
+  </data>
+  <data name="Unattend.InvalidCatalogMessage" xml:space="preserve">
+    <value>Katalogā ir nederīgi vai dublēti ieraksti. Atsvaidziniet vai noņemiet attiecīgos failus.</value>
+  </data>
+  <data name="Unattend.InvalidFileMessage" xml:space="preserve">
+    <value>Izmantojiet derīgu Windows atbilžu faila XML, kura lielums nepārsniedz 4 MiB un kurā nav DTD vai ārējo entītiju. Validējiet failu ar Windows SIM.</value>
+  </data>
+  <data name="Unattend.InvalidSourcesMessage" xml:space="preserve">
+    <value>Daži avoti trūkst, ir mainīti vai nav derīgi. Pirms datu nesēja izveides atsvaidziniet vai noņemiet šos ierakstus.</value>
+  </data>
+  <data name="Unattend.MissingDefaultOption" xml:space="preserve">
+    <value>Trūkst noklusējuma faila — izvēlieties aizstājēju</value>
+  </data>
+  <data name="Unattend.NativeOption" xml:space="preserve">
+    <value>Izmantot Foundry iestatījumus</value>
+  </data>
+  <data name="Unattend.OwnershipDescription" xml:space="preserve">
+    <value>Atlasītais fails aizstāj Foundry ģenerēto atbilžu failu. Tā iestatījumi tiek izmantoti tādi, kādi tie ir, tos neapvienojot un neaizpildot trūkstošās vērtības. Lai izmantotu saglabāto konfigurāciju, atlasiet “Izmantot Foundry iestatījumus”.</value>
+  </data>
+  <data name="Unattend.ProtectionDescription" xml:space="preserve">
+    <value>Pielāgotiem failiem nepieciešama izvietošanas datu nesēja aizsardzība ar paroli vispārīgajā konfigurācijā. XML var saturēt akreditācijas datus vai skriptus. Katalogā tiek saglabātas tikai atsauces uz avotiem; sāknēšanas attēlā ir šifrētas kopijas.</value>
+  </data>
+  <data name="Unattend.ProtectionRequiredMessage" xml:space="preserve">
+    <value>Lai izmantotu pielāgotus atbilžu failus, vispārīgajā konfigurācijā iespējojiet izvietošanas datu nesēja aizsardzību ar paroli.</value>
+  </data>
+  <data name="Unattend.RefreshDuplicateMessage" xml:space="preserve">
+    <value>Šis avots tagad sakrīt ar citu importētu failu. Noņemiet šo ierakstu un izvēlieties esošo failu.</value>
+  </data>
+  <data name="Unattend.RefreshLabel" xml:space="preserve">
+    <value>Atsvaidzināt avotu</value>
+  </data>
+  <data name="Unattend.RemoveLabel" xml:space="preserve">
+    <value>Noņemt</value>
+  </data>
+  <data name="Unattend.RenameLabel" xml:space="preserve">
+    <value>Pārdēvēt</value>
+  </data>
+  <data name="Unattend.SaveFailedMessage" xml:space="preserve">
+    <value>Konfigurāciju neizdevās saglabāt. Pārbaudiet piekļuvi Foundry konfigurācijas mapei un mēģiniet vēlreiz.</value>
+  </data>
+  <data name="Unattend.SelectedFileLabel" xml:space="preserve">
+    <value>Atlasītais fails</value>
+  </data>
+  <data name="Unattend.SourceChangedMessage" xml:space="preserve">
+    <value>Avots ir mainīts. Pirms datu nesēja izveides izmantojiet Atsvaidzināt avotu, lai pieņemtu atjaunināto failu.</value>
+  </data>
+  <data name="Unattend.SourceChecksBusyMessage" xml:space="preserve">
+    <value>Divas avotu pārbaudes joprojām gaida piekļuvi failiem. Atjaunojiet piekļuvi nepieejamajām avotu atrašanās vietām un pēc tam vēlreiz pārbaudiet avotus.</value>
+  </data>
+  <data name="Unattend.SourceNotCheckedMessage" xml:space="preserve">
+    <value>Avota pārbaude vēl nav veikta. Izvēlieties Pārbaudīt avotus, lai validētu pašreizējo failu, nepieņemot satura izmaiņas.</value>
+  </data>
+  <data name="Unattend.SourceReadFailedMessage" xml:space="preserve">
+    <value>Avotu neizdevās nolasīt. Pārbaudiet, vai fails joprojām pastāv un ir pieejams.</value>
+  </data>
+  <data name="Unattend.SourceTimeoutMessage" xml:space="preserve">
+    <value>Avota validācijas taimauts. Pārbaudiet piekļuvi avota atrašanās vietai un mēģiniet vēlreiz.</value>
+  </data>
+  <data name="Unattend.UnsupportedSettingsMessage" xml:space="preserve">
+    <value>Tiek atbalstīti tikai specialize un oobeSystem iestatījumi. Noņemiet citus netukšus konfigurācijas posmus, bezsaistes apkopes norādījumus vai atkārtotu sagatavošanu audita režīmam.</value>
+  </data>
+  <data name="Unattend.ValidSource" xml:space="preserve">
+    <value>Avots validēts.</value>
   </data>
   <data name="Update.Badge.New" xml:space="preserve">
     <value>Jauns</value>

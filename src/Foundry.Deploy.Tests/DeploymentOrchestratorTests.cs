@@ -11,11 +11,61 @@ using Foundry.Deploy.Services.Operations;
 using Foundry.Telemetry;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
+using DeployUnattendFile = Foundry.Core.Models.Configuration.Deploy.DeployUnattendFile;
 
 namespace Foundry.Deploy.Tests;
 
 public sealed class DeploymentOrchestratorTests
 {
+    [Theory]
+    [InlineData(false, "native")]
+    [InlineData(true, "custom")]
+    public async Task RunAsync_ReportsActualUnattendModeWithoutNativeOobeUsageOrFileMetadata(bool useCustom, string expectedMode)
+    {
+        using TempDeploymentWorkspace workspace = TempDeploymentWorkspace.Create();
+        var telemetryService = new RecordingTelemetryService();
+        var orchestrator = new DeploymentOrchestrator(
+            new FakeOperationProgressService(),
+            new FakeDeploymentLogService(),
+            new FakeTargetDiskService(),
+            CreateSteps(Path.Combine(workspace.RootPath, "TargetWindows")),
+            telemetryService,
+            NullLogger<DeploymentOrchestrator>.Instance);
+
+        await orchestrator.RunAsync(new DeploymentContext
+        {
+            Mode = DeploymentMode.Iso,
+            CacheRootPath = workspace.RootPath,
+            TargetDiskNumber = 1,
+            TargetComputerName = "private-file-computer",
+            OperatingSystem = new OperatingSystemCatalogItem(),
+            DriverPackSelectionKind = DriverPackSelectionKind.None,
+            Unattend = useCustom ? new UnattendSelection(new DeployUnattendFile
+            {
+                Id = "private-file-id",
+                DisplayName = "private-file-label",
+                ContentHash = "private-file-hash"
+            }, @"C:\private-file-asset.xml") : null,
+            Oobe = new DeployOobeSettings
+            {
+                IsEnabled = true,
+                EnableAdministratorAccount = true,
+                AdditionalAccounts = [new DeployOobeAdditionalAccountSettings { UserName = "private-file-user" }]
+            }
+        }, TestContext.Current.CancellationToken);
+
+        TelemetryEvent telemetryEvent = Assert.Single(telemetryService.Events);
+        Assert.Equal(TelemetryEvents.DeploySessionFinished, telemetryEvent.Name);
+        Assert.Equal(expectedMode, telemetryEvent.Properties["deploy_unattend_mode"]);
+        Assert.Equal(!useCustom, telemetryEvent.Properties["deploy_oobe_enabled"]);
+        Assert.Equal(!useCustom, telemetryEvent.Properties["deploy_oobe_administrator_enabled"]);
+        Assert.Equal(useCustom ? 0 : 1, telemetryEvent.Properties["deploy_oobe_additional_account_count"]);
+        Assert.Equal(!useCustom, telemetryEvent.Properties["deploy_oobe_account_creation_skipped"]);
+        Assert.DoesNotContain(telemetryEvent.Properties.Values, value => value?.ToString()?.Contains("private-file", StringComparison.Ordinal) == true);
+        IReadOnlyDictionary<string, object?> sanitized = TelemetryEventPropertyPolicy.Sanitize(telemetryEvent.Name, telemetryEvent.Properties);
+        Assert.Equal(expectedMode, sanitized["deploy_unattend_mode"]);
+    }
+
     [Fact]
     public void Constructor_WhenStepsAreRegisteredOutOfOrder_UsesCanonicalExecutionOrder()
     {
@@ -23,11 +73,13 @@ public sealed class DeploymentOrchestratorTests
         [
             DeploymentStepNames.GatherDeploymentVariables,
             DeploymentStepNames.InitializeDeploymentWorkspace,
+            DeploymentStepNames.ValidateCustomUnattend,
             DeploymentStepNames.ValidateTargetConfiguration,
             DeploymentStepNames.ResolveCacheStrategy,
             DeploymentStepNames.PrepareTargetDiskLayout,
             DeploymentStepNames.DownloadOperatingSystemImage,
             DeploymentStepNames.ApplyOperatingSystemImage,
+            DeploymentStepNames.StageCustomUnattend,
             DeploymentStepNames.DownloadDriverPack,
             DeploymentStepNames.ExtractDriverPack,
             DeploymentStepNames.ApplyDriverPack,

@@ -6,6 +6,7 @@ namespace Foundry.Deploy.Services.Wizard;
 
 public sealed record DeploymentWizardStateSnapshot
 {
+    public bool IsUnattendSelectionValid { get; init; } = true;
     public required DeploymentWizardStepId CurrentStepId { get; init; }
     public required IReadOnlyList<DeploymentWizardStepDefinition> AvailableSteps { get; init; }
     public required bool IsDeploymentRunning { get; init; }

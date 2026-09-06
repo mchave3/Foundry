@@ -665,8 +665,14 @@
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>回復パーティションを封印</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>カスタム応答ファイルの配置</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>カスタマイズを準備</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>カスタム応答ファイルの検証</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>構成を検証</value>
@@ -1474,6 +1480,39 @@
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>ログファイルを開く</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>この応答ファイルは、構成されている Autopilot 登録モードと競合します。別のファイルを選択するか、メディアの構成を変更してください。</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>カスタムコマンドは Foundry と競合する可能性があります。この構成をテストしてください。</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>ハッシュのアップロードは Autopilot 登録を保証しません。</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>選択した Windows イメージと Foundry の構成で、この応答ファイルをテストしてください。</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>選択した応答ファイルは利用できないか、無効か、選択した Windows アーキテクチャと互換性がありません。別のファイルを選択するか、メディアを再作成してください。</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>応答ファイルで管理</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>構成されている既定の応答ファイルが見つかりません。ブートメディアを再作成してください。</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>Foundry の設定を使用する</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>Windows は選択した応答ファイルを使用します。Foundry は設定を結合したり追加したりしません。</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>タイムゾーン</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>応答ファイル</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>概要に戻る</value>

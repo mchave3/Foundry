@@ -2091,6 +2091,12 @@
   <data name="Nav_StartKey.Title" xml:space="preserve">
     <value>Začněte</value>
   </data>
+  <data name="Nav_UnattendKey.Description" xml:space="preserve">
+    <value>Importujte soubory odpovědí systému Windows a zvolte nastavení použitá při nasazení.</value>
+  </data>
+  <data name="Nav_UnattendKey.Title" xml:space="preserve">
+    <value>Unattend</value>
+  </data>
   <data name="Nav_WifiKey.Description" xml:space="preserve">
     <value>Konfigurujte zřizování Wi-Fi a profily.</value>
   </data>
@@ -2984,6 +2990,117 @@
   </data>
   <data name="ThemeSetting_MicaItem.Content" xml:space="preserve">
     <value>Slída</value>
+  </data>
+  <data name="Unattend.AutopilotWarning" xml:space="preserve">
+    <value>Obsahuje nastavení, která mohou zabránit registraci do Autopilotu. Nekompatibilní režimy registrace budou při nasazení zablokovány.</value>
+  </data>
+  <data name="Unattend.CatalogDescription" xml:space="preserve">
+    <value>Vyberte soubor, který chcete přejmenovat, aktualizovat nebo odebrat. Zdrojové soubory musí zůstat dostupné až do vytvoření média. Změněné zdroje je nutné aktualizovat.</value>
+  </data>
+  <data name="Unattend.CatalogLabel" xml:space="preserve">
+    <value>Soubory odpovědí</value>
+  </data>
+  <data name="Unattend.CheckSourcesLabel" xml:space="preserve">
+    <value>Zkontrolovat zdroje</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Obsahuje příkazy. Zkontrolujte, zda se nepřekrývají s přizpůsobením a instalačními skripty Foundry.</value>
+  </data>
+  <data name="Unattend.CompatibilityDescription" xml:space="preserve">
+    <value>Podporována jsou pouze nastavení specialize a oobeSystem. Ostatní operace nasazení Foundry zůstávají povoleny a mohou být v konfliktu s vlastními nastaveními nebo příkazy. Ověřte soubor pomocí Windows SIM a otestujte celou konfiguraci ve virtuálním počítači. Externí soubory skriptů se neimportují.</value>
+  </data>
+  <data name="Unattend.DefaultDescription" xml:space="preserve">
+    <value>Obsluha může na stránce cíle vybrat nastavení Foundry nebo jeden z přiložených souborů. Import souboru nemění výchozí volbu.</value>
+  </data>
+  <data name="Unattend.DefaultLabel" xml:space="preserve">
+    <value>Výchozí volba pro nasazení</value>
+  </data>
+  <data name="Unattend.DisplayNameLabel" xml:space="preserve">
+    <value>Zobrazovaný název</value>
+  </data>
+  <data name="Unattend.DuplicateMessage" xml:space="preserve">
+    <value>Počet přeskočených souborů, které již jsou v katalogu: {0}.</value>
+  </data>
+  <data name="Unattend.EmptyCatalogMessage" xml:space="preserve">
+    <value>Chcete-li používat tuto funkci, importujte alespoň jeden soubor odpovědí.</value>
+  </data>
+  <data name="Unattend.EnableDescription" xml:space="preserve">
+    <value>Zahrnout importované soubory do spouštěcí bitové kopie. Vypnutím se katalog zachová, ale jeho soubory nebudou zahrnuty do nových médií.</value>
+  </data>
+  <data name="Unattend.EnableLabel" xml:space="preserve">
+    <value>Povolit vlastní soubory odpovědí</value>
+  </data>
+  <data name="Unattend.ImportLabel" xml:space="preserve">
+    <value>Importovat soubory</value>
+  </data>
+  <data name="Unattend.ImportPickerTitle" xml:space="preserve">
+    <value>Importovat soubory odpovědí systému Windows</value>
+  </data>
+  <data name="Unattend.InvalidArchitectureMessage" xml:space="preserve">
+    <value>Soubor musí uvádět podporovanou architekturu a obsahovat nastavení komponent, která se na ni vztahují.</value>
+  </data>
+  <data name="Unattend.InvalidCatalogMessage" xml:space="preserve">
+    <value>Katalog obsahuje neplatné nebo duplicitní položky. Dotčené soubory aktualizujte nebo odeberte.</value>
+  </data>
+  <data name="Unattend.InvalidFileMessage" xml:space="preserve">
+    <value>Použijte platný soubor odpovědí systému Windows ve formátu XML o velikosti nejvýše 4 MiB, bez DTD a externích entit. Ověřte soubor pomocí Windows SIM.</value>
+  </data>
+  <data name="Unattend.InvalidSourcesMessage" xml:space="preserve">
+    <value>Některé zdroje chybí, byly změněny nebo jsou neplatné. Před vytvořením média tyto položky aktualizujte nebo odeberte.</value>
+  </data>
+  <data name="Unattend.MissingDefaultOption" xml:space="preserve">
+    <value>Výchozí volba chybí – vyberte náhradu</value>
+  </data>
+  <data name="Unattend.NativeOption" xml:space="preserve">
+    <value>Použít nastavení Foundry</value>
+  </data>
+  <data name="Unattend.OwnershipDescription" xml:space="preserve">
+    <value>Vybraný soubor nahrazuje soubor odpovědí vygenerovaný Foundry. Jeho nastavení se použijí beze změn, bez slučování nebo doplňování chybějících hodnot. Chcete-li použít uloženou konfiguraci, vyberte Použít nastavení Foundry.</value>
+  </data>
+  <data name="Unattend.ProtectionDescription" xml:space="preserve">
+    <value>Vlastní soubory vyžadují ochranu média pro nasazení heslem v obecné konfiguraci. XML může obsahovat přihlašovací údaje nebo skripty. Katalog ukládá pouze odkazy na zdroje. Spouštěcí bitová kopie obsahuje zašifrované kopie.</value>
+  </data>
+  <data name="Unattend.ProtectionRequiredMessage" xml:space="preserve">
+    <value>Chcete-li používat vlastní soubory odpovědí, povolte v obecné konfiguraci ochranu média pro nasazení heslem.</value>
+  </data>
+  <data name="Unattend.RefreshDuplicateMessage" xml:space="preserve">
+    <value>Tento zdroj je nyní duplicitou jiného importovaného souboru. Odeberte tuto položku a vyberte existující soubor.</value>
+  </data>
+  <data name="Unattend.RefreshLabel" xml:space="preserve">
+    <value>Aktualizovat zdroj</value>
+  </data>
+  <data name="Unattend.RemoveLabel" xml:space="preserve">
+    <value>Odebrat</value>
+  </data>
+  <data name="Unattend.RenameLabel" xml:space="preserve">
+    <value>Přejmenovat</value>
+  </data>
+  <data name="Unattend.SaveFailedMessage" xml:space="preserve">
+    <value>Konfiguraci se nepodařilo uložit. Zkontrolujte přístup ke konfigurační složce Foundry a zkuste to znovu.</value>
+  </data>
+  <data name="Unattend.SelectedFileLabel" xml:space="preserve">
+    <value>Vybraný soubor</value>
+  </data>
+  <data name="Unattend.SourceChangedMessage" xml:space="preserve">
+    <value>Zdroj byl změněn. Před vytvořením média přijměte aktualizovaný soubor pomocí volby Aktualizovat zdroj.</value>
+  </data>
+  <data name="Unattend.SourceChecksBusyMessage" xml:space="preserve">
+    <value>Dvě kontroly zdrojů stále čekají na přístup k souborům. Obnovte přístup k nedostupným umístěním zdrojů a poté zdroje znovu zkontrolujte.</value>
+  </data>
+  <data name="Unattend.SourceNotCheckedMessage" xml:space="preserve">
+    <value>Zdroj čeká na kontrolu. Volbou Zkontrolovat zdroje ověříte aktuální soubor bez přijetí změn obsahu.</value>
+  </data>
+  <data name="Unattend.SourceReadFailedMessage" xml:space="preserve">
+    <value>Zdroj se nepodařilo přečíst. Zkontrolujte, zda soubor stále existuje a je dostupný.</value>
+  </data>
+  <data name="Unattend.SourceTimeoutMessage" xml:space="preserve">
+    <value>Vypršel časový limit ověření zdroje. Zkontrolujte přístup k umístění zdroje a zkuste to znovu.</value>
+  </data>
+  <data name="Unattend.UnsupportedSettingsMessage" xml:space="preserve">
+    <value>Podporována jsou pouze nastavení specialize a oobeSystem. Odeberte ostatní neprázdné fáze konfigurace, pokyny pro offline údržbu nebo opětovné zapečetění do režimu auditu.</value>
+  </data>
+  <data name="Unattend.ValidSource" xml:space="preserve">
+    <value>Zdroj byl ověřen.</value>
   </data>
   <data name="Update.Badge.New" xml:space="preserve">
     <value>Nové</value>

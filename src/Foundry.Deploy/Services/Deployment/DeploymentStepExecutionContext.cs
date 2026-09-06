@@ -17,8 +17,18 @@ namespace Foundry.Deploy.Services.Deployment;
 /// <summary>
 /// Provides shared state, logging, workspace paths, and progress helpers to deployment steps.
 /// </summary>
-public sealed class DeploymentStepExecutionContext
+public sealed class DeploymentStepExecutionContext : IDisposable
 {
+    /// <summary>Holds credential-bearing bytes only in memory between validation and staging.</summary>
+    internal Unattend.UnattendSnapshot? UnattendSnapshot { get; set; }
+
+    /// <summary>Releases sensitive answer-file content on every terminal deployment outcome.</summary>
+    public void Dispose()
+    {
+        UnattendSnapshot?.Dispose();
+        UnattendSnapshot = null;
+    }
+
     private const string WinPeRoot = @"X:\Foundry";
     private static readonly string WinPeDriveRoot = Path.GetPathRoot(WinPeRoot) ?? @"X:\";
     private const string LogsFolderName = "Logs";

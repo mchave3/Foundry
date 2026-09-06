@@ -2091,6 +2091,12 @@
   <data name="Nav_StartKey.Title" xml:space="preserve">
     <value>Έναρξη</value>
   </data>
+  <data name="Nav_UnattendKey.Description" xml:space="preserve">
+    <value>Εισαγάγετε αρχεία απαντήσεων των Windows και επιλέξτε τις ρυθμίσεις που θα χρησιμοποιούνται στις αναπτύξεις.</value>
+  </data>
+  <data name="Nav_UnattendKey.Title" xml:space="preserve">
+    <value>Unattend</value>
+  </data>
   <data name="Nav_WifiKey.Description" xml:space="preserve">
     <value>Διαμορφώστε την παροχή Wi-Fi και τα προφίλ.</value>
   </data>
@@ -2984,6 +2990,117 @@
   </data>
   <data name="ThemeSetting_MicaItem.Content" xml:space="preserve">
     <value>Μίκα</value>
+  </data>
+  <data name="Unattend.AutopilotWarning" xml:space="preserve">
+    <value>Περιέχει ρυθμίσεις που ενδέχεται να εμποδίσουν την εγγραφή στο Autopilot. Οι μη συμβατές μέθοδοι εγγραφής θα αποκλειστούν κατά την ανάπτυξη.</value>
+  </data>
+  <data name="Unattend.CatalogDescription" xml:space="preserve">
+    <value>Επιλέξτε ένα αρχείο για μετονομασία, ανανέωση ή κατάργηση. Τα αρχεία προέλευσης πρέπει να παραμένουν διαθέσιμα μέχρι τη δημιουργία του μέσου. Αν αλλάξουν, απαιτείται ανανέωση.</value>
+  </data>
+  <data name="Unattend.CatalogLabel" xml:space="preserve">
+    <value>Αρχεία απαντήσεων</value>
+  </data>
+  <data name="Unattend.CheckSourcesLabel" xml:space="preserve">
+    <value>Έλεγχος προελεύσεων</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Περιέχει εντολές. Ελέγξτε πιθανές επικαλύψεις με την προσαρμογή και τα σενάρια εγκατάστασης του Foundry.</value>
+  </data>
+  <data name="Unattend.CompatibilityDescription" xml:space="preserve">
+    <value>Υποστηρίζονται μόνο οι ρυθμίσεις specialize και oobeSystem. Οι άλλες εργασίες ανάπτυξης του Foundry παραμένουν ενεργές και μπορεί να συγκρούονται με προσαρμοσμένες ρυθμίσεις ή εντολές. Επικυρώστε με το Windows SIM και δοκιμάστε ολόκληρη τη διαμόρφωση σε εικονική μηχανή. Δεν εισάγονται εξωτερικά αρχεία σεναρίων.</value>
+  </data>
+  <data name="Unattend.DefaultDescription" xml:space="preserve">
+    <value>Ο χειριστής μπορεί να επιλέξει τις ρυθμίσεις του Foundry ή ένα ενσωματωμένο αρχείο στη σελίδα προορισμού. Η εισαγωγή αρχείου δεν αλλάζει την προεπιλογή.</value>
+  </data>
+  <data name="Unattend.DefaultLabel" xml:space="preserve">
+    <value>Προεπιλογή ανάπτυξης</value>
+  </data>
+  <data name="Unattend.DisplayNameLabel" xml:space="preserve">
+    <value>Εμφανιζόμενο όνομα</value>
+  </data>
+  <data name="Unattend.DuplicateMessage" xml:space="preserve">
+    <value>Παραλείφθηκαν {0} αρχεία που υπάρχουν ήδη στον κατάλογο.</value>
+  </data>
+  <data name="Unattend.EmptyCatalogMessage" xml:space="preserve">
+    <value>Εισαγάγετε τουλάχιστον ένα αρχείο απαντήσεων για να χρησιμοποιήσετε αυτήν τη δυνατότητα.</value>
+  </data>
+  <data name="Unattend.EnableDescription" xml:space="preserve">
+    <value>Ενσωματώστε τα εισηγμένα αρχεία στην εικόνα εκκίνησης. Η απενεργοποίηση διατηρεί τον κατάλογο, αλλά εξαιρεί τα αρχεία του από τα νέα μέσα.</value>
+  </data>
+  <data name="Unattend.EnableLabel" xml:space="preserve">
+    <value>Ενεργοποίηση προσαρμοσμένων αρχείων απαντήσεων</value>
+  </data>
+  <data name="Unattend.ImportLabel" xml:space="preserve">
+    <value>Εισαγωγή αρχείων</value>
+  </data>
+  <data name="Unattend.ImportPickerTitle" xml:space="preserve">
+    <value>Εισαγωγή αρχείων απαντήσεων των Windows</value>
+  </data>
+  <data name="Unattend.InvalidArchitectureMessage" xml:space="preserve">
+    <value>Το αρχείο πρέπει να δηλώνει υποστηριζόμενη αρχιτεκτονική και να περιέχει ρυθμίσεις στοιχείων κατάλληλες για αυτήν.</value>
+  </data>
+  <data name="Unattend.InvalidCatalogMessage" xml:space="preserve">
+    <value>Ο κατάλογος περιέχει μη έγκυρες ή διπλότυπες εγγραφές. Ανανεώστε ή καταργήστε τα αντίστοιχα αρχεία.</value>
+  </data>
+  <data name="Unattend.InvalidFileMessage" xml:space="preserve">
+    <value>Χρησιμοποιήστε έγκυρο XML αρχείου απαντήσεων των Windows έως 4 MiB, χωρίς DTD ή εξωτερικές οντότητες. Επικυρώστε το αρχείο με το Windows SIM.</value>
+  </data>
+  <data name="Unattend.InvalidSourcesMessage" xml:space="preserve">
+    <value>Ορισμένα αρχεία προέλευσης λείπουν, έχουν αλλάξει ή δεν είναι έγκυρα. Ανανεώστε ή καταργήστε αυτές τις εγγραφές πριν δημιουργήσετε το μέσο.</value>
+  </data>
+  <data name="Unattend.MissingDefaultOption" xml:space="preserve">
+    <value>Η προεπιλογή λείπει — επιλέξτε αντικατάσταση</value>
+  </data>
+  <data name="Unattend.NativeOption" xml:space="preserve">
+    <value>Χρήση των ρυθμίσεων του Foundry</value>
+  </data>
+  <data name="Unattend.OwnershipDescription" xml:space="preserve">
+    <value>Το επιλεγμένο αρχείο αντικαθιστά το αρχείο απαντήσεων που δημιουργεί το Foundry. Οι ρυθμίσεις του χρησιμοποιούνται ως έχουν, χωρίς συγχώνευση ή συμπλήρωση τιμών που λείπουν. Επιλέξτε «Χρήση των ρυθμίσεων του Foundry» για να χρησιμοποιήσετε την αποθηκευμένη διαμόρφωσή σας.</value>
+  </data>
+  <data name="Unattend.ProtectionDescription" xml:space="preserve">
+    <value>Τα προσαρμοσμένα αρχεία απαιτούν προστασία του μέσου ανάπτυξης με κωδικό πρόσβασης στις γενικές ρυθμίσεις. Το XML μπορεί να περιέχει διαπιστευτήρια ή σενάρια. Ο κατάλογος αποθηκεύει μόνο αναφορές στα αρχεία προέλευσης. Η εικόνα εκκίνησης περιέχει κρυπτογραφημένα αντίγραφα.</value>
+  </data>
+  <data name="Unattend.ProtectionRequiredMessage" xml:space="preserve">
+    <value>Ενεργοποιήστε την προστασία του μέσου ανάπτυξης με κωδικό πρόσβασης στις γενικές ρυθμίσεις για να χρησιμοποιήσετε προσαρμοσμένα αρχεία απαντήσεων.</value>
+  </data>
+  <data name="Unattend.RefreshDuplicateMessage" xml:space="preserve">
+    <value>Αυτό το αρχείο προέλευσης είναι πλέον ίδιο με άλλο εισηγμένο αρχείο. Καταργήστε την εγγραφή και επιλέξτε το υπάρχον αρχείο.</value>
+  </data>
+  <data name="Unattend.RefreshLabel" xml:space="preserve">
+    <value>Ανανέωση προέλευσης</value>
+  </data>
+  <data name="Unattend.RemoveLabel" xml:space="preserve">
+    <value>Κατάργηση</value>
+  </data>
+  <data name="Unattend.RenameLabel" xml:space="preserve">
+    <value>Μετονομασία</value>
+  </data>
+  <data name="Unattend.SaveFailedMessage" xml:space="preserve">
+    <value>Δεν ήταν δυνατή η αποθήκευση των ρυθμίσεων. Ελέγξτε την πρόσβαση στον φάκελο ρυθμίσεων του Foundry και δοκιμάστε ξανά.</value>
+  </data>
+  <data name="Unattend.SelectedFileLabel" xml:space="preserve">
+    <value>Επιλεγμένο αρχείο</value>
+  </data>
+  <data name="Unattend.SourceChangedMessage" xml:space="preserve">
+    <value>Το αρχείο προέλευσης άλλαξε. Χρησιμοποιήστε την Ανανέωση προέλευσης για αποδοχή του ενημερωμένου αρχείου πριν δημιουργήσετε το μέσο.</value>
+  </data>
+  <data name="Unattend.SourceChecksBusyMessage" xml:space="preserve">
+    <value>Δύο έλεγχοι προελεύσεων περιμένουν ακόμη πρόσβαση στα αρχεία. Αποκαταστήστε την πρόσβαση στις μη διαθέσιμες θέσεις και ελέγξτε ξανά τις προελεύσεις.</value>
+  </data>
+  <data name="Unattend.SourceNotCheckedMessage" xml:space="preserve">
+    <value>Εκκρεμεί έλεγχος προέλευσης. Επιλέξτε Έλεγχος προελεύσεων για επικύρωση του τρέχοντος αρχείου χωρίς αποδοχή αλλαγών στο περιεχόμενο.</value>
+  </data>
+  <data name="Unattend.SourceReadFailedMessage" xml:space="preserve">
+    <value>Δεν ήταν δυνατή η ανάγνωση του αρχείου προέλευσης. Ελέγξτε ότι το αρχείο εξακολουθεί να υπάρχει και είναι προσβάσιμο.</value>
+  </data>
+  <data name="Unattend.SourceTimeoutMessage" xml:space="preserve">
+    <value>Έληξε το χρονικό όριο επικύρωσης της προέλευσης. Ελέγξτε την πρόσβαση στη θέση του αρχείου και δοκιμάστε ξανά.</value>
+  </data>
+  <data name="Unattend.UnsupportedSettingsMessage" xml:space="preserve">
+    <value>Υποστηρίζονται μόνο οι ρυθμίσεις specialize και oobeSystem. Καταργήστε άλλες μη κενές φάσεις, οδηγίες συντήρησης χωρίς σύνδεση ή επανασφράγιση σε λειτουργία ελέγχου.</value>
+  </data>
+  <data name="Unattend.ValidSource" xml:space="preserve">
+    <value>Το αρχείο προέλευσης επικυρώθηκε.</value>
   </data>
   <data name="Update.Badge.New" xml:space="preserve">
     <value>Νέο</value>

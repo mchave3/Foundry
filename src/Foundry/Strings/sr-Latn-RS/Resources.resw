@@ -2091,6 +2091,12 @@
   <data name="Nav_StartKey.Title" xml:space="preserve">
     <value>Počni</value>
   </data>
+  <data name="Nav_UnattendKey.Description" xml:space="preserve">
+    <value>Uvezite Windows datoteke odgovora i izaberite postavke koje se koriste pri primeni.</value>
+  </data>
+  <data name="Nav_UnattendKey.Title" xml:space="preserve">
+    <value>Unattend</value>
+  </data>
   <data name="Nav_WifiKey.Description" xml:space="preserve">
     <value>Konfigurišite obezbeđivanje i profile za Wi-Fi.</value>
   </data>
@@ -2984,6 +2990,117 @@
   </data>
   <data name="ThemeSetting_MicaItem.Content" xml:space="preserve">
     <value>Mica</value>
+  </data>
+  <data name="Unattend.AutopilotWarning" xml:space="preserve">
+    <value>Sadrži postavke koje mogu sprečiti upis u Autopilot; nekompatibilni režimi upisa biće blokirani tokom primene.</value>
+  </data>
+  <data name="Unattend.CatalogDescription" xml:space="preserve">
+    <value>Izaberite datoteku da biste je preimenovali, osvežili ili uklonili. Izvorne datoteke moraju ostati dostupne do kreiranja medija; promenjene izvore treba osvežiti.</value>
+  </data>
+  <data name="Unattend.CatalogLabel" xml:space="preserve">
+    <value>Datoteke odgovora</value>
+  </data>
+  <data name="Unattend.CheckSourcesLabel" xml:space="preserve">
+    <value>Proveri izvore</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Sadrži komande; proverite moguće sukobe sa prilagođavanjima programa Foundry i tačkama izvršavanja instalacije.</value>
+  </data>
+  <data name="Unattend.CompatibilityDescription" xml:space="preserve">
+    <value>Podržane su samo postavke specialize i oobeSystem. Ostale operacije primene programa Foundry ostaju omogućene i mogu biti u sukobu sa prilagođenim postavkama ili komandama. Proverite pomoću Windows SIM i testirajte celu konfiguraciju na virtuelnoj mašini. Spoljne datoteke skripti se ne uvoze.</value>
+  </data>
+  <data name="Unattend.DefaultDescription" xml:space="preserve">
+    <value>Operater može da izabere postavke programa Foundry ili jednu datoteku uključenu u medij na stranici Ciljni uređaj. Uvoz datoteke ne menja podrazumevani izbor.</value>
+  </data>
+  <data name="Unattend.DefaultLabel" xml:space="preserve">
+    <value>Podrazumevani izbor za primenu</value>
+  </data>
+  <data name="Unattend.DisplayNameLabel" xml:space="preserve">
+    <value>Ime za prikaz</value>
+  </data>
+  <data name="Unattend.DuplicateMessage" xml:space="preserve">
+    <value>Preskočeno je {0} datoteka koje već postoje u katalogu.</value>
+  </data>
+  <data name="Unattend.EmptyCatalogMessage" xml:space="preserve">
+    <value>Uvezite najmanje jednu datoteku odgovora da biste koristili ovu funkciju.</value>
+  </data>
+  <data name="Unattend.EnableDescription" xml:space="preserve">
+    <value>Uključite uvezene datoteke u sliku za pokretanje. Isključivanje čuva katalog, ali isključuje njegove datoteke iz novih medija.</value>
+  </data>
+  <data name="Unattend.EnableLabel" xml:space="preserve">
+    <value>Omogući prilagođene datoteke odgovora</value>
+  </data>
+  <data name="Unattend.ImportLabel" xml:space="preserve">
+    <value>Uvezi datoteke</value>
+  </data>
+  <data name="Unattend.ImportPickerTitle" xml:space="preserve">
+    <value>Uvezi Windows datoteke odgovora</value>
+  </data>
+  <data name="Unattend.InvalidArchitectureMessage" xml:space="preserve">
+    <value>Datoteka mora navesti podržanu arhitekturu i sadržati postavke komponenti koje važe za nju.</value>
+  </data>
+  <data name="Unattend.InvalidCatalogMessage" xml:space="preserve">
+    <value>Katalog sadrži nevažeće ili duplirane stavke. Osvežite ili uklonite odgovarajuće datoteke.</value>
+  </data>
+  <data name="Unattend.InvalidFileMessage" xml:space="preserve">
+    <value>Koristite važeći XML Windows datoteke odgovora veličine do 4 MiB, bez DTD-ova ili spoljnih entiteta. Proverite datoteku pomoću Windows SIM.</value>
+  </data>
+  <data name="Unattend.InvalidSourcesMessage" xml:space="preserve">
+    <value>Neki izvori nedostaju, promenjeni su ili nisu važeći. Osvežite ili uklonite ove stavke pre kreiranja medija.</value>
+  </data>
+  <data name="Unattend.MissingDefaultOption" xml:space="preserve">
+    <value>Podrazumevana datoteka nedostaje — izaberite zamenu</value>
+  </data>
+  <data name="Unattend.NativeOption" xml:space="preserve">
+    <value>Koristi postavke programa Foundry</value>
+  </data>
+  <data name="Unattend.OwnershipDescription" xml:space="preserve">
+    <value>Izabrana datoteka zamenjuje datoteku odgovora koju generiše Foundry. Njene postavke se koriste takve kakve jesu, bez spajanja ili dopunjavanja nedostajućih vrednosti. Izaberite „Koristi postavke programa Foundry“ da biste koristili sačuvanu konfiguraciju.</value>
+  </data>
+  <data name="Unattend.ProtectionDescription" xml:space="preserve">
+    <value>Prilagođene datoteke zahtevaju zaštitu medija za primenu lozinkom u opštoj konfiguraciji. XML može sadržati akreditive ili skripte. Katalog čuva samo reference na izvore; slika za pokretanje sadrži šifrovane kopije.</value>
+  </data>
+  <data name="Unattend.ProtectionRequiredMessage" xml:space="preserve">
+    <value>Da biste koristili prilagođene datoteke odgovora, omogućite zaštitu medija za primenu lozinkom u opštoj konfiguraciji.</value>
+  </data>
+  <data name="Unattend.RefreshDuplicateMessage" xml:space="preserve">
+    <value>Ovaj izvor sada duplira drugu uvezenu datoteku. Uklonite ovu stavku i izaberite postojeću datoteku.</value>
+  </data>
+  <data name="Unattend.RefreshLabel" xml:space="preserve">
+    <value>Osveži izvor</value>
+  </data>
+  <data name="Unattend.RemoveLabel" xml:space="preserve">
+    <value>Ukloni</value>
+  </data>
+  <data name="Unattend.RenameLabel" xml:space="preserve">
+    <value>Preimenuj</value>
+  </data>
+  <data name="Unattend.SaveFailedMessage" xml:space="preserve">
+    <value>Konfiguracija nije mogla da se sačuva. Proverite pristup konfiguracionoj fascikli programa Foundry i pokušajte ponovo.</value>
+  </data>
+  <data name="Unattend.SelectedFileLabel" xml:space="preserve">
+    <value>Izabrana datoteka</value>
+  </data>
+  <data name="Unattend.SourceChangedMessage" xml:space="preserve">
+    <value>Izvor je promenjen. Koristite Osveži izvor da prihvatite ažuriranu datoteku pre kreiranja medija.</value>
+  </data>
+  <data name="Unattend.SourceChecksBusyMessage" xml:space="preserve">
+    <value>Dve provere izvora još čekaju na pristup datotekama. Ponovo omogućite pristup nedostupnim lokacijama izvora, a zatim ponovite proveru.</value>
+  </data>
+  <data name="Unattend.SourceNotCheckedMessage" xml:space="preserve">
+    <value>Provera izvora je na čekanju. Izaberite Proveri izvore da biste proverili trenutnu datoteku bez prihvatanja promena sadržaja.</value>
+  </data>
+  <data name="Unattend.SourceReadFailedMessage" xml:space="preserve">
+    <value>Izvor nije mogao da se pročita. Proverite da li datoteka i dalje postoji i da li je dostupna.</value>
+  </data>
+  <data name="Unattend.SourceTimeoutMessage" xml:space="preserve">
+    <value>Vreme za proveru izvora je isteklo. Proverite pristup lokaciji izvora i pokušajte ponovo.</value>
+  </data>
+  <data name="Unattend.UnsupportedSettingsMessage" xml:space="preserve">
+    <value>Podržane su samo postavke specialize i oobeSystem. Uklonite ostale faze koje nisu prazne, uputstva za održavanje van mreže ili pripremu za ponovno pokretanje u režimu nadzora.</value>
+  </data>
+  <data name="Unattend.ValidSource" xml:space="preserve">
+    <value>Izvor je proveren.</value>
   </data>
   <data name="Update.Badge.New" xml:space="preserve">
     <value>Novo</value>

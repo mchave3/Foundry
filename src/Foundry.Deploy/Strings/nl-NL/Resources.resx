@@ -665,8 +665,14 @@ Doorgaan met de implementatie?</value>
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>Recovery-partitie verzegelen</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>Aangepast antwoordbestand klaarzetten</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>Aanpassingen voorbereiden</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>Aangepast antwoordbestand valideren</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>Configuratie valideren</value>
@@ -1474,6 +1480,39 @@ Doorgaan met de implementatie?</value>
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>Logbestand openen</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>Dit antwoordbestand conflicteert met de ingestelde Autopilot-inschrijvingsmodus. Kies een ander bestand of wijzig de mediaconfiguratie.</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Aangepaste opdrachten kunnen conflicteren met Foundry. Test deze configuratie.</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>Het uploaden van de hash garandeert geen Autopilot-inschrijving.</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>Test dit antwoordbestand met de geselecteerde Windows-image en Foundry-configuratie.</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>Het geselecteerde antwoordbestand is niet beschikbaar, ongeldig of niet compatibel met de geselecteerde Windows-architectuur. Kies een ander bestand of maak de media opnieuw.</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>Beheerd door antwoordbestand</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>Het ingestelde standaardantwoordbestand ontbreekt. Maak het opstartmedium opnieuw.</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>Foundry-instellingen gebruiken</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>Windows gebruikt het geselecteerde antwoordbestand. Foundry voegt geen instellingen samen of toe.</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>Tijdzone</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>Antwoordbestand</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>Terug naar overzicht</value>

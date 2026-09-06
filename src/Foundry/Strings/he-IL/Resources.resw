@@ -2091,6 +2091,12 @@
   <data name="Nav_StartKey.Title" xml:space="preserve">
     <value>התחל</value>
   </data>
+  <data name="Nav_UnattendKey.Description" xml:space="preserve">
+    <value>ייבוא קובצי תשובות של Windows ובחירת ההגדרות שישמשו בפריסות.</value>
+  </data>
+  <data name="Nav_UnattendKey.Title" xml:space="preserve">
+    <value>Unattend</value>
+  </data>
   <data name="Nav_WifiKey.Description" xml:space="preserve">
     <value>הגדר הקצאת Wi-Fi ופרופילים.</value>
   </data>
@@ -2984,6 +2990,117 @@
   </data>
   <data name="ThemeSetting_MicaItem.Content" xml:space="preserve">
     <value>מיקה</value>
+  </data>
+  <data name="Unattend.AutopilotWarning" xml:space="preserve">
+    <value>מכיל הגדרות שעלולות למנוע רישום ל-Autopilot; מצבי רישום שאינם תואמים ייחסמו במהלך הפריסה.</value>
+  </data>
+  <data name="Unattend.CatalogDescription" xml:space="preserve">
+    <value>בחרו קובץ כדי לשנות את שמו, לרענן או להסיר אותו. קובצי המקור חייבים להישאר זמינים עד ליצירת המדיה; מקורות שהשתנו דורשים רענון.</value>
+  </data>
+  <data name="Unattend.CatalogLabel" xml:space="preserve">
+    <value>קובצי תשובות</value>
+  </data>
+  <data name="Unattend.CheckSourcesLabel" xml:space="preserve">
+    <value>בדיקת מקורות</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>מכיל פקודות; בדקו אם הן חופפות להתאמות של Foundry ולפעולות ההתקנה שלו.</value>
+  </data>
+  <data name="Unattend.CompatibilityDescription" xml:space="preserve">
+    <value>נתמכות רק הגדרות specialize ו-oobeSystem. פעולות הפריסה האחרות של Foundry נשארות מופעלות ועלולות להתנגש עם הגדרות או פקודות מותאמות אישית. אמתו באמצעות Windows SIM ובדקו את התצורה המלאה במכונה וירטואלית. קובצי סקריפטים חיצוניים אינם מיובאים.</value>
+  </data>
+  <data name="Unattend.DefaultDescription" xml:space="preserve">
+    <value>המפעיל יכול לבחור בהגדרות Foundry או בקובץ אחד שנכלל במדיה בדף היעד. ייבוא קובץ אינו משנה את ברירת המחדל.</value>
+  </data>
+  <data name="Unattend.DefaultLabel" xml:space="preserve">
+    <value>ברירת המחדל לפריסה</value>
+  </data>
+  <data name="Unattend.DisplayNameLabel" xml:space="preserve">
+    <value>שם תצוגה</value>
+  </data>
+  <data name="Unattend.DuplicateMessage" xml:space="preserve">
+    <value>דולגו {0} קבצים שכבר קיימים בקטלוג.</value>
+  </data>
+  <data name="Unattend.EmptyCatalogMessage" xml:space="preserve">
+    <value>ייבאו לפחות קובץ תשובות אחד כדי להשתמש בתכונה זו.</value>
+  </data>
+  <data name="Unattend.EnableDescription" xml:space="preserve">
+    <value>כלילת הקבצים המיובאים בתמונת האתחול. כיבוי האפשרות שומר את הקטלוג אך אינו כולל את קבציו במדיה חדשה.</value>
+  </data>
+  <data name="Unattend.EnableLabel" xml:space="preserve">
+    <value>הפעלת קובצי תשובות מותאמים אישית</value>
+  </data>
+  <data name="Unattend.ImportLabel" xml:space="preserve">
+    <value>ייבוא קבצים</value>
+  </data>
+  <data name="Unattend.ImportPickerTitle" xml:space="preserve">
+    <value>ייבוא קובצי תשובות של Windows</value>
+  </data>
+  <data name="Unattend.InvalidArchitectureMessage" xml:space="preserve">
+    <value>הקובץ חייב להצהיר על ארכיטקטורה נתמכת ולכלול הגדרות רכיבים החלות עליה.</value>
+  </data>
+  <data name="Unattend.InvalidCatalogMessage" xml:space="preserve">
+    <value>הקטלוג מכיל רשומות לא תקינות או כפולות. רעננו או הסירו את הקבצים הרלוונטיים.</value>
+  </data>
+  <data name="Unattend.InvalidFileMessage" xml:space="preserve">
+    <value>השתמשו ב-XML תקין של קובץ תשובות של Windows, בגודל של עד 4 MiB, ללא DTD או ישויות חיצוניות. אמתו את הקובץ באמצעות Windows SIM.</value>
+  </data>
+  <data name="Unattend.InvalidSourcesMessage" xml:space="preserve">
+    <value>חלק מהמקורות חסרים, השתנו או אינם תקינים. רעננו או הסירו רשומות אלה לפני יצירת המדיה.</value>
+  </data>
+  <data name="Unattend.MissingDefaultOption" xml:space="preserve">
+    <value>ברירת המחדל חסרה — בחרו חלופה</value>
+  </data>
+  <data name="Unattend.NativeOption" xml:space="preserve">
+    <value>שימוש בהגדרות Foundry</value>
+  </data>
+  <data name="Unattend.OwnershipDescription" xml:space="preserve">
+    <value>הקובץ שנבחר מחליף את קובץ התשובות ש-Foundry יוצר. ההגדרות שלו משמשות כפי שהן, ללא מיזוג או השלמת ערכים חסרים. בחרו שימוש בהגדרות Foundry כדי להשתמש בתצורה השמורה.</value>
+  </data>
+  <data name="Unattend.ProtectionDescription" xml:space="preserve">
+    <value>קבצים מותאמים אישית מחייבים הגנת סיסמה למדיית הפריסה בתצורה הכללית. XML עשוי להכיל אישורים או סקריפטים. הקטלוג שומר רק הפניות למקורות; תמונת האתחול מכילה עותקים מוצפנים.</value>
+  </data>
+  <data name="Unattend.ProtectionRequiredMessage" xml:space="preserve">
+    <value>הפעילו הגנת סיסמה למדיית הפריסה בתצורה הכללית כדי להשתמש בקובצי תשובות מותאמים אישית.</value>
+  </data>
+  <data name="Unattend.RefreshDuplicateMessage" xml:space="preserve">
+    <value>מקור זה זהה כעת לקובץ מיובא אחר. הסירו רשומה זו ובחרו בקובץ הקיים.</value>
+  </data>
+  <data name="Unattend.RefreshLabel" xml:space="preserve">
+    <value>רענון מקור</value>
+  </data>
+  <data name="Unattend.RemoveLabel" xml:space="preserve">
+    <value>הסרה</value>
+  </data>
+  <data name="Unattend.RenameLabel" xml:space="preserve">
+    <value>שינוי שם</value>
+  </data>
+  <data name="Unattend.SaveFailedMessage" xml:space="preserve">
+    <value>לא ניתן לשמור את התצורה. בדקו את הגישה לתיקיית התצורה של Foundry ונסו שוב.</value>
+  </data>
+  <data name="Unattend.SelectedFileLabel" xml:space="preserve">
+    <value>הקובץ שנבחר</value>
+  </data>
+  <data name="Unattend.SourceChangedMessage" xml:space="preserve">
+    <value>המקור השתנה. השתמשו ברענון מקור כדי לקבל את הקובץ המעודכן לפני יצירת המדיה.</value>
+  </data>
+  <data name="Unattend.SourceChecksBusyMessage" xml:space="preserve">
+    <value>שתי בדיקות מקור עדיין ממתינות לגישה לקבצים. שחזרו את הגישה למיקומי המקור שאינם זמינים ובדקו שוב את המקורות.</value>
+  </data>
+  <data name="Unattend.SourceNotCheckedMessage" xml:space="preserve">
+    <value>בדיקת המקור ממתינה. בחרו בדיקת מקורות כדי לאמת את הקובץ הנוכחי בלי לקבל שינויים בתוכן.</value>
+  </data>
+  <data name="Unattend.SourceReadFailedMessage" xml:space="preserve">
+    <value>לא ניתן לקרוא את המקור. ודאו שהקובץ עדיין קיים ונגיש.</value>
+  </data>
+  <data name="Unattend.SourceTimeoutMessage" xml:space="preserve">
+    <value>תם הזמן הקצוב לאימות המקור. בדקו את הגישה למיקום המקור ונסו שוב.</value>
+  </data>
+  <data name="Unattend.UnsupportedSettingsMessage" xml:space="preserve">
+    <value>נתמכות רק הגדרות specialize ו-oobeSystem. הסירו שלבי תצורה אחרים שאינם ריקים, הוראות שירות לא מקוון או הוראות לאתחול מחדש במצב ביקורת.</value>
+  </data>
+  <data name="Unattend.ValidSource" xml:space="preserve">
+    <value>המקור אומת.</value>
   </data>
   <data name="Update.Badge.New" xml:space="preserve">
     <value>חדש</value>

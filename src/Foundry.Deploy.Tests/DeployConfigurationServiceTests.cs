@@ -11,6 +11,21 @@ namespace Foundry.Deploy.Tests;
 
 public sealed class DeployConfigurationServiceTests
 {
+    [Theory]
+    [InlineData("{\"isEnabled\":true,\"files\":[]}")]
+    [InlineData("{\"isEnabled\":true,\"defaultFileId\":\"missing\",\"files\":[]}")]
+    public void LoadOptional_WhenUnattendManifestIsInvalid_FailsClosed(string manifest)
+    {
+        using var tempDirectory = new TemporaryDirectory();
+        string path = CreateJsonFile(tempDirectory.Path, "foundry.deploy.config.json", "{\"unattend\":" + manifest + "}");
+        var service = new DeployConfigurationService(NullLogger<DeployConfigurationService>.Instance, path);
+
+        DeployConfigurationLoadResult result = service.LoadOptional();
+
+        Assert.Null(result.Document);
+        Assert.NotEmpty(result.FailureMessage!);
+    }
+
     [Fact]
     public void LoadOptional_WhenRemoteDiagnosticsConsentIsMissing_DefaultsToEnabled()
     {

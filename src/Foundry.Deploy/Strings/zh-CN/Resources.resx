@@ -665,8 +665,14 @@
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>封闭恢复分区</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>准备自定义应答文件</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>准备自定义项</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>验证自定义应答文件</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>验证配置</value>
@@ -1474,6 +1480,39 @@
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>打开日志文件</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>此应答文件与配置的 Autopilot 注册模式冲突。请选择其他文件或更改介质配置。</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>自定义命令可能与 Foundry 冲突。请测试此配置。</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>上传哈希不保证能完成 Autopilot 注册。</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>请使用选定的 Windows 映像和 Foundry 配置测试此应答文件。</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>选定的应答文件不可用、无效或与所选 Windows 体系结构不兼容。请选择其他文件或重新创建介质。</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>由应答文件管理</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>配置的默认应答文件缺失。请重新创建启动介质。</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>使用 Foundry 设置</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>Windows 使用选定的应答文件。Foundry 不会合并或添加设置。</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>时区</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>应答文件</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>返回摘要</value>

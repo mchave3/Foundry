@@ -47,6 +47,11 @@ public sealed record FoundryConfigurationDocument
     public CustomizationSettings Customization { get; init; } = new();
 
     /// <summary>
+    /// Gets referenced custom answer files available for protected deployment media.
+    /// </summary>
+    public UnattendSettings Unattend { get; init; } = new();
+
+    /// <summary>
     /// Gets Autopilot provisioning settings used during deployment.
     /// </summary>
     public AutopilotSettings Autopilot { get; init; } = new();

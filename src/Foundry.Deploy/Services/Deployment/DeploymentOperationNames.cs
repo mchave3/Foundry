@@ -9,6 +9,8 @@ namespace Foundry.Deploy.Services.Deployment;
 /// </summary>
 public static class DeploymentOperationNames
 {
+    public const string ValidateCustomUnattend = "unattend.validate";
+    public const string StageCustomUnattend = "unattend.stage";
     public const string AcquireGate = "deployment.acquire_gate";
     public const string GatherVariables = "deployment.gather_variables";
     public const string InitializeWorkspace = "deployment.initialize_workspace";
@@ -68,6 +70,8 @@ public static class DeploymentOperationNames
     {
         return stepName switch
         {
+            DeploymentStepNames.ValidateCustomUnattend => ValidateCustomUnattend,
+            DeploymentStepNames.StageCustomUnattend => StageCustomUnattend,
             DeploymentStepNames.GatherDeploymentVariables => GatherVariables,
             DeploymentStepNames.InitializeDeploymentWorkspace => InitializeWorkspace,
             DeploymentStepNames.ValidateTargetConfiguration => ValidateTarget,

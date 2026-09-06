@@ -2091,6 +2091,12 @@
   <data name="Nav_StartKey.Title" xml:space="preserve">
     <value>เริ่ม</value>
   </data>
+  <data name="Nav_UnattendKey.Description" xml:space="preserve">
+    <value>นำเข้าไฟล์คำตอบของ Windows และเลือกการตั้งค่าที่ใช้ในการปรับใช้</value>
+  </data>
+  <data name="Nav_UnattendKey.Title" xml:space="preserve">
+    <value>Unattend</value>
+  </data>
   <data name="Nav_WifiKey.Description" xml:space="preserve">
     <value>กำหนดค่าการจัดสรรและโปรไฟล์ Wi-Fi</value>
   </data>
@@ -2984,6 +2990,117 @@
   </data>
   <data name="ThemeSetting_MicaItem.Content" xml:space="preserve">
     <value>ไมกา</value>
+  </data>
+  <data name="Unattend.AutopilotWarning" xml:space="preserve">
+    <value>มีการตั้งค่าที่อาจขัดขวางการลงทะเบียนกับ Autopilot ระบบจะบล็อกโหมดการลงทะเบียนที่เข้ากันไม่ได้ระหว่างการปรับใช้</value>
+  </data>
+  <data name="Unattend.CatalogDescription" xml:space="preserve">
+    <value>เลือกไฟล์เพื่อเปลี่ยนชื่อ รีเฟรช หรือลบ ไฟล์ต้นฉบับต้องพร้อมใช้งานจนกว่าจะสร้างสื่อเสร็จ หากต้นฉบับเปลี่ยนแปลง ต้องรีเฟรชต้นฉบับ</value>
+  </data>
+  <data name="Unattend.CatalogLabel" xml:space="preserve">
+    <value>ไฟล์คำตอบ</value>
+  </data>
+  <data name="Unattend.CheckSourcesLabel" xml:space="preserve">
+    <value>ตรวจสอบต้นฉบับ</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>มีคำสั่งอยู่ โปรดตรวจสอบความขัดแย้งกับการปรับแต่งของ Foundry และจุดเรียกทำงานระหว่างการติดตั้ง</value>
+  </data>
+  <data name="Unattend.CompatibilityDescription" xml:space="preserve">
+    <value>รองรับเฉพาะการตั้งค่าใน specialize และ oobeSystem เท่านั้น การดำเนินการปรับใช้อื่นของ Foundry ยังคงเปิดใช้งานและอาจขัดแย้งกับการตั้งค่าหรือคำสั่งที่กำหนดเอง ตรวจสอบด้วย Windows SIM และทดสอบการกำหนดค่าทั้งหมดในเครื่องเสมือน โดยจะไม่นำเข้าไฟล์สคริปต์ภายนอก</value>
+  </data>
+  <data name="Unattend.DefaultDescription" xml:space="preserve">
+    <value>ผู้ปฏิบัติงานสามารถเลือกการตั้งค่าของ Foundry หรือไฟล์หนึ่งไฟล์ที่รวมอยู่ในสื่อได้ในหน้าอุปกรณ์เป้าหมาย การนำเข้าไฟล์จะไม่เปลี่ยนตัวเลือกเริ่มต้น</value>
+  </data>
+  <data name="Unattend.DefaultLabel" xml:space="preserve">
+    <value>ตัวเลือกเริ่มต้นสำหรับการปรับใช้</value>
+  </data>
+  <data name="Unattend.DisplayNameLabel" xml:space="preserve">
+    <value>ชื่อที่แสดง</value>
+  </data>
+  <data name="Unattend.DuplicateMessage" xml:space="preserve">
+    <value>ข้ามไฟล์ที่มีอยู่ในแค็ตตาล็อกแล้ว {0} ไฟล์</value>
+  </data>
+  <data name="Unattend.EmptyCatalogMessage" xml:space="preserve">
+    <value>นำเข้าไฟล์คำตอบอย่างน้อยหนึ่งไฟล์เพื่อใช้คุณลักษณะนี้</value>
+  </data>
+  <data name="Unattend.EnableDescription" xml:space="preserve">
+    <value>รวมไฟล์ที่นำเข้าไว้ในอิมเมจสำหรับบูต การปิดตัวเลือกนี้จะเก็บแค็ตตาล็อกไว้ แต่จะไม่รวมไฟล์เหล่านั้นไว้ในสื่อใหม่</value>
+  </data>
+  <data name="Unattend.EnableLabel" xml:space="preserve">
+    <value>เปิดใช้ไฟล์คำตอบที่กำหนดเอง</value>
+  </data>
+  <data name="Unattend.ImportLabel" xml:space="preserve">
+    <value>นำเข้าไฟล์</value>
+  </data>
+  <data name="Unattend.ImportPickerTitle" xml:space="preserve">
+    <value>นำเข้าไฟล์คำตอบของ Windows</value>
+  </data>
+  <data name="Unattend.InvalidArchitectureMessage" xml:space="preserve">
+    <value>ไฟล์ต้องระบุสถาปัตยกรรมที่รองรับและมีการตั้งค่าคอมโพเนนต์ที่ใช้ได้กับสถาปัตยกรรมนั้น</value>
+  </data>
+  <data name="Unattend.InvalidCatalogMessage" xml:space="preserve">
+    <value>แค็ตตาล็อกมีรายการที่ไม่ถูกต้องหรือซ้ำกัน โปรดรีเฟรชหรือลบไฟล์ที่เกี่ยวข้อง</value>
+  </data>
+  <data name="Unattend.InvalidFileMessage" xml:space="preserve">
+    <value>ใช้ XML ของไฟล์คำตอบ Windows ที่ถูกต้อง ขนาดไม่เกิน 4 MiB และไม่มี DTD หรือเอนทิตีภายนอก ตรวจสอบไฟล์ด้วย Windows SIM</value>
+  </data>
+  <data name="Unattend.InvalidSourcesMessage" xml:space="preserve">
+    <value>ต้นฉบับบางรายการหายไป มีการเปลี่ยนแปลง หรือไม่ถูกต้อง โปรดรีเฟรชหรือลบรายการเหล่านี้ก่อนสร้างสื่อ</value>
+  </data>
+  <data name="Unattend.MissingDefaultOption" xml:space="preserve">
+    <value>ไม่พบไฟล์เริ่มต้น — โปรดเลือกไฟล์แทน</value>
+  </data>
+  <data name="Unattend.NativeOption" xml:space="preserve">
+    <value>ใช้การตั้งค่าของ Foundry</value>
+  </data>
+  <data name="Unattend.OwnershipDescription" xml:space="preserve">
+    <value>ไฟล์ที่เลือกจะแทนที่ไฟล์คำตอบที่ Foundry สร้างขึ้น การตั้งค่าในไฟล์จะถูกใช้ตามที่ระบุ โดยไม่ผสานหรือเติมค่าที่ขาดหายไป เลือก “ใช้การตั้งค่าของ Foundry” เพื่อใช้การกำหนดค่าที่บันทึกไว้</value>
+  </data>
+  <data name="Unattend.ProtectionDescription" xml:space="preserve">
+    <value>ไฟล์ที่กำหนดเองต้องเปิดใช้การป้องกันสื่อการปรับใช้ด้วยรหัสผ่านในการกำหนดค่าทั่วไป XML อาจมีข้อมูลรับรองหรือสคริปต์ แค็ตตาล็อกจะบันทึกเฉพาะการอ้างอิงไปยังต้นฉบับ ส่วนอิมเมจสำหรับบูตจะมีสำเนาที่เข้ารหัส</value>
+  </data>
+  <data name="Unattend.ProtectionRequiredMessage" xml:space="preserve">
+    <value>เปิดใช้การป้องกันสื่อการปรับใช้ด้วยรหัสผ่านในการกำหนดค่าทั่วไปเพื่อใช้ไฟล์คำตอบที่กำหนดเอง</value>
+  </data>
+  <data name="Unattend.RefreshDuplicateMessage" xml:space="preserve">
+    <value>ขณะนี้ต้นฉบับนี้ซ้ำกับไฟล์อื่นที่นำเข้าไว้แล้ว โปรดลบรายการนี้และเลือกไฟล์ที่มีอยู่แทน</value>
+  </data>
+  <data name="Unattend.RefreshLabel" xml:space="preserve">
+    <value>รีเฟรชต้นฉบับ</value>
+  </data>
+  <data name="Unattend.RemoveLabel" xml:space="preserve">
+    <value>ลบ</value>
+  </data>
+  <data name="Unattend.RenameLabel" xml:space="preserve">
+    <value>เปลี่ยนชื่อ</value>
+  </data>
+  <data name="Unattend.SaveFailedMessage" xml:space="preserve">
+    <value>ไม่สามารถบันทึกการกำหนดค่าได้ โปรดตรวจสอบสิทธิ์เข้าถึงโฟลเดอร์การกำหนดค่าของ Foundry แล้วลองอีกครั้ง</value>
+  </data>
+  <data name="Unattend.SelectedFileLabel" xml:space="preserve">
+    <value>ไฟล์ที่เลือก</value>
+  </data>
+  <data name="Unattend.SourceChangedMessage" xml:space="preserve">
+    <value>ต้นฉบับมีการเปลี่ยนแปลง ใช้รีเฟรชต้นฉบับเพื่อยอมรับไฟล์ที่อัปเดตก่อนสร้างสื่อ</value>
+  </data>
+  <data name="Unattend.SourceChecksBusyMessage" xml:space="preserve">
+    <value>การตรวจสอบต้นฉบับสองรายการยังคงรอการเข้าถึงไฟล์ โปรดกู้คืนการเข้าถึงตำแหน่งต้นฉบับที่ไม่พร้อมใช้งาน แล้วตรวจสอบต้นฉบับอีกครั้ง</value>
+  </data>
+  <data name="Unattend.SourceNotCheckedMessage" xml:space="preserve">
+    <value>กำลังรอตรวจสอบต้นฉบับ เลือกตรวจสอบต้นฉบับเพื่อตรวจสอบไฟล์ปัจจุบันโดยไม่ยอมรับการเปลี่ยนแปลงเนื้อหา</value>
+  </data>
+  <data name="Unattend.SourceReadFailedMessage" xml:space="preserve">
+    <value>ไม่สามารถอ่านต้นฉบับได้ โปรดตรวจสอบว่าไฟล์ยังคงอยู่และเข้าถึงได้</value>
+  </data>
+  <data name="Unattend.SourceTimeoutMessage" xml:space="preserve">
+    <value>การตรวจสอบต้นฉบับหมดเวลา โปรดตรวจสอบการเข้าถึงตำแหน่งต้นฉบับแล้วลองอีกครั้ง</value>
+  </data>
+  <data name="Unattend.UnsupportedSettingsMessage" xml:space="preserve">
+    <value>รองรับเฉพาะการตั้งค่าใน specialize และ oobeSystem เท่านั้น โปรดลบขั้นตอนอื่นที่มีเนื้อหา คำสั่งการให้บริการออฟไลน์ หรือการเตรียมให้เริ่มระบบใหม่ในโหมดตรวจสอบ</value>
+  </data>
+  <data name="Unattend.ValidSource" xml:space="preserve">
+    <value>ตรวจสอบต้นฉบับแล้ว</value>
   </data>
   <data name="Update.Badge.New" xml:space="preserve">
     <value>ใหม่</value>

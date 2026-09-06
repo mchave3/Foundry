@@ -2091,6 +2091,12 @@
   <data name="Nav_StartKey.Title" xml:space="preserve">
     <value>Pradėti</value>
   </data>
+  <data name="Nav_UnattendKey.Description" xml:space="preserve">
+    <value>Importuokite „Windows“ atsakymų failus ir pasirinkite diegimams taikomus parametrus.</value>
+  </data>
+  <data name="Nav_UnattendKey.Title" xml:space="preserve">
+    <value>Unattend</value>
+  </data>
   <data name="Nav_WifiKey.Description" xml:space="preserve">
     <value>Konfigūruokite Wi-Fi parengimą ir profilius.</value>
   </data>
@@ -2984,6 +2990,117 @@
   </data>
   <data name="ThemeSetting_MicaItem.Content" xml:space="preserve">
     <value>Žėrutis</value>
+  </data>
+  <data name="Unattend.AutopilotWarning" xml:space="preserve">
+    <value>Yra parametrų, galinčių neleisti užregistruoti įrenginio „Autopilot“; nesuderinami registravimo režimai diegimo metu bus blokuojami.</value>
+  </data>
+  <data name="Unattend.CatalogDescription" xml:space="preserve">
+    <value>Pasirinkite failą, kurį norite pervardyti, atnaujinti arba pašalinti. Šaltinio failai turi būti pasiekiami iki laikmenos sukūrimo; pasikeitusius šaltinius reikia atnaujinti.</value>
+  </data>
+  <data name="Unattend.CatalogLabel" xml:space="preserve">
+    <value>Atsakymų failai</value>
+  </data>
+  <data name="Unattend.CheckSourcesLabel" xml:space="preserve">
+    <value>Tikrinti šaltinius</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Yra komandų; patikrinkite, ar jos nesidubliuoja su „Foundry“ tinkinimais ir diegimo veiksmais.</value>
+  </data>
+  <data name="Unattend.CompatibilityDescription" xml:space="preserve">
+    <value>Palaikomi tik specialize ir oobeSystem parametrai. Kitos „Foundry“ diegimo operacijos lieka įgalintos ir gali konfliktuoti su pasirinktiniais parametrais ar komandomis. Patikrinkite naudodami „Windows SIM“ ir išbandykite visą konfigūraciją virtualiojoje mašinoje. Išoriniai scenarijų failai neimportuojami.</value>
+  </data>
+  <data name="Unattend.DefaultDescription" xml:space="preserve">
+    <value>Operatorius puslapyje „Paskirties įrenginys“ gali pasirinkti „Foundry“ parametrus arba vieną laikmenoje esantį failą. Importavus failą numatytasis pasirinkimas nesikeičia.</value>
+  </data>
+  <data name="Unattend.DefaultLabel" xml:space="preserve">
+    <value>Numatytasis diegimo pasirinkimas</value>
+  </data>
+  <data name="Unattend.DisplayNameLabel" xml:space="preserve">
+    <value>Rodomas pavadinimas</value>
+  </data>
+  <data name="Unattend.DuplicateMessage" xml:space="preserve">
+    <value>Praleista kataloge jau esančių failų: {0}.</value>
+  </data>
+  <data name="Unattend.EmptyCatalogMessage" xml:space="preserve">
+    <value>Norėdami naudoti šią funkciją, importuokite bent vieną atsakymų failą.</value>
+  </data>
+  <data name="Unattend.EnableDescription" xml:space="preserve">
+    <value>Įtraukite importuotus failus į įkrovos atvaizdą. Išjungus šią parinktį katalogas išsaugomas, tačiau jo failai neįtraukiami į naujas laikmenas.</value>
+  </data>
+  <data name="Unattend.EnableLabel" xml:space="preserve">
+    <value>Įgalinti pasirinktinius atsakymų failus</value>
+  </data>
+  <data name="Unattend.ImportLabel" xml:space="preserve">
+    <value>Importuoti failus</value>
+  </data>
+  <data name="Unattend.ImportPickerTitle" xml:space="preserve">
+    <value>Importuoti „Windows“ atsakymų failus</value>
+  </data>
+  <data name="Unattend.InvalidArchitectureMessage" xml:space="preserve">
+    <value>Faile turi būti nurodyta palaikoma architektūra ir jai taikomi komponentų parametrai.</value>
+  </data>
+  <data name="Unattend.InvalidCatalogMessage" xml:space="preserve">
+    <value>Kataloge yra netinkamų arba pasikartojančių įrašų. Atnaujinkite arba pašalinkite atitinkamus failus.</value>
+  </data>
+  <data name="Unattend.InvalidFileMessage" xml:space="preserve">
+    <value>Naudokite tinkamą „Windows“ atsakymų failo XML, ne didesnį nei 4 MiB, be DTD ir išorinių objektų. Patikrinkite failą naudodami „Windows SIM“.</value>
+  </data>
+  <data name="Unattend.InvalidSourcesMessage" xml:space="preserve">
+    <value>Kai kurių šaltinių nėra, jie pasikeitė arba yra netinkami. Prieš kurdami laikmeną atnaujinkite arba pašalinkite šiuos įrašus.</value>
+  </data>
+  <data name="Unattend.MissingDefaultOption" xml:space="preserve">
+    <value>Nėra numatytojo failo – pasirinkite kitą</value>
+  </data>
+  <data name="Unattend.NativeOption" xml:space="preserve">
+    <value>Naudoti „Foundry“ parametrus</value>
+  </data>
+  <data name="Unattend.OwnershipDescription" xml:space="preserve">
+    <value>Pasirinktas failas pakeičia „Foundry“ sugeneruotą atsakymų failą. Jo parametrai naudojami tokie, kokie yra, jų nesujungiant ir neužpildant trūkstamų reikšmių. Norėdami naudoti išsaugotą konfigūraciją, pasirinkite „Naudoti „Foundry“ parametrus“.</value>
+  </data>
+  <data name="Unattend.ProtectionDescription" xml:space="preserve">
+    <value>Pasirinktiniams failams reikia diegimo laikmenos apsaugos slaptažodžiu bendrojoje konfigūracijoje. XML gali būti kredencialų arba scenarijų. Kataloge išsaugomos tik nuorodos į šaltinius; įkrovos atvaizde yra užšifruotos kopijos.</value>
+  </data>
+  <data name="Unattend.ProtectionRequiredMessage" xml:space="preserve">
+    <value>Norėdami naudoti pasirinktinius atsakymų failus, bendrojoje konfigūracijoje įgalinkite diegimo laikmenos apsaugą slaptažodžiu.</value>
+  </data>
+  <data name="Unattend.RefreshDuplicateMessage" xml:space="preserve">
+    <value>Šis šaltinis dabar sutampa su kitu importuotu failu. Pašalinkite šį įrašą ir pasirinkite esamą failą.</value>
+  </data>
+  <data name="Unattend.RefreshLabel" xml:space="preserve">
+    <value>Atnaujinti šaltinį</value>
+  </data>
+  <data name="Unattend.RemoveLabel" xml:space="preserve">
+    <value>Pašalinti</value>
+  </data>
+  <data name="Unattend.RenameLabel" xml:space="preserve">
+    <value>Pervardyti</value>
+  </data>
+  <data name="Unattend.SaveFailedMessage" xml:space="preserve">
+    <value>Nepavyko išsaugoti konfigūracijos. Patikrinkite prieigą prie „Foundry“ konfigūracijos aplanko ir bandykite dar kartą.</value>
+  </data>
+  <data name="Unattend.SelectedFileLabel" xml:space="preserve">
+    <value>Pasirinktas failas</value>
+  </data>
+  <data name="Unattend.SourceChangedMessage" xml:space="preserve">
+    <value>Šaltinis pasikeitė. Prieš kurdami laikmeną pasirinkite „Atnaujinti šaltinį“, kad priimtumėte atnaujintą failą.</value>
+  </data>
+  <data name="Unattend.SourceChecksBusyMessage" xml:space="preserve">
+    <value>Dvi šaltinių patikros vis dar laukia prieigos prie failų. Atkurkite prieigą prie nepasiekiamų šaltinių vietų, tada dar kartą patikrinkite šaltinius.</value>
+  </data>
+  <data name="Unattend.SourceNotCheckedMessage" xml:space="preserve">
+    <value>Šaltinis dar nepatikrintas. Pasirinkite „Tikrinti šaltinius“, kad patikrintumėte dabartinį failą nepriimdami turinio pakeitimų.</value>
+  </data>
+  <data name="Unattend.SourceReadFailedMessage" xml:space="preserve">
+    <value>Nepavyko perskaityti šaltinio. Patikrinkite, ar failas vis dar yra ir ar jis pasiekiamas.</value>
+  </data>
+  <data name="Unattend.SourceTimeoutMessage" xml:space="preserve">
+    <value>Baigėsi šaltinio tikrinimo laikas. Patikrinkite prieigą prie šaltinio vietos ir bandykite dar kartą.</value>
+  </data>
+  <data name="Unattend.UnsupportedSettingsMessage" xml:space="preserve">
+    <value>Palaikomi tik specialize ir oobeSystem parametrai. Pašalinkite kitus netuščius konfigūracijos etapus, autonominės priežiūros nurodymus arba pakartotinį parengimą audito režimui.</value>
+  </data>
+  <data name="Unattend.ValidSource" xml:space="preserve">
+    <value>Šaltinis patikrintas.</value>
   </data>
   <data name="Update.Badge.New" xml:space="preserve">
     <value>Nauja</value>

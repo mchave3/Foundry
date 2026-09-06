@@ -665,8 +665,14 @@ Pokračovat v nasazování?</value>
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>Zapečeť oddíl pro obnovení</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>Připravit vlastní soubor odpovědí</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>Připrav přizpůsobení</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>Ověřit vlastní soubor odpovědí</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>Ověř konfiguraci</value>
@@ -1474,6 +1480,39 @@ Pokračovat v nasazování?</value>
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>Otevřete soubor protokolu</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>Tento soubor odpovědí je v konfliktu s nastaveným režimem registrace do Autopilotu. Vyberte jiný soubor nebo změňte konfiguraci média.</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Vlastní příkazy mohou být v konfliktu s Foundry. Otestujte tuto konfiguraci.</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>Nahrání hashe nezaručuje registraci do Autopilotu.</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>Otestujte tento soubor odpovědí s vybranou bitovou kopií Windows a konfigurací Foundry.</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>Vybraný soubor odpovědí je nedostupný, neplatný nebo nekompatibilní s vybranou architekturou systému Windows. Vyberte jiný soubor nebo znovu vytvořte médium.</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>Spravováno souborem odpovědí</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>Nastavený výchozí soubor odpovědí chybí. Znovu vytvořte spouštěcí médium.</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>Použít nastavení Foundry</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>Windows používá vybraný soubor odpovědí. Foundry neslučuje ani nepřidává nastavení.</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>Časové pásmo</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>Soubor odpovědí</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>Zpět na shrnutí</value>

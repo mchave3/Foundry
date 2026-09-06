@@ -61,6 +61,8 @@ public sealed partial class StartMediaViewModel : ObservableObject, IDisposable
     private int lastDownloadLogBucket = -1;
     private string? lastFinalMediaLogStatus;
     private int lastFinalMediaLogBucket = -1;
+    private bool isRefreshingUnattendSources;
+    private bool isDisposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="StartMediaViewModel"/> class.
@@ -277,6 +279,7 @@ public sealed partial class StartMediaViewModel : ObservableObject, IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
+        isDisposed = true;
         configurationOverviewService.Changed -= OnConfigurationOverviewChanged;
         localizationService.LanguageChanged -= OnLanguageChanged;
     }
@@ -291,6 +294,10 @@ public sealed partial class StartMediaViewModel : ObservableObject, IDisposable
         if (adkService.CurrentStatus.CanCreateMedia)
         {
             await RefreshUsbCandidatesAsync();
+        }
+        else
+        {
+            await RefreshUnattendSourcesAsync();
         }
 
         MediaPreflightOptions options = CreatePreflightOptions();
@@ -318,6 +325,12 @@ public sealed partial class StartMediaViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private async Task RefreshUsbCandidatesAsync()
     {
+        await RefreshUnattendSourcesAsync();
+        if (isDisposed)
+        {
+            return;
+        }
+
         if (!adkService.CurrentStatus.CanCreateMedia)
         {
             usbCandidateDiscoveryState = UsbCandidateDiscoveryState.Blocked;
@@ -384,6 +397,17 @@ public sealed partial class StartMediaViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private async Task CreateIsoAsync()
     {
+        if (IsMediaOperationRunning || isRefreshingUnattendSources)
+        {
+            return;
+        }
+
+        await RefreshUnattendSourcesAsync();
+        if (isDisposed)
+        {
+            return;
+        }
+
         SynchronizeRuntimeTelemetrySettings();
 
         MediaPreflightOptions options = CreatePreflightOptions();
@@ -403,6 +427,17 @@ public sealed partial class StartMediaViewModel : ObservableObject, IDisposable
     [RelayCommand]
     private async Task CreateUsbAsync()
     {
+        if (IsMediaOperationRunning || isRefreshingUnattendSources)
+        {
+            return;
+        }
+
+        await RefreshUnattendSourcesAsync();
+        if (isDisposed)
+        {
+            return;
+        }
+
         SynchronizeRuntimeTelemetrySettings();
 
         MediaPreflightOptions options = CreatePreflightOptions();
@@ -975,6 +1010,7 @@ public sealed partial class StartMediaViewModel : ObservableObject, IDisposable
             NetworkSecretsKey = connectBundle.MediaSecretsKey,
             DeploymentSecretsKey = deploymentProtectionMaterial.DeploymentKey,
             IsDeploymentProtectionEnabled = deploymentProtectionMaterial.Settings.IsEnabled,
+            Unattend = foundryConfigurationStateService.Current.Unattend,
             FoundryConnectAssetFiles = connectBundle.AssetFiles,
             AutopilotProvisioningMode = options.IsAutopilotEnabled
                 ? options.AutopilotProvisioningMode
@@ -1376,6 +1412,29 @@ public sealed partial class StartMediaViewModel : ObservableObject, IDisposable
             localizationService.GetString("Common.Close")));
     }
 
+    private async Task RefreshUnattendSourcesAsync()
+    {
+        if (isDisposed || isRefreshingUnattendSources || !foundryConfigurationStateService.Current.Unattend.IsEnabled)
+        {
+            return;
+        }
+
+        isRefreshingUnattendSources = true;
+        RefreshEvaluation();
+        try
+        {
+            await foundryConfigurationStateService.RefreshUnattendSourcesAsync();
+        }
+        finally
+        {
+            isRefreshingUnattendSources = false;
+            if (!isDisposed)
+            {
+                RefreshEvaluation();
+            }
+        }
+    }
+
     partial void OnSelectedUsbDiskChanged(SelectionOption<WinPeUsbDiskCandidate>? value)
     {
         IsSelectedUsbFoundryMedia = value?.Value.IsFoundryMedia == true;
@@ -1475,8 +1534,8 @@ public sealed partial class StartMediaViewModel : ObservableObject, IDisposable
         CanGenerateIsoSummary = evaluation.CanGenerateIsoSummary;
         CanGenerateUsbSummary = evaluation.CanGenerateUsbSummary;
         CanSelectUsbDisk = UsbCandidates.Count > 0 && !IsRefreshingUsbCandidates;
-        CanCreateIso = evaluation.CanCreateIso && !IsMediaOperationRunning;
-        CanCreateUsb = evaluation.CanCreateUsb && !IsMediaOperationRunning;
+        CanCreateIso = evaluation.CanCreateIso && !IsMediaOperationRunning && !isRefreshingUnattendSources;
+        CanCreateUsb = evaluation.CanCreateUsb && !IsMediaOperationRunning && !isRefreshingUnattendSources;
         FinalExecutionStatus = options.IsFinalExecutionEnabled
             ? localizationService.GetString("StartMedia.FinalExecution.Ready")
             : localizationService.GetString("StartMedia.FinalExecution.Deferred");
@@ -1858,6 +1917,9 @@ public sealed partial class StartMediaViewModel : ObservableObject, IDisposable
                     ? FormatOobeSummary(customization.Oobe)
                     : localizationService.GetString("Nav_OobeKey.Description"),
                 ConfigurationNavigationTarget.Oobe),
+            CreateOverviewItem(ConfigurationOverviewItem.Unattend, overview, "Nav_UnattendKey.Title",
+                localizationService.GetString("Nav_UnattendKey.Description"),
+                ConfigurationNavigationTarget.Unattend),
             CreateOverviewItem(ConfigurationOverviewItem.OptionalFeatures, overview, "Nav_OptionalFeaturesKey.Title",
                 optionalFeatures.IsEnabled
                     ? optionalFeatureDescription

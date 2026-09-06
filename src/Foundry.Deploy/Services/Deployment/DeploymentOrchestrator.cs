@@ -352,6 +352,10 @@ public sealed class DeploymentOrchestrator : IDeploymentOrchestrator
                 LogsDirectoryPath = ResolveLogsDirectory(executionContext, runtimeState)
             };
         }
+        finally
+        {
+            executionContext?.Dispose();
+        }
     }
 
     private Task TrackDeploymentCompletedAsync(
@@ -401,10 +405,11 @@ public sealed class DeploymentOrchestrator : IDeploymentOrchestrator
             ["deploy_autopilot_provisioning_mode"] = NormalizeTelemetryString(ResolveAutopilotProvisioningMode(context)),
             ["deploy_autopilot_hash_upload_state"] = NormalizeTelemetryString(runtimeState?.AutopilotHardwareHashUploadState.ToString()),
             ["deploy_autopilot_hash_group_tag_selected"] = !string.IsNullOrWhiteSpace(runtimeState?.AutopilotHardwareHashGroupTag),
-            ["deploy_oobe_enabled"] = context.Oobe.IsEnabled,
-            ["deploy_oobe_administrator_enabled"] = context.Oobe.EnableAdministratorAccount,
-            ["deploy_oobe_additional_account_count"] = context.Oobe.AdditionalAccounts.Count,
-            ["deploy_oobe_account_creation_skipped"] = context.Oobe.AdditionalAccounts.Count > 0,
+            ["deploy_unattend_mode"] = context.UsesCustomUnattend ? "custom" : "native",
+            ["deploy_oobe_enabled"] = !context.UsesCustomUnattend && context.Oobe.IsEnabled,
+            ["deploy_oobe_administrator_enabled"] = !context.UsesCustomUnattend && context.Oobe.EnableAdministratorAccount,
+            ["deploy_oobe_additional_account_count"] = context.UsesCustomUnattend ? 0 : context.Oobe.AdditionalAccounts.Count,
+            ["deploy_oobe_account_creation_skipped"] = !context.UsesCustomUnattend && context.Oobe.AdditionalAccounts.Count > 0,
             ["deploy_completion_reboot_mode"] = rebootPolicy.Mode
         };
 

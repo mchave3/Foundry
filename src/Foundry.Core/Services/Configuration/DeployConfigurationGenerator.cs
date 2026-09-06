@@ -58,6 +58,7 @@ public sealed class DeployConfigurationGenerator : IDeployConfigurationGenerator
         OobeAccountSecretState? oobeAccountSecretState)
     {
         ArgumentNullException.ThrowIfNull(document);
+        UnattendFileService.ValidateSettings(document.Unattend, protectionSettings?.IsEnabled == true);
         AutopilotConfigurationValidator.ThrowIfNotReady(document.Autopilot, DateTimeOffset.UtcNow);
         MachineNamingValidator.ThrowIfInvalid(document.Customization.MachineNaming);
         OobeAccountConfigurationValidator.ThrowIfInvalid(document.Customization.Oobe, oobeAccountSecretState);
@@ -67,6 +68,19 @@ public sealed class DeployConfigurationGenerator : IDeployConfigurationGenerator
         return new FoundryDeployConfigurationDocument
         {
             Protection = protectionSettings ?? new DeployProtectionSettings(),
+            Unattend = document.Unattend.IsEnabled
+                ? new DeployUnattendSettings
+                {
+                    IsEnabled = true,
+                    DefaultFileId = document.Unattend.DefaultFileId,
+                    Files = document.Unattend.Files.Select(file => new DeployUnattendFile
+                    {
+                        Id = file.Id,
+                        DisplayName = file.DisplayName,
+                        ContentHash = file.ContentHash
+                    }).ToArray()
+                }
+                : new DeployUnattendSettings(),
             Completion = new DeployCompletionSettings
             {
                 AutomaticRebootEnabled = document.General.AutomaticRebootEnabled,

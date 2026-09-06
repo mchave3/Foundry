@@ -50,6 +50,14 @@ internal static class DeploymentProtectionDetector
 
         try
         {
+            string unattendRootPath = Path.Combine(rootPath, "Config", "Unattend");
+            if (configuration.Document?.Unattend.IsEnabled == true ||
+                Directory.Exists(unattendRootPath) && Directory.EnumerateFiles(unattendRootPath, "*", SearchOption.AllDirectories).Any(path =>
+                    path.EndsWith(".xml.encrypted", StringComparison.OrdinalIgnoreCase) || path.EndsWith(".xml", StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+
             string autopilotRootPath = Path.Combine(rootPath, AutopilotProfilesRelativePath);
             if (Directory.Exists(autopilotRootPath) &&
                 Directory.EnumerateFiles(

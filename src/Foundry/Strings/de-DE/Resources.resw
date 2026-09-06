@@ -2091,6 +2091,12 @@
   <data name="Nav_StartKey.Title" xml:space="preserve">
     <value>Starten</value>
   </data>
+  <data name="Nav_UnattendKey.Description" xml:space="preserve">
+    <value>Importieren Sie Windows-Antwortdateien und wählen Sie die bei Bereitstellungen verwendeten Einstellungen.</value>
+  </data>
+  <data name="Nav_UnattendKey.Title" xml:space="preserve">
+    <value>Unattend</value>
+  </data>
   <data name="Nav_WifiKey.Description" xml:space="preserve">
     <value>Konfigurieren Sie das Wi-Fi Provisioning und die Profile.</value>
   </data>
@@ -2984,6 +2990,117 @@
   </data>
   <data name="ThemeSetting_MicaItem.Content" xml:space="preserve">
     <value>Glimmer</value>
+  </data>
+  <data name="Unattend.AutopilotWarning" xml:space="preserve">
+    <value>Enthält Einstellungen, die die Autopilot-Registrierung verhindern können. Inkompatible Registrierungsmodi werden bei der Bereitstellung blockiert.</value>
+  </data>
+  <data name="Unattend.CatalogDescription" xml:space="preserve">
+    <value>Wählen Sie eine Datei aus, um sie umzubenennen, ihre Quelle zu aktualisieren oder sie zu entfernen. Quelldateien müssen bis zur Medienerstellung verfügbar bleiben; geänderte Quellen müssen aktualisiert werden.</value>
+  </data>
+  <data name="Unattend.CatalogLabel" xml:space="preserve">
+    <value>Antwortdateien</value>
+  </data>
+  <data name="Unattend.CheckSourcesLabel" xml:space="preserve">
+    <value>Quellen prüfen</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Enthält Befehle. Prüfen Sie Wechselwirkungen mit Foundry-Anpassungen und Setup-Skripts.</value>
+  </data>
+  <data name="Unattend.CompatibilityDescription" xml:space="preserve">
+    <value>Nur Einstellungen für specialize und oobeSystem werden unterstützt. Andere Bereitstellungsvorgänge von Foundry bleiben aktiviert und können mit benutzerdefinierten Einstellungen oder Befehlen in Konflikt stehen. Validieren Sie mit Windows SIM und testen Sie die gesamte Konfiguration in einer VM. Externe Skriptdateien werden nicht importiert.</value>
+  </data>
+  <data name="Unattend.DefaultDescription" xml:space="preserve">
+    <value>Auf der Seite Ziel kann der Bediener Foundry-Einstellungen oder eine integrierte Datei auswählen. Das Importieren einer Datei ändert die Standardauswahl nicht.</value>
+  </data>
+  <data name="Unattend.DefaultLabel" xml:space="preserve">
+    <value>Standardauswahl für die Bereitstellung</value>
+  </data>
+  <data name="Unattend.DisplayNameLabel" xml:space="preserve">
+    <value>Anzeigename</value>
+  </data>
+  <data name="Unattend.DuplicateMessage" xml:space="preserve">
+    <value>{0} bereits im Katalog vorhandene Datei(en) wurden übersprungen.</value>
+  </data>
+  <data name="Unattend.EmptyCatalogMessage" xml:space="preserve">
+    <value>Importieren Sie mindestens eine Antwortdatei, um dieses Feature zu verwenden.</value>
+  </data>
+  <data name="Unattend.EnableDescription" xml:space="preserve">
+    <value>Die importierten Dateien werden in das Startimage integriert. Beim Deaktivieren bleibt der Katalog erhalten, seine Dateien werden jedoch von neuen Medien ausgeschlossen.</value>
+  </data>
+  <data name="Unattend.EnableLabel" xml:space="preserve">
+    <value>Benutzerdefinierte Antwortdateien aktivieren</value>
+  </data>
+  <data name="Unattend.ImportLabel" xml:space="preserve">
+    <value>Dateien importieren</value>
+  </data>
+  <data name="Unattend.ImportPickerTitle" xml:space="preserve">
+    <value>Windows-Antwortdateien importieren</value>
+  </data>
+  <data name="Unattend.InvalidArchitectureMessage" xml:space="preserve">
+    <value>Die Datei muss eine unterstützte Architektur angeben und dafür geeignete Komponenteneinstellungen enthalten.</value>
+  </data>
+  <data name="Unattend.InvalidCatalogMessage" xml:space="preserve">
+    <value>Der Katalog enthält ungültige oder doppelte Einträge. Aktualisieren oder entfernen Sie die betroffenen Dateien.</value>
+  </data>
+  <data name="Unattend.InvalidFileMessage" xml:space="preserve">
+    <value>Verwenden Sie gültiges XML für Windows-Antwortdateien mit höchstens 4 MiB, ohne DTDs oder externe Entitäten. Validieren Sie die Datei mit Windows SIM.</value>
+  </data>
+  <data name="Unattend.InvalidSourcesMessage" xml:space="preserve">
+    <value>Einige Quellen fehlen, wurden geändert oder sind ungültig. Aktualisieren oder entfernen Sie diese Einträge vor der Medienerstellung.</value>
+  </data>
+  <data name="Unattend.MissingDefaultOption" xml:space="preserve">
+    <value>Standarddatei fehlt – Ersatz auswählen</value>
+  </data>
+  <data name="Unattend.NativeOption" xml:space="preserve">
+    <value>Foundry-Einstellungen verwenden</value>
+  </data>
+  <data name="Unattend.OwnershipDescription" xml:space="preserve">
+    <value>Die ausgewählte Datei ersetzt die von Foundry generierte Antwortdatei. Ihre Einstellungen werden unverändert verwendet, ohne Zusammenführung oder Ergänzung fehlender Werte. Wählen Sie „Foundry-Einstellungen verwenden“, um Ihre gespeicherte Konfiguration zu nutzen.</value>
+  </data>
+  <data name="Unattend.ProtectionDescription" xml:space="preserve">
+    <value>Benutzerdefinierte Dateien erfordern den Kennwortschutz für Bereitstellungsmedien in der allgemeinen Konfiguration. XML kann Anmeldeinformationen oder Skripts enthalten. Der Katalog speichert nur Quellverweise; das Startimage enthält verschlüsselte Kopien.</value>
+  </data>
+  <data name="Unattend.ProtectionRequiredMessage" xml:space="preserve">
+    <value>Aktivieren Sie in der allgemeinen Konfiguration den Kennwortschutz für Bereitstellungsmedien, um benutzerdefinierte Antwortdateien zu verwenden.</value>
+  </data>
+  <data name="Unattend.RefreshDuplicateMessage" xml:space="preserve">
+    <value>Diese Quelle ist jetzt mit einer anderen importierten Datei identisch. Entfernen Sie diesen Eintrag und wählen Sie die vorhandene Datei.</value>
+  </data>
+  <data name="Unattend.RefreshLabel" xml:space="preserve">
+    <value>Quelle aktualisieren</value>
+  </data>
+  <data name="Unattend.RemoveLabel" xml:space="preserve">
+    <value>Entfernen</value>
+  </data>
+  <data name="Unattend.RenameLabel" xml:space="preserve">
+    <value>Umbenennen</value>
+  </data>
+  <data name="Unattend.SaveFailedMessage" xml:space="preserve">
+    <value>Die Konfiguration konnte nicht gespeichert werden. Prüfen Sie den Zugriff auf den Foundry-Konfigurationsordner und versuchen Sie es erneut.</value>
+  </data>
+  <data name="Unattend.SelectedFileLabel" xml:space="preserve">
+    <value>Ausgewählte Datei</value>
+  </data>
+  <data name="Unattend.SourceChangedMessage" xml:space="preserve">
+    <value>Die Quelle wurde geändert. Verwenden Sie Quelle aktualisieren, um die aktualisierte Datei vor der Medienerstellung zu übernehmen.</value>
+  </data>
+  <data name="Unattend.SourceChecksBusyMessage" xml:space="preserve">
+    <value>Zwei Quellenprüfungen warten noch auf Dateizugriff. Stellen Sie den Zugriff auf die nicht verfügbaren Quellspeicherorte wieder her und prüfen Sie die Quellen erneut.</value>
+  </data>
+  <data name="Unattend.SourceNotCheckedMessage" xml:space="preserve">
+    <value>Quellenprüfung steht aus. Wählen Sie Quellen prüfen, um die aktuelle Datei zu validieren, ohne Inhaltsänderungen zu übernehmen.</value>
+  </data>
+  <data name="Unattend.SourceReadFailedMessage" xml:space="preserve">
+    <value>Die Quelle konnte nicht gelesen werden. Prüfen Sie, ob die Datei noch vorhanden und zugänglich ist.</value>
+  </data>
+  <data name="Unattend.SourceTimeoutMessage" xml:space="preserve">
+    <value>Zeitüberschreitung bei der Quellenvalidierung. Prüfen Sie den Zugriff auf den Quellspeicherort und versuchen Sie es erneut.</value>
+  </data>
+  <data name="Unattend.UnsupportedSettingsMessage" xml:space="preserve">
+    <value>Nur Einstellungen für specialize und oobeSystem werden unterstützt. Entfernen Sie andere nicht leere Konfigurationsdurchläufe, Offlinewartungsanweisungen und das erneute Versiegeln im Überwachungsmodus.</value>
+  </data>
+  <data name="Unattend.ValidSource" xml:space="preserve">
+    <value>Quelle validiert.</value>
   </data>
   <data name="Update.Badge.New" xml:space="preserve">
     <value>Neu</value>

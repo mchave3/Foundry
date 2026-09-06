@@ -2091,6 +2091,12 @@
   <data name="Nav_StartKey.Title" xml:space="preserve">
     <value>Започнете</value>
   </data>
+  <data name="Nav_UnattendKey.Description" xml:space="preserve">
+    <value>Импортирайте файлове с отговори за Windows и изберете настройките за разполагане.</value>
+  </data>
+  <data name="Nav_UnattendKey.Title" xml:space="preserve">
+    <value>Unattend</value>
+  </data>
   <data name="Nav_WifiKey.Description" xml:space="preserve">
     <value>Конфигурирайте предоставянето и профилите на Wi-Fi.</value>
   </data>
@@ -2984,6 +2990,117 @@
   </data>
   <data name="ThemeSetting_MicaItem.Content" xml:space="preserve">
     <value>слюда</value>
+  </data>
+  <data name="Unattend.AutopilotWarning" xml:space="preserve">
+    <value>Съдържа настройки, които могат да попречат на записването в Autopilot; несъвместимите режими на записване ще бъдат блокирани при разполагане.</value>
+  </data>
+  <data name="Unattend.CatalogDescription" xml:space="preserve">
+    <value>Изберете файл, за да го преименувате, обновите или премахнете. Изходните файлове трябва да останат достъпни до създаването на носителя; променените източници изискват обновяване.</value>
+  </data>
+  <data name="Unattend.CatalogLabel" xml:space="preserve">
+    <value>Файлове с отговори</value>
+  </data>
+  <data name="Unattend.CheckSourcesLabel" xml:space="preserve">
+    <value>Проверка на източниците</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Съдържа команди; проверете за припокриване с персонализациите и процедурите за настройка на Foundry.</value>
+  </data>
+  <data name="Unattend.CompatibilityDescription" xml:space="preserve">
+    <value>Поддържат се само настройки за specialize и oobeSystem. Другите операции за разполагане на Foundry остават включени и може да са в конфликт с потребителски настройки или команди. Проверете с Windows SIM и тествайте цялата конфигурация във виртуална машина. Външни скриптови файлове не се импортират.</value>
+  </data>
+  <data name="Unattend.DefaultDescription" xml:space="preserve">
+    <value>Операторът може да избере настройките на Foundry или един от включените файлове на страницата за целта. Импортирането на файл не променя избора по подразбиране.</value>
+  </data>
+  <data name="Unattend.DefaultLabel" xml:space="preserve">
+    <value>Избор по подразбиране за разполагане</value>
+  </data>
+  <data name="Unattend.DisplayNameLabel" xml:space="preserve">
+    <value>Показвано име</value>
+  </data>
+  <data name="Unattend.DuplicateMessage" xml:space="preserve">
+    <value>Пропуснати са {0} файла, които вече присъстват в каталога.</value>
+  </data>
+  <data name="Unattend.EmptyCatalogMessage" xml:space="preserve">
+    <value>Импортирайте поне един файл с отговори, за да използвате тази функция.</value>
+  </data>
+  <data name="Unattend.EnableDescription" xml:space="preserve">
+    <value>Включете импортираните файлове в образа за зареждане. Изключването на тази опция запазва каталога, но изключва файловете му от новите носители.</value>
+  </data>
+  <data name="Unattend.EnableLabel" xml:space="preserve">
+    <value>Разрешаване на потребителски файлове с отговори</value>
+  </data>
+  <data name="Unattend.ImportLabel" xml:space="preserve">
+    <value>Импортиране на файлове</value>
+  </data>
+  <data name="Unattend.ImportPickerTitle" xml:space="preserve">
+    <value>Импортиране на файлове с отговори за Windows</value>
+  </data>
+  <data name="Unattend.InvalidArchitectureMessage" xml:space="preserve">
+    <value>Файлът трябва да посочва поддържана архитектура и да съдържа настройки на компоненти, приложими за нея.</value>
+  </data>
+  <data name="Unattend.InvalidCatalogMessage" xml:space="preserve">
+    <value>Каталогът съдържа невалидни или дублиращи се записи. Обновете или премахнете засегнатите файлове.</value>
+  </data>
+  <data name="Unattend.InvalidFileMessage" xml:space="preserve">
+    <value>Използвайте валиден XML файл с отговори за Windows с размер до 4 MiB, без DTD или външни обекти. Проверете файла с Windows SIM.</value>
+  </data>
+  <data name="Unattend.InvalidSourcesMessage" xml:space="preserve">
+    <value>Някои източници липсват, променени са или са невалидни. Обновете или премахнете тези записи, преди да създадете носителя.</value>
+  </data>
+  <data name="Unattend.MissingDefaultOption" xml:space="preserve">
+    <value>Изборът по подразбиране липсва – изберете заместител</value>
+  </data>
+  <data name="Unattend.NativeOption" xml:space="preserve">
+    <value>Използване на настройките на Foundry</value>
+  </data>
+  <data name="Unattend.OwnershipDescription" xml:space="preserve">
+    <value>Избраният файл заменя файла с отговори, генериран от Foundry. Настройките му се използват без промени, без обединяване или попълване на липсващи стойности. Изберете „Използване на настройките на Foundry“, за да използвате запазената си конфигурация.</value>
+  </data>
+  <data name="Unattend.ProtectionDescription" xml:space="preserve">
+    <value>Потребителските файлове изискват защита с парола на носителя за разполагане в общите настройки. XML може да съдържа идентификационни данни или скриптове. Каталогът запазва само препратки към източниците; образът за зареждане съдържа шифровани копия.</value>
+  </data>
+  <data name="Unattend.ProtectionRequiredMessage" xml:space="preserve">
+    <value>Включете защитата с парола на носителя за разполагане в общите настройки, за да използвате потребителски файлове с отговори.</value>
+  </data>
+  <data name="Unattend.RefreshDuplicateMessage" xml:space="preserve">
+    <value>Този източник вече дублира друг импортиран файл. Премахнете този запис и изберете съществуващия файл.</value>
+  </data>
+  <data name="Unattend.RefreshLabel" xml:space="preserve">
+    <value>Обновяване на източника</value>
+  </data>
+  <data name="Unattend.RemoveLabel" xml:space="preserve">
+    <value>Премахване</value>
+  </data>
+  <data name="Unattend.RenameLabel" xml:space="preserve">
+    <value>Преименуване</value>
+  </data>
+  <data name="Unattend.SaveFailedMessage" xml:space="preserve">
+    <value>Настройките не можаха да бъдат запазени. Проверете достъпа до папката с настройки на Foundry и опитайте отново.</value>
+  </data>
+  <data name="Unattend.SelectedFileLabel" xml:space="preserve">
+    <value>Избран файл</value>
+  </data>
+  <data name="Unattend.SourceChangedMessage" xml:space="preserve">
+    <value>Източникът е променен. Използвайте „Обновяване на източника“, за да приемете обновения файл, преди да създадете носителя.</value>
+  </data>
+  <data name="Unattend.SourceChecksBusyMessage" xml:space="preserve">
+    <value>Две проверки на източници все още чакат достъп до файловете. Възстановете достъпа до недостъпните местоположения на източници, след което проверете отново.</value>
+  </data>
+  <data name="Unattend.SourceNotCheckedMessage" xml:space="preserve">
+    <value>Предстои проверка на източника. Изберете „Проверка на източниците“, за да проверите текущия файл, без да приемате промени в съдържанието.</value>
+  </data>
+  <data name="Unattend.SourceReadFailedMessage" xml:space="preserve">
+    <value>Източникът не можа да бъде прочетен. Проверете дали файлът все още съществува и е достъпен.</value>
+  </data>
+  <data name="Unattend.SourceTimeoutMessage" xml:space="preserve">
+    <value>Времето за проверка на източника изтече. Проверете достъпа до местоположението на източника и опитайте отново.</value>
+  </data>
+  <data name="Unattend.UnsupportedSettingsMessage" xml:space="preserve">
+    <value>Поддържат се само настройки за specialize и oobeSystem. Премахнете другите непразни етапи, инструкциите за офлайн обслужване или повторното запечатване в режим на проверка.</value>
+  </data>
+  <data name="Unattend.ValidSource" xml:space="preserve">
+    <value>Източникът е проверен.</value>
   </data>
   <data name="Update.Badge.New" xml:space="preserve">
     <value>Нов</value>

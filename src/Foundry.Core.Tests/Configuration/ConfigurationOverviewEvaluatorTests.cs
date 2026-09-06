@@ -10,6 +10,34 @@ namespace Foundry.Core.Tests.Configuration;
 public sealed class ConfigurationOverviewEvaluatorTests
 {
     [Fact]
+    public void Evaluate_DefaultAnswerFiles_AreDisabledInOverviewAndNavigation()
+    {
+        ConfigurationOverviewEvaluation evaluation = ConfigurationOverviewEvaluator.Evaluate(
+            CreateContext(new FoundryConfigurationDocument()));
+
+        Assert.Equal(ConfigurationOverviewState.Disabled, evaluation[ConfigurationOverviewItem.Unattend]);
+        Assert.Equal(ConfigurationOverviewState.Disabled, ConfigurationOverviewNavigationEvaluator.EvaluateTarget(
+            evaluation, ConfigurationNavigationTarget.Unattend));
+    }
+
+    [Theory]
+    [InlineData(true, ConfigurationOverviewState.Configured)]
+    [InlineData(false, ConfigurationOverviewState.NeedsAttention)]
+    public void Evaluate_EnabledAnswerFiles_UsesSourceAndProtectionReadiness(bool isReady, ConfigurationOverviewState expected)
+    {
+        var configuration = new FoundryConfigurationDocument
+        {
+            Unattend = new UnattendSettings { IsEnabled = true }
+        };
+        ConfigurationOverviewEvaluation evaluation = ConfigurationOverviewEvaluator.Evaluate(
+            CreateContext(configuration) with { IsUnattendConfigurationReady = isReady });
+
+        Assert.Equal(expected, evaluation[ConfigurationOverviewItem.Unattend]);
+        Assert.Equal(expected, ConfigurationOverviewNavigationEvaluator.EvaluateTarget(
+            evaluation, ConfigurationNavigationTarget.Unattend));
+    }
+
+    [Fact]
     public void Evaluate_DefaultConfiguration_UsesValidDefaultsAndNeutralOptionalStates()
     {
         ConfigurationOverviewEvaluation evaluation = ConfigurationOverviewEvaluator.Evaluate(

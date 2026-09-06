@@ -665,8 +665,14 @@ ErrorCode=0x80070005
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>איטום מחיצת שחזור</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>הכנת קובץ תשובות מותאם אישית</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>הכנת התאמות</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>אימות קובץ תשובות מותאם אישית</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>אימות תצורה</value>
@@ -1474,6 +1480,39 @@ ErrorCode=0x80070005
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>פתח קובץ יומן</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>קובץ תשובות זה מתנגש במצב הרישום שהוגדר עבור Autopilot. בחרו קובץ אחר או שנו את תצורת המדיה.</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>פקודות מותאמות אישית עלולות להתנגש עם Foundry. בדקו תצורה זו.</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>העלאת הגיבוב אינה מבטיחה רישום ל-Autopilot.</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>בדקו קובץ תשובות זה עם תמונת Windows ותצורת Foundry שנבחרו.</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>קובץ התשובות שנבחר אינו זמין, אינו תקין או אינו תואם לארכיטקטורת Windows שנבחרה. בחרו קובץ אחר או צרו מחדש את המדיה.</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>מנוהל באמצעות קובץ התשובות</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>קובץ התשובות שהוגדר כברירת מחדל חסר. צרו מחדש את מדיית האתחול.</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>שימוש בהגדרות Foundry</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>Windows משתמש בקובץ התשובות שנבחר. Foundry אינו ממזג או מוסיף הגדרות.</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>אזור זמן</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>קובץ תשובות</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>חזרה לסיכום</value>

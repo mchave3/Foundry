@@ -665,8 +665,14 @@
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>ซีลพาร์ติชันการกู้คืน</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>เตรียมไฟล์คำตอบที่กำหนดเอง</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>เตรียมการปรับแต่ง</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>ตรวจสอบไฟล์คำตอบที่กำหนดเอง</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>ตรวจสอบการกำหนดค่า</value>
@@ -1474,6 +1480,39 @@
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>เปิดไฟล์บันทึก</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>ไฟล์คำตอบนี้ขัดแย้งกับโหมดการลงทะเบียน Autopilot ที่กำหนดไว้ โปรดเลือกไฟล์อื่นหรือเปลี่ยนการกำหนดค่าของสื่อ</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>คำสั่งที่กำหนดเองอาจขัดแย้งกับ Foundry โปรดทดสอบการกำหนดค่านี้</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>การอัปโหลดแฮชไม่รับประกันการลงทะเบียนกับ Autopilot</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>ทดสอบไฟล์คำตอบนี้กับอิมเมจ Windows และการกำหนดค่า Foundry ที่เลือก</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>ไฟล์คำตอบที่เลือกไม่พร้อมใช้งาน ไม่ถูกต้อง หรือเข้ากันไม่ได้กับสถาปัตยกรรม Windows ที่เลือก โปรดเลือกไฟล์อื่นหรือสร้างสื่อใหม่</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>จัดการโดยไฟล์คำตอบ</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>ไม่พบไฟล์คำตอบเริ่มต้นที่กำหนดไว้ โปรดสร้างสื่อสำหรับบูตใหม่</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>ใช้การตั้งค่าของ Foundry</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>Windows ใช้ไฟล์คำตอบที่เลือก Foundry จะไม่ผสานหรือเพิ่มการตั้งค่า</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>เขตเวลา</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>ไฟล์คำตอบ</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>กลับสู่สรุป</value>

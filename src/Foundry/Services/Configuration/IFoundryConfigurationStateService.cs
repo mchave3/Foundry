@@ -64,6 +64,22 @@ public interface IFoundryConfigurationStateService
     bool IsAutopilotConfigurationReady { get; }
 
     /// <summary>
+    /// Gets whether custom answer-file sources and media protection are ready for generation.
+    /// </summary>
+    bool IsUnattendConfigurationReady { get; }
+
+    /// <summary>
+    /// Gets cached source inspections for the current catalog, without performing file I/O.
+    /// </summary>
+    IReadOnlyList<UnattendSourceValidation> UnattendSourceValidations { get; }
+
+    /// <summary>
+    /// Refreshes bounded source inspections off the UI thread and publishes current results through StateChanged.
+    /// Late results from replaced catalogs are discarded; inaccessible sources never block the UI thread.
+    /// </summary>
+    Task RefreshUnattendSourcesAsync();
+
+    /// <summary>
     /// Gets the detailed Autopilot readiness status for the selected provisioning mode.
     /// </summary>
     AutopilotConfigurationValidationResult AutopilotConfigurationValidation { get; }
@@ -118,6 +134,12 @@ public interface IFoundryConfigurationStateService
     /// </summary>
     /// <param name="settings">New Autopilot settings.</param>
     void UpdateAutopilot(AutopilotSettings settings);
+
+    /// <summary>
+    /// Persists answer-file metadata and source references without storing XML content.
+    /// </summary>
+    /// <param name="settings">New answer-file settings.</param>
+    void UpdateUnattend(UnattendSettings settings);
 
     /// <summary>
     /// Replaces telemetry settings propagated into generated runtime configuration.

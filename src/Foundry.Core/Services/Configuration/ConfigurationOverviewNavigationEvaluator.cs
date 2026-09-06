@@ -41,6 +41,7 @@ public static class ConfigurationOverviewNavigationEvaluator
             ConfigurationNavigationTarget.AutopilotHardwareHashUpload => evaluation[ConfigurationOverviewItem.AutopilotZeroTouch],
             ConfigurationNavigationTarget.AutopilotInteractiveHardwareHashUpload => evaluation[ConfigurationOverviewItem.AutopilotInteractive],
             ConfigurationNavigationTarget.OperatingSystemSelection => evaluation[ConfigurationOverviewItem.OperatingSystemSelection],
+            ConfigurationNavigationTarget.Unattend => evaluation[ConfigurationOverviewItem.Unattend],
             ConfigurationNavigationTarget.MachineNaming => evaluation[ConfigurationOverviewItem.MachineNaming],
             ConfigurationNavigationTarget.Oobe => evaluation[ConfigurationOverviewItem.Oobe],
             ConfigurationNavigationTarget.WindowsOptionalFeatures => evaluation[ConfigurationOverviewItem.OptionalFeatures],

@@ -8,15 +8,17 @@ namespace Foundry.Deploy.Services.Deployment;
 
 public sealed record DeploymentLaunchPreparationResult
 {
+    public string? FailureMessage { get; init; }
     public required bool IsReadyToStart { get; init; }
     public required string NormalizedComputerName { get; init; }
     public TargetDiskInfo? EffectiveTargetDisk { get; init; }
     public DeploymentContext? Context { get; init; }
 
-    public static DeploymentLaunchPreparationResult Failure(string normalizedComputerName)
+    public static DeploymentLaunchPreparationResult Failure(string normalizedComputerName, string? failureMessage = null)
     {
         return new DeploymentLaunchPreparationResult
         {
+            FailureMessage = failureMessage,
             IsReadyToStart = false,
             NormalizedComputerName = normalizedComputerName
         };

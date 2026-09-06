@@ -665,8 +665,14 @@ Continuar com a implantação?</value>
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>Selar partição de recuperação</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>Preparar arquivo de resposta personalizado</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>Preparar personalizações</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>Validar arquivo de resposta personalizado</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>Validar configuração</value>
@@ -1474,6 +1480,39 @@ Continuar com a implantação?</value>
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>Abrir arquivo de registro</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>Este arquivo de resposta entra em conflito com o modo de inscrição no Autopilot configurado. Escolha outro arquivo ou altere a configuração da mídia.</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Comandos personalizados podem entrar em conflito com o Foundry. Teste esta configuração.</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>O envio do hash não garante a inscrição no Autopilot.</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>Teste este arquivo de resposta com a imagem do Windows e a configuração do Foundry selecionadas.</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>O arquivo de resposta selecionado está indisponível, inválido ou é incompatível com a arquitetura do Windows selecionada. Escolha outro arquivo ou recrie a mídia.</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>Gerenciado pelo arquivo de resposta</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>O arquivo de resposta padrão configurado está ausente. Recrie a mídia de inicialização.</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>Usar configurações do Foundry</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>O Windows usa o arquivo de resposta selecionado. O Foundry não mescla nem adiciona configurações.</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>Fuso horário</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>Arquivo de resposta</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>Voltar ao resumo</value>

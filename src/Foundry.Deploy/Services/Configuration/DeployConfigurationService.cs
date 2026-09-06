@@ -68,6 +68,8 @@ public sealed class DeployConfigurationService : IDeployConfigurationService
                 };
             }
 
+            Foundry.Deploy.Services.Deployment.Unattend.UnattendCatalog.Validate(document.Unattend, document.Protection?.IsEnabled == true);
+
             document = DeployConfigurationMigration.ApplySchemaMigrations(document);
 
             if (document.SchemaVersion > ConfigurationSchemaVersions.DeployCurrent)
@@ -104,7 +106,7 @@ public sealed class DeployConfigurationService : IDeployConfigurationService
                 IsBootMediaUpdateRecommended = isBootMediaUpdateRecommended
             };
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or JsonException)
+        catch (Exception ex) when (ex is InvalidDataException or IOException or UnauthorizedAccessException or JsonException or InvalidOperationException or ArgumentException)
         {
             _logger.LogWarning(
                 ex,

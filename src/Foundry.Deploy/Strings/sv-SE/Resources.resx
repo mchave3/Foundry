@@ -665,8 +665,14 @@ Fortsätt med implementeringen?</value>
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>Försegla återställningspartitionen</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>Förbered egen svarsfil</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>Förbered anpassningar</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>Validera egen svarsfil</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>Validera konfiguration</value>
@@ -1474,6 +1480,39 @@ Fortsätt med implementeringen?</value>
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>Öppna loggfilen</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>Den här svarsfilen står i konflikt med det konfigurerade registreringsläget för Autopilot. Välj en annan fil eller ändra mediets konfiguration.</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Egna kommandon kan stå i konflikt med Foundry. Testa konfigurationen.</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>Hashuppladdning garanterar inte registrering i Autopilot.</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>Testa denna svarsfil med den valda Windows-avbildningen och Foundry-konfigurationen.</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>Den valda svarsfilen är otillgänglig, ogiltig eller inkompatibel med den valda Windows-arkitekturen. Välj en annan fil eller skapa om mediet.</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>Hanteras av svarsfilen</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>Den konfigurerade standardsvarsfilen saknas. Skapa om startmediet.</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>Använd Foundry-inställningar</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>Windows använder den valda svarsfilen. Foundry slår inte samman eller lägger till inställningar.</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>Tidszon</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>Svarsfil</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>Återgå till sammanfattningen</value>

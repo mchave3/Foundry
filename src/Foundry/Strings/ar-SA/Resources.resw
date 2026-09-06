@@ -2091,6 +2091,12 @@
   <data name="Nav_StartKey.Title" xml:space="preserve">
     <value>ابدأ</value>
   </data>
+  <data name="Nav_UnattendKey.Description" xml:space="preserve">
+    <value>استورد ملفات إجابات Windows واختر الإعدادات المستخدمة في عمليات النشر.</value>
+  </data>
+  <data name="Nav_UnattendKey.Title" xml:space="preserve">
+    <value>Unattend</value>
+  </data>
   <data name="Nav_WifiKey.Description" xml:space="preserve">
     <value>قم بتكوين تهيئة Wi-Fi والملفات التعريفية.</value>
   </data>
@@ -2984,6 +2990,117 @@
   </data>
   <data name="ThemeSetting_MicaItem.Content" xml:space="preserve">
     <value>ميكا</value>
+  </data>
+  <data name="Unattend.AutopilotWarning" xml:space="preserve">
+    <value>يحتوي على إعدادات قد تمنع التسجيل في Autopilot؛ سيتم حظر أوضاع التسجيل غير المتوافقة أثناء النشر.</value>
+  </data>
+  <data name="Unattend.CatalogDescription" xml:space="preserve">
+    <value>حدد ملفًا لإعادة تسميته أو تحديثه أو إزالته. يجب أن تظل ملفات المصدر متاحة حتى إنشاء الوسائط؛ وتتطلب المصادر المعدّلة التحديث.</value>
+  </data>
+  <data name="Unattend.CatalogLabel" xml:space="preserve">
+    <value>ملفات الإجابات</value>
+  </data>
+  <data name="Unattend.CheckSourcesLabel" xml:space="preserve">
+    <value>التحقق من المصادر</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>يحتوي على أوامر؛ راجع تداخلها مع تخصيصات Foundry وإجراءات الإعداد.</value>
+  </data>
+  <data name="Unattend.CompatibilityDescription" xml:space="preserve">
+    <value>تُدعم إعدادات specialize وoobeSystem فقط. تظل عمليات النشر الأخرى في Foundry مفعّلة وقد تتعارض مع الإعدادات أو الأوامر المخصصة. تحقق باستخدام Windows SIM واختبر التكوين الكامل في جهاز ظاهري. لا يتم استيراد ملفات البرامج النصية الخارجية.</value>
+  </data>
+  <data name="Unattend.DefaultDescription" xml:space="preserve">
+    <value>يمكن للمشغّل اختيار إعدادات Foundry أو أحد الملفات المضمّنة في صفحة الهدف. لا يؤدي استيراد ملف إلى تغيير الاختيار الافتراضي.</value>
+  </data>
+  <data name="Unattend.DefaultLabel" xml:space="preserve">
+    <value>الاختيار الافتراضي للنشر</value>
+  </data>
+  <data name="Unattend.DisplayNameLabel" xml:space="preserve">
+    <value>اسم العرض</value>
+  </data>
+  <data name="Unattend.DuplicateMessage" xml:space="preserve">
+    <value>تم تخطي {0} من الملفات الموجودة بالفعل في الكتالوج.</value>
+  </data>
+  <data name="Unattend.EmptyCatalogMessage" xml:space="preserve">
+    <value>استورد ملف إجابات واحدًا على الأقل لاستخدام هذه الميزة.</value>
+  </data>
+  <data name="Unattend.EnableDescription" xml:space="preserve">
+    <value>ضمّن الملفات المستوردة في صورة التمهيد. يؤدي إيقاف هذا الخيار إلى الاحتفاظ بالكتالوج مع استبعاد ملفاته من الوسائط الجديدة.</value>
+  </data>
+  <data name="Unattend.EnableLabel" xml:space="preserve">
+    <value>تمكين ملفات الإجابات المخصصة</value>
+  </data>
+  <data name="Unattend.ImportLabel" xml:space="preserve">
+    <value>استيراد ملفات</value>
+  </data>
+  <data name="Unattend.ImportPickerTitle" xml:space="preserve">
+    <value>استيراد ملفات إجابات Windows</value>
+  </data>
+  <data name="Unattend.InvalidArchitectureMessage" xml:space="preserve">
+    <value>يجب أن يحدد الملف بنية مدعومة وأن يحتوي على إعدادات مكونات تنطبق عليها.</value>
+  </data>
+  <data name="Unattend.InvalidCatalogMessage" xml:space="preserve">
+    <value>يحتوي الكتالوج على إدخالات غير صالحة أو مكررة. حدّث الملفات المعنية أو أزلها.</value>
+  </data>
+  <data name="Unattend.InvalidFileMessage" xml:space="preserve">
+    <value>استخدم ملف إجابات Windows بصيغة XML صالحة لا يتجاوز حجمه 4 MiB، دون تعريفات DTD أو كيانات خارجية. تحقق من الملف باستخدام Windows SIM.</value>
+  </data>
+  <data name="Unattend.InvalidSourcesMessage" xml:space="preserve">
+    <value>بعض المصادر مفقودة أو معدّلة أو غير صالحة. حدّث هذه الإدخالات أو أزلها قبل إنشاء الوسائط.</value>
+  </data>
+  <data name="Unattend.MissingDefaultOption" xml:space="preserve">
+    <value>الاختيار الافتراضي مفقود - اختر بديلًا</value>
+  </data>
+  <data name="Unattend.NativeOption" xml:space="preserve">
+    <value>استخدام إعدادات Foundry</value>
+  </data>
+  <data name="Unattend.OwnershipDescription" xml:space="preserve">
+    <value>يحل الملف المحدد محل ملف الإجابات الذي ينشئه Foundry. تُستخدم إعداداته كما هي، دون دمج أو استكمال القيم الناقصة. حدد استخدام إعدادات Foundry لاستخدام التكوين المحفوظ.</value>
+  </data>
+  <data name="Unattend.ProtectionDescription" xml:space="preserve">
+    <value>تتطلب الملفات المخصصة حماية وسائط النشر بكلمة مرور في الإعدادات العامة. قد يحتوي XML على بيانات اعتماد أو برامج نصية. يحفظ الكتالوج مراجع المصادر فقط؛ وتحتوي صورة التمهيد على نسخ مشفّرة.</value>
+  </data>
+  <data name="Unattend.ProtectionRequiredMessage" xml:space="preserve">
+    <value>فعّل حماية وسائط النشر بكلمة مرور في الإعدادات العامة لاستخدام ملفات الإجابات المخصصة.</value>
+  </data>
+  <data name="Unattend.RefreshDuplicateMessage" xml:space="preserve">
+    <value>أصبح هذا المصدر مطابقًا لملف مستورد آخر. أزل هذا الإدخال واختر الملف الموجود.</value>
+  </data>
+  <data name="Unattend.RefreshLabel" xml:space="preserve">
+    <value>تحديث المصدر</value>
+  </data>
+  <data name="Unattend.RemoveLabel" xml:space="preserve">
+    <value>إزالة</value>
+  </data>
+  <data name="Unattend.RenameLabel" xml:space="preserve">
+    <value>إعادة تسمية</value>
+  </data>
+  <data name="Unattend.SaveFailedMessage" xml:space="preserve">
+    <value>تعذر حفظ الإعدادات. تحقق من إمكانية الوصول إلى مجلد إعدادات Foundry وحاول مرة أخرى.</value>
+  </data>
+  <data name="Unattend.SelectedFileLabel" xml:space="preserve">
+    <value>الملف المحدد</value>
+  </data>
+  <data name="Unattend.SourceChangedMessage" xml:space="preserve">
+    <value>تغيّر المصدر. استخدم تحديث المصدر لقبول الملف المحدّث قبل إنشاء الوسائط.</value>
+  </data>
+  <data name="Unattend.SourceChecksBusyMessage" xml:space="preserve">
+    <value>ما زالت عمليتا تحقق من المصادر تنتظران الوصول إلى الملفات. أعد إتاحة مواقع المصادر غير المتاحة، ثم تحقق من المصادر مجددًا.</value>
+  </data>
+  <data name="Unattend.SourceNotCheckedMessage" xml:space="preserve">
+    <value>التحقق من المصدر معلّق. اختر التحقق من المصادر للتحقق من الملف الحالي دون قبول تغييرات المحتوى.</value>
+  </data>
+  <data name="Unattend.SourceReadFailedMessage" xml:space="preserve">
+    <value>تعذرت قراءة المصدر. تحقق من أن الملف ما زال موجودًا ويمكن الوصول إليه.</value>
+  </data>
+  <data name="Unattend.SourceTimeoutMessage" xml:space="preserve">
+    <value>انتهت مهلة التحقق من المصدر. تحقق من إمكانية الوصول إلى موقع المصدر وحاول مرة أخرى.</value>
+  </data>
+  <data name="Unattend.UnsupportedSettingsMessage" xml:space="preserve">
+    <value>تُدعم إعدادات specialize وoobeSystem فقط. أزل مراحل الإعداد الأخرى غير الفارغة أو تعليمات الصيانة دون اتصال أو إعادة التهيئة لوضع التدقيق.</value>
+  </data>
+  <data name="Unattend.ValidSource" xml:space="preserve">
+    <value>تم التحقق من المصدر.</value>
   </data>
   <data name="Update.Badge.New" xml:space="preserve">
     <value>جديد</value>

@@ -95,6 +95,11 @@ internal sealed class NavigationStatusService : INavigationStatusService
             return ConfigurationNavigationTarget.MachineNaming;
         }
 
+        if (pageType == typeof(UnattendPage))
+        {
+            return ConfigurationNavigationTarget.Unattend;
+        }
+
         if (pageType == typeof(OobePage))
         {
             return ConfigurationNavigationTarget.Oobe;

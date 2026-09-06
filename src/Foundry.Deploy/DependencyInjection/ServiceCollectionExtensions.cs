@@ -146,6 +146,9 @@ public static class ServiceCollectionExtensions
         services.AddSingleton<IDeploymentStep, ApplyRecoveryDriversStep>();
         services.AddSingleton<IDeploymentStep, ConfigureOobeSettingsStep>();
         services.AddSingleton<IDeploymentStep, ConfigureRecoveryEnvironmentStep>();
+        services.AddSingleton<Foundry.Deploy.Services.Deployment.Unattend.UnattendContentService>();
+        services.AddSingleton<IDeploymentStep, ValidateCustomUnattendStep>();
+        services.AddSingleton<IDeploymentStep, StageCustomUnattendStep>();
         services.AddSingleton<IDeploymentStep, ConfigureTargetComputerNameStep>();
         services.AddSingleton<IDeploymentStep, ConfigureWindowsOptionalFeaturesStep>();
         services.AddSingleton<IDeploymentStep, DownloadDriverPackStep>();

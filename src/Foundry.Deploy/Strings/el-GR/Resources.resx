@@ -665,8 +665,14 @@
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>Σφράγιση διαμερίσματος ανάκτησης</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>Τοποθέτηση προσαρμοσμένου αρχείου απαντήσεων</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>Προετοιμασία προσαρμογών</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>Επικύρωση προσαρμοσμένου αρχείου απαντήσεων</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>Επαλήθευση διαμόρφωσης</value>
@@ -1474,6 +1480,39 @@
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>Ανοίξτε το αρχείο καταγραφής</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>Αυτό το αρχείο απαντήσεων δεν είναι συμβατό με τη ρυθμισμένη μέθοδο εγγραφής στο Autopilot. Επιλέξτε άλλο αρχείο ή αλλάξτε τις ρυθμίσεις του μέσου.</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Οι προσαρμοσμένες εντολές μπορεί να συγκρούονται με το Foundry. Δοκιμάστε αυτή τη διαμόρφωση.</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>Η αποστολή του κατακερματισμού δεν εγγυάται την εγγραφή στο Autopilot.</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>Δοκιμάστε αυτό το αρχείο απαντήσεων με την επιλεγμένη εικόνα Windows και τη διαμόρφωση του Foundry.</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>Το επιλεγμένο αρχείο απαντήσεων δεν είναι διαθέσιμο, δεν είναι έγκυρο ή δεν είναι συμβατό με την επιλεγμένη αρχιτεκτονική των Windows. Επιλέξτε άλλο αρχείο ή δημιουργήστε ξανά το μέσο.</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>Διαχείριση από το αρχείο απαντήσεων</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>Το καθορισμένο προεπιλεγμένο αρχείο απαντήσεων λείπει. Δημιουργήστε ξανά το μέσο εκκίνησης.</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>Χρήση των ρυθμίσεων του Foundry</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>Τα Windows χρησιμοποιούν το επιλεγμένο αρχείο απαντήσεων. Το Foundry δεν συγχωνεύει ούτε προσθέτει ρυθμίσεις.</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>Ζώνη ώρας</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>Αρχείο απαντήσεων</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>Επιστροφή στη σύνοψη</value>

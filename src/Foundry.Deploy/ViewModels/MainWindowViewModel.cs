@@ -308,6 +308,7 @@ public partial class MainWindowViewModel : LocalizedViewModelBase
             {
                 Mode = _deploymentRuntimeContext.Mode,
                 CacheRootPath = Preparation.CacheRootPath,
+                Unattend = Preparation.SelectedUnattend,
                 TargetComputerName = Preparation.TargetComputerName,
                 DefaultTimeZoneId = _wizardContext.DefaultTimeZoneId,
                 SelectedTargetDisk = Preparation.SelectedTargetDisk,
@@ -335,13 +336,15 @@ public partial class MainWindowViewModel : LocalizedViewModelBase
 
         if (!launchPreparation.IsReadyToStart || launchPreparation.Context is null)
         {
+            if (launchPreparation.FailureMessage is not null)
+                Preparation.ReportUnattendFailure(launchPreparation.FailureMessage);
             return;
         }
 
         RunOnUi(() =>
         {
             IsDeploymentRunning = true;
-            Session.BeginDeployment(launchPreparation.NormalizedComputerName, _deploymentOrchestrator.PlannedSteps.Count);
+            Session.BeginDeployment(Preparation.EffectiveComputerName, _deploymentOrchestrator.PlannedSteps.Count);
         });
 
         try
@@ -365,7 +368,7 @@ public partial class MainWindowViewModel : LocalizedViewModelBase
     private void ShowDebugProgressPage()
     {
         Session.ShowDebugProgress(
-            Preparation.TargetComputerName,
+            Preparation.EffectiveComputerName,
             currentStepIndex: 7,
             plannedStepCount: _deploymentOrchestrator.PlannedSteps.Count,
             currentStepName: DeploymentStepNames.ApplyOperatingSystemImage,
@@ -376,7 +379,7 @@ public partial class MainWindowViewModel : LocalizedViewModelBase
     private void ShowDebugSuccessPage()
     {
         Session.ShowDebugSuccess(
-            Preparation.TargetComputerName,
+            Preparation.EffectiveComputerName,
             _deploymentOrchestrator.PlannedSteps.Count,
             DeploymentStepNames.FinalizeDeploymentAndWriteLogs);
     }
@@ -385,7 +388,7 @@ public partial class MainWindowViewModel : LocalizedViewModelBase
     private void ShowDebugErrorPage()
     {
         Session.ShowDebugError(
-            Preparation.TargetComputerName,
+            Preparation.EffectiveComputerName,
             currentStepIndex: 7,
             failedStepName: DeploymentStepNames.ApplyOperatingSystemImage,
             failedStepErrorMessage:
@@ -487,6 +490,7 @@ public partial class MainWindowViewModel : LocalizedViewModelBase
             IsCatalogLoading = IsCatalogLoading,
             IsTargetDiskLoading = Preparation.IsTargetDiskLoading,
             IsDebugSafeMode = IsDebugSafeMode,
+            IsUnattendSelectionValid = Preparation.IsUnattendSelectionValid,
             IsTargetComputerNameValid = Preparation.IsTargetComputerNameValid,
             HasSelectedOperatingSystem = OperatingSystemCatalog.SelectedOperatingSystem is not null,
             HasTargetDiskSelection = Preparation.SelectedTargetDisk is not null,
@@ -564,7 +568,7 @@ public partial class MainWindowViewModel : LocalizedViewModelBase
 
     private void RefreshSummaryCategories()
     {
-        bool hasCustomization = _wizardContext.Oobe.IsEnabled ||
+        bool hasCustomization = Preparation.UsesCustomUnattend || _wizardContext.Oobe.IsEnabled ||
                                 _wizardContext.AppxRemoval.IsEnabled ||
                                 _wizardContext.AiComponentRemoval.IsEnabled ||
                                 _wizardContext.WindowsOptionalFeatures.IsEnabled;
@@ -572,10 +576,10 @@ public partial class MainWindowViewModel : LocalizedViewModelBase
         OperatingSystemCatalogItem? operatingSystem = SelectedOperatingSystem;
         var source = new DeploymentSummarySource
         {
-            TargetSummary = Preparation.TargetComputerName,
-            IsTargetConfigured = Preparation.IsTargetComputerNameValid &&
+            TargetSummary = Preparation.EffectiveComputerName,
+            IsTargetConfigured = Preparation.IsUnattendSelectionValid && Preparation.IsTargetComputerNameValid &&
                                  (IsDebugSafeMode || Preparation.SelectedTargetDisk?.IsSelectable == true),
-            HasTargetWarning = Preparation.SelectedTargetDisk is { IsSelectable: false },
+            HasTargetWarning = Preparation.HasUnattendWarning || Preparation.HasUnattendValidationError || Preparation.SelectedTargetDisk is { IsSelectable: false },
             TargetRows = BuildTargetSummaryRows(),
             OperatingSystemSummary = SummaryOperatingSystemText,
             IsOperatingSystemConfigured = operatingSystem is not null,
@@ -623,10 +627,12 @@ public partial class MainWindowViewModel : LocalizedViewModelBase
 
     private IReadOnlyList<DeploymentSummaryRowViewModel> BuildTargetSummaryRows()
     {
-        return
+        List<DeploymentSummaryRowViewModel> rows =
         [
             DeploymentSummaryRowViewModel.Section(GetString("TargetDevice.DeploymentSettings")),
-            new(GetString("Preparation.ComputerName"), Preparation.TargetComputerName),
+            new(GetString("Unattend.Title"), Preparation.UnattendSummary),
+            new(GetString("Preparation.ComputerName"), Preparation.EffectiveComputerName),
+            new(GetString("Unattend.TimeZone"), Preparation.UsesCustomUnattend ? GetString("Unattend.Managed") : _wizardContext.DefaultTimeZoneId ?? GetString("Common.None")),
             new(GetString("Summary.TargetDisk"), SummaryTargetDiskText),
             new(GetString("TargetDevice.Firmware"), SummaryFirmwareText),
             DeploymentSummaryRowViewModel.Separator(),
@@ -639,6 +645,11 @@ public partial class MainWindowViewModel : LocalizedViewModelBase
             new(GetString("TargetDevice.PowerSource"), Preparation.HardwarePowerText),
             new(GetString("TargetDevice.FirmwareStatus"), Preparation.HardwareFirmwareText)
         ];
+        if (Preparation.HasUnattendWarning)
+            rows.Add(new(GetString("Summary.WarningDetails"), Preparation.UnattendWarning));
+        if (Preparation.HasUnattendValidationError)
+            rows.Add(new(GetString("Summary.Status"), Preparation.UnattendValidationMessage));
+        return rows;
     }
 
     private IReadOnlyList<DeploymentSummaryRowViewModel> BuildDriverSummaryRows()
@@ -724,7 +735,8 @@ public partial class MainWindowViewModel : LocalizedViewModelBase
             _wizardContext.AiComponentRemoval,
             _wizardContext.WindowsOptionalFeatures,
             GetString,
-            CurrentCulture);
+            CurrentCulture,
+            Preparation.UsesCustomUnattend);
     }
 
     private IReadOnlyList<DeploymentSummaryRowViewModel> BuildNetworkSummaryRows()
@@ -796,7 +808,7 @@ public partial class MainWindowViewModel : LocalizedViewModelBase
         _wizardContext.ApplyStartupSnapshot(startupSnapshot);
         IsBootMediaUpdateRecommended = startupSnapshot.IsBootMediaUpdateRecommended;
         Session.ConfigureRebootPolicy(DeploymentRebootPolicy.Create(_wizardContext.Completion));
-        Session.SetComputerName(Preparation.TargetComputerName);
+        Session.SetComputerName(Preparation.EffectiveComputerName);
         Session.CompleteStartupInitialization();
     }
 

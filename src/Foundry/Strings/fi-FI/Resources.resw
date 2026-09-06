@@ -2091,6 +2091,12 @@
   <data name="Nav_StartKey.Title" xml:space="preserve">
     <value>Aloita</value>
   </data>
+  <data name="Nav_UnattendKey.Description" xml:space="preserve">
+    <value>Tuo Windowsin vastaustiedostoja ja valitse käyttöönotossa käytettävät asetukset.</value>
+  </data>
+  <data name="Nav_UnattendKey.Title" xml:space="preserve">
+    <value>Unattend</value>
+  </data>
   <data name="Nav_WifiKey.Description" xml:space="preserve">
     <value>Määritä Wi-Fi-provisiointi ja profiilit.</value>
   </data>
@@ -2984,6 +2990,117 @@
   </data>
   <data name="ThemeSetting_MicaItem.Content" xml:space="preserve">
     <value>Mica</value>
+  </data>
+  <data name="Unattend.AutopilotWarning" xml:space="preserve">
+    <value>Sisältää asetuksia, jotka voivat estää Autopilot-rekisteröinnin. Yhteensopimattomat rekisteröintitilat estetään käyttöönoton aikana.</value>
+  </data>
+  <data name="Unattend.CatalogDescription" xml:space="preserve">
+    <value>Valitse tiedosto, jonka haluat nimetä uudelleen, päivittää tai poistaa. Lähdetiedostojen on oltava käytettävissä tietovälineen luomiseen asti. Muuttuneet lähteet on päivitettävä.</value>
+  </data>
+  <data name="Unattend.CatalogLabel" xml:space="preserve">
+    <value>Vastaustiedostot</value>
+  </data>
+  <data name="Unattend.CheckSourcesLabel" xml:space="preserve">
+    <value>Tarkista lähteet</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Sisältää komentoja. Tarkista niiden yhteisvaikutukset Foundryn mukautusten ja asennuskomentosarjojen kanssa.</value>
+  </data>
+  <data name="Unattend.CompatibilityDescription" xml:space="preserve">
+    <value>Vain specialize- ja oobeSystem-asetuksia tuetaan. Muut Foundryn käyttöönottotoiminnot pysyvät käytössä ja voivat olla ristiriidassa mukautettujen asetusten tai komentojen kanssa. Vahvista Windows SIM -työkalulla ja testaa koko kokoonpano virtuaalikoneessa. Ulkoisia komentosarjatiedostoja ei tuoda.</value>
+  </data>
+  <data name="Unattend.DefaultDescription" xml:space="preserve">
+    <value>Käyttäjä voi valita Kohde-sivulla Foundryn asetukset tai yhden mukaan pakatun tiedoston. Tiedoston tuominen ei muuta oletusvalintaa.</value>
+  </data>
+  <data name="Unattend.DefaultLabel" xml:space="preserve">
+    <value>Käyttöönoton oletusvalinta</value>
+  </data>
+  <data name="Unattend.DisplayNameLabel" xml:space="preserve">
+    <value>Näyttönimi</value>
+  </data>
+  <data name="Unattend.DuplicateMessage" xml:space="preserve">
+    <value>Ohitettiin {0} tiedostoa, jotka ovat jo luettelossa.</value>
+  </data>
+  <data name="Unattend.EmptyCatalogMessage" xml:space="preserve">
+    <value>Tuo vähintään yksi vastaustiedosto, jotta voit käyttää tätä ominaisuutta.</value>
+  </data>
+  <data name="Unattend.EnableDescription" xml:space="preserve">
+    <value>Sisällytä tuodut tiedostot käynnistysnäköistiedostoon. Poistaminen käytöstä säilyttää luettelon, mutta jättää sen tiedostot pois uusista tietovälineistä.</value>
+  </data>
+  <data name="Unattend.EnableLabel" xml:space="preserve">
+    <value>Ota mukautetut vastaustiedostot käyttöön</value>
+  </data>
+  <data name="Unattend.ImportLabel" xml:space="preserve">
+    <value>Tuo tiedostoja</value>
+  </data>
+  <data name="Unattend.ImportPickerTitle" xml:space="preserve">
+    <value>Tuo Windowsin vastaustiedostoja</value>
+  </data>
+  <data name="Unattend.InvalidArchitectureMessage" xml:space="preserve">
+    <value>Tiedoston on määritettävä tuettu arkkitehtuuri ja sisällettävä siihen soveltuvia komponenttiasetuksia.</value>
+  </data>
+  <data name="Unattend.InvalidCatalogMessage" xml:space="preserve">
+    <value>Luettelossa on virheellisiä tai päällekkäisiä kohteita. Päivitä tai poista kyseiset tiedostot.</value>
+  </data>
+  <data name="Unattend.InvalidFileMessage" xml:space="preserve">
+    <value>Käytä kelvollista Windowsin vastaustiedoston XML:ää, jonka koko on enintään 4 MiB ja joka ei sisällä DTD-määrityksiä tai ulkoisia entiteettejä. Vahvista tiedosto Windows SIM -työkalulla.</value>
+  </data>
+  <data name="Unattend.InvalidSourcesMessage" xml:space="preserve">
+    <value>Jotkin lähteet puuttuvat, ovat muuttuneet tai virheellisiä. Päivitä tai poista nämä kohteet ennen tietovälineen luomista.</value>
+  </data>
+  <data name="Unattend.MissingDefaultOption" xml:space="preserve">
+    <value>Oletustiedosto puuttuu – valitse korvaava tiedosto</value>
+  </data>
+  <data name="Unattend.NativeOption" xml:space="preserve">
+    <value>Käytä Foundryn asetuksia</value>
+  </data>
+  <data name="Unattend.OwnershipDescription" xml:space="preserve">
+    <value>Valittu tiedosto korvaa Foundryn luoman vastaustiedoston. Sen asetuksia käytetään sellaisinaan yhdistämättä niitä tai täydentämättä puuttuvia arvoja. Valitse Käytä Foundryn asetuksia, jos haluat käyttää tallennettua kokoonpanoasi.</value>
+  </data>
+  <data name="Unattend.ProtectionDescription" xml:space="preserve">
+    <value>Mukautetut tiedostot edellyttävät käyttöönottotietovälineen salasanasuojausta yleisissä asetuksissa. XML voi sisältää tunnistetietoja tai komentosarjoja. Luettelo tallentaa vain lähdeviitteet; käynnistysnäköistiedosto sisältää salatut kopiot.</value>
+  </data>
+  <data name="Unattend.ProtectionRequiredMessage" xml:space="preserve">
+    <value>Ota käyttöön käyttöönottotietovälineen salasanasuojaus yleisissä asetuksissa, jotta voit käyttää mukautettuja vastaustiedostoja.</value>
+  </data>
+  <data name="Unattend.RefreshDuplicateMessage" xml:space="preserve">
+    <value>Tämä lähde on nyt sama kuin toinen tuotu tiedosto. Poista tämä kohde ja valitse olemassa oleva tiedosto.</value>
+  </data>
+  <data name="Unattend.RefreshLabel" xml:space="preserve">
+    <value>Päivitä lähde</value>
+  </data>
+  <data name="Unattend.RemoveLabel" xml:space="preserve">
+    <value>Poista</value>
+  </data>
+  <data name="Unattend.RenameLabel" xml:space="preserve">
+    <value>Nimeä uudelleen</value>
+  </data>
+  <data name="Unattend.SaveFailedMessage" xml:space="preserve">
+    <value>Asetuksia ei voitu tallentaa. Tarkista Foundryn asetuskansion käyttöoikeudet ja yritä uudelleen.</value>
+  </data>
+  <data name="Unattend.SelectedFileLabel" xml:space="preserve">
+    <value>Valittu tiedosto</value>
+  </data>
+  <data name="Unattend.SourceChangedMessage" xml:space="preserve">
+    <value>Lähde on muuttunut. Hyväksy päivitetty tiedosto valitsemalla Päivitä lähde ennen tietovälineen luomista.</value>
+  </data>
+  <data name="Unattend.SourceChecksBusyMessage" xml:space="preserve">
+    <value>Kaksi lähdetarkistusta odottaa yhä tiedostojen käyttöä. Palauta pääsy lähdesijainteihin, jotka eivät ole käytettävissä, ja tarkista lähteet uudelleen.</value>
+  </data>
+  <data name="Unattend.SourceNotCheckedMessage" xml:space="preserve">
+    <value>Lähteen tarkistus odottaa. Valitse Tarkista lähteet, jos haluat vahvistaa nykyisen tiedoston hyväksymättä sisältömuutoksia.</value>
+  </data>
+  <data name="Unattend.SourceReadFailedMessage" xml:space="preserve">
+    <value>Lähdettä ei voitu lukea. Tarkista, että tiedosto on edelleen olemassa ja käytettävissä.</value>
+  </data>
+  <data name="Unattend.SourceTimeoutMessage" xml:space="preserve">
+    <value>Lähteen vahvistus aikakatkaistiin. Tarkista lähdesijainnin käyttöoikeudet ja yritä uudelleen.</value>
+  </data>
+  <data name="Unattend.UnsupportedSettingsMessage" xml:space="preserve">
+    <value>Vain specialize- ja oobeSystem-asetuksia tuetaan. Poista muut vaiheosiot, jotka eivät ole tyhjiä, offline-ylläpito-ohjeet sekä uudelleensinetöinti valvontatilaan.</value>
+  </data>
+  <data name="Unattend.ValidSource" xml:space="preserve">
+    <value>Lähde vahvistettu.</value>
   </data>
   <data name="Update.Badge.New" xml:space="preserve">
     <value>Uusi</value>

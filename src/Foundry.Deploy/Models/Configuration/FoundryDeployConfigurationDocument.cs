@@ -24,8 +24,11 @@ public sealed record FoundryDeployConfigurationDocument
     public int SchemaVersion { get; init; } = CurrentSchemaVersion;
 
     /// <summary>
-    /// Gets deployment media access-protection settings.
+    /// Gets the protected answer-file manifest without authoring paths or XML content.
     /// </summary>
+    public Foundry.Core.Models.Configuration.Deploy.DeployUnattendSettings Unattend { get; init; } = new();
+
+    /// <summary>Gets deployment media access-protection settings.</summary>
     public DeployProtectionSettings Protection { get; init; } = new();
 
     /// <summary>

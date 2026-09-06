@@ -61,6 +61,10 @@ public sealed class DeploymentWizardContext : IDisposable
             Preparation.ApplyAutopilotConfiguration(new DeployAutopilotSettings(), startupSnapshot.AutopilotProfiles);
         }
 
+        Preparation.ApplyUnattendConfiguration(
+            startupSnapshot.DeployConfigurationDocument?.Unattend ?? new(),
+            startupSnapshot.ConfigurationPath,
+            startupSnapshot.ConfigurationFailureMessage);
         Preparation.ApplyMachineNamePreparation(startupSnapshot.MachineNamePreparation);
 
         if (startupSnapshot.DetectedHardware is not null)
@@ -140,6 +144,7 @@ public sealed class DeploymentWizardContext : IDisposable
 
     private void RefreshDriverPackSelectionContext()
     {
+        Preparation.UpdateUnattendContext(OperatingSystemCatalog.SelectedOperatingSystem?.Architecture ?? OperatingSystemCatalog.EffectiveOsArchitecture);
         DriverPackSelection.UpdateSelectionContext(
             Preparation.DetectedHardware,
             OperatingSystemCatalog.SelectedOperatingSystem,

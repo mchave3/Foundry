@@ -665,8 +665,14 @@ Vil du fortsætte med implementeringen?</value>
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>Forsegl gendannelsespartition</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>Klargør brugerdefineret svarfil</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>Forbered tilpasninger</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>Validér brugerdefineret svarfil</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>Validér konfiguration</value>
@@ -1474,6 +1480,39 @@ Vil du fortsætte med implementeringen?</value>
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>Åbn logfil</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>Denne svarfil er i konflikt med den konfigurerede Autopilot-tilmeldingstilstand. Vælg en anden fil, eller ændr mediekonfigurationen.</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Brugerdefinerede kommandoer kan være i konflikt med Foundry. Test denne konfiguration.</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>Upload af hash garanterer ikke Autopilot-tilmelding.</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>Test denne svarfil med den valgte Windows-afbildning og Foundry-konfiguration.</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>Den valgte svarfil er utilgængelig, ugyldig eller inkompatibel med den valgte Windows-arkitektur. Vælg en anden fil, eller opret mediet igen.</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>Styres af svarfilen</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>Den konfigurerede standardsvarfil mangler. Opret startmediet igen.</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>Brug Foundry-indstillinger</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>Windows bruger den valgte svarfil. Foundry sammenfletter eller tilføjer ikke indstillinger.</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>Tidszone</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>Svarfil</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>Vend tilbage til oversigt</value>

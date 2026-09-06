@@ -40,10 +40,12 @@ public sealed partial class DeploymentPreparationViewModel : LocalizedViewModelB
 
     public DeploymentPreparationViewModel(
         ILocalizationService localizationService,
-        bool isDebugSafeMode)
+        bool isDebugSafeMode,
+        Foundry.Deploy.Services.Deployment.Unattend.UnattendContentService? unattendContentService = null)
         : base(localizationService)
     {
         _isDebugSafeMode = isDebugSafeMode;
+        _unattendContentService = unattendContentService;
         LocalizationService.LanguageChanged += OnLocalizationLanguageChanged;
     }
 
@@ -171,8 +173,8 @@ public sealed partial class DeploymentPreparationViewModel : LocalizedViewModelB
         ? GetString("Common.None")
         : ResolveEffectiveHardwareHashGroupTag()!;
 
-    public bool HasTargetComputerNameValidationError => !string.IsNullOrWhiteSpace(TargetComputerNameValidationMessage);
-    public bool IsTargetComputerNameValid => !HasTargetComputerNameValidationError && ComputerNameRules.IsValid(TargetComputerName);
+    public bool HasTargetComputerNameValidationError => !UsesCustomUnattend && !string.IsNullOrWhiteSpace(TargetComputerNameValidationMessage);
+    public bool IsTargetComputerNameValid => UsesCustomUnattend || (!HasTargetComputerNameValidationError && ComputerNameRules.IsValid(TargetComputerName));
 
     public HardwareProfile? DetectedHardware => _detectedHardware;
     public string HardwareManufacturerText => GetHardwareValue(_detectedHardware?.Manufacturer);
@@ -219,6 +221,7 @@ public sealed partial class DeploymentPreparationViewModel : LocalizedViewModelB
         IsTargetComputerNameReadOnly = _machineNamingConfiguration.IsEnabled &&
                                        _machineNamingConfiguration.Mode == Foundry.Core.Models.Configuration.MachineNamingMode.Composed &&
                                        !_machineNamingConfiguration.AllowEditingDuringDeployment;
+        OnPropertyChanged(nameof(IsComputerNameInputReadOnly));
 
         RaiseStateChanged();
     }
@@ -343,6 +346,7 @@ public sealed partial class DeploymentPreparationViewModel : LocalizedViewModelB
 
     partial void OnTargetComputerNameChanged(string value)
     {
+        OnPropertyChanged(nameof(EffectiveComputerName));
         if (_isApplyingComputerName)
         {
             RaiseStateChanged();
@@ -587,6 +591,7 @@ public sealed partial class DeploymentPreparationViewModel : LocalizedViewModelB
             OnPropertyChanged(nameof(HasAutopilotProfileHint));
             OnPropertyChanged(nameof(AutopilotModeText));
             RefreshHardwareHashGroupTagOptions();
+            RefreshUnattendLocalization();
             RaiseHardwareHashPropertiesChanged();
             OnPropertyChanged(nameof(TargetDiskSelectionHint));
             OnPropertyChanged(nameof(TargetDisks));

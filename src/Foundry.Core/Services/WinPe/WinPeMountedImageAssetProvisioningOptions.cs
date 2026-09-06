@@ -19,6 +19,11 @@ public sealed record WinPeMountedImageAssetProvisioningOptions
     public byte[]? NetworkSecretsKey { get; init; }
     public byte[]? DeploymentSecretsKey { get; init; }
     public bool IsDeploymentProtectionEnabled { get; init; }
+
+    /// <summary>
+    /// Gets source references validated and encrypted when custom answer files are embedded in media.
+    /// </summary>
+    public UnattendSettings Unattend { get; init; } = new();
     public IReadOnlyList<FoundryConnectProvisionedAssetFile> FoundryConnectAssetFiles { get; init; } = [];
 
     /// <summary>

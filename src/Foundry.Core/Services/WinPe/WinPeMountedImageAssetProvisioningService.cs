@@ -74,7 +74,7 @@ public sealed class WinPeMountedImageAssetProvisioningService : IWinPeMountedIma
 
             return WinPeResult.Success();
         }
-        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException or JsonException)
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException or JsonException or InvalidOperationException or InvalidDataException)
         {
             return WinPeResult.Failure(
                 WinPeErrorCodes.BuildFailed,
@@ -122,6 +122,9 @@ public sealed class WinPeMountedImageAssetProvisioningService : IWinPeMountedIma
         string deployConfigurationJson = string.IsNullOrWhiteSpace(options.DeployConfigurationJson)
             ? CreateFallbackDeployConfigurationJson()
             : options.DeployConfigurationJson;
+
+        await WinPeUnattendAssetProvisioner.ProvisionAsync(
+            foundryConfigPath, options, deployConfigurationJson, cancellationToken).ConfigureAwait(false);
 
         await File.WriteAllTextAsync(
             Path.Combine(foundryConfigPath, "foundry.deploy.config.json"),
@@ -231,6 +234,11 @@ public sealed class WinPeMountedImageAssetProvisioningService : IWinPeMountedIma
 
         if (isDeploymentProtectionEnabled)
         {
+            string plaintextKeyPath = Path.Combine(foundryConfigPath, "Secrets", "deployment-secrets.key");
+            if (File.Exists(plaintextKeyPath))
+            {
+                File.Delete(plaintextKeyPath);
+            }
             return;
         }
 

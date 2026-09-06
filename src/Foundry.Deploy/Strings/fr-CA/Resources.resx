@@ -665,8 +665,14 @@ Continuer le déploiement?</value>
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>Sceller la partition de récupération</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>Préparer le fichier de réponses personnalisé</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>Préparer les personnalisations</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>Valider le fichier de réponses personnalisé</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>Valider la configuration</value>
@@ -1474,6 +1480,39 @@ Continuer le déploiement?</value>
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>Ouvrir le fichier journal</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>Ce fichier de réponses est incompatible avec le mode d’inscription Autopilot configuré. Choisissez un autre fichier ou modifiez la configuration du média.</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Les commandes personnalisées peuvent entrer en conflit avec Foundry. Testez cette configuration.</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>L’envoi du hachage ne garantit pas l’inscription à Autopilot.</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>Testez ce fichier de réponses avec l’image Windows et la configuration Foundry sélectionnées.</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>Le fichier de réponses sélectionné est indisponible, invalide ou incompatible avec l’architecture Windows sélectionnée. Choisissez un autre fichier ou recréez le média.</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>Géré par le fichier de réponses</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>Le fichier de réponses configuré par défaut est manquant. Recréez le média de démarrage.</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>Utiliser les paramètres de Foundry</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>Windows utilise le fichier de réponses sélectionné. Foundry ne fusionne ni n’ajoute de paramètres.</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>Fuseau horaire</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>Fichier de réponses</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>Retourner au sommaire</value>

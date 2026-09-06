@@ -665,8 +665,14 @@ Continuar com a implantação?</value>
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>Selar partição de recuperação</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>Preparar ficheiro de resposta personalizado</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>Preparar personalizações</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>Validar ficheiro de resposta personalizado</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>Validar configuração</value>
@@ -1474,6 +1480,39 @@ Continuar com a implantação?</value>
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>Abrir arquivo de registro</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>Este ficheiro de resposta entra em conflito com o modo de inscrição no Autopilot configurado. Escolha outro ficheiro ou altere a configuração do suporte.</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Os comandos personalizados podem entrar em conflito com o Foundry. Teste esta configuração.</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>O carregamento do hash não garante a inscrição no Autopilot.</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>Teste este ficheiro de resposta com a imagem do Windows e a configuração do Foundry selecionadas.</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>O ficheiro de resposta selecionado está indisponível, é inválido ou é incompatível com a arquitetura do Windows selecionada. Escolha outro ficheiro ou recrie o suporte.</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>Gerido pelo ficheiro de resposta</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>O ficheiro de resposta predefinido está em falta. Recrie o suporte de arranque.</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>Usar definições do Foundry</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>O Windows usa o ficheiro de resposta selecionado. O Foundry não combina nem adiciona definições.</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>Fuso horário</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>Ficheiro de resposta</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>Voltar ao resumo</value>

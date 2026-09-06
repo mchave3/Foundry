@@ -17,6 +17,13 @@ public interface IFilePickerService
     Task<string?> PickOpenFileAsync(FileOpenPickerRequest request);
 
     /// <summary>
+    /// Shows an open-file picker that permits multiple selections.
+    /// </summary>
+    /// <param name="request">The picker request.</param>
+    /// <returns>Selected paths, or an empty list when canceled.</returns>
+    Task<IReadOnlyList<string>> PickOpenFilesAsync(FileOpenPickerRequest request);
+
+    /// <summary>
     /// Shows a save-file picker.
     /// </summary>
     /// <param name="request">The picker request.</param>

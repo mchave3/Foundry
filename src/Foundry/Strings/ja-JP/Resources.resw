@@ -2091,6 +2091,12 @@
   <data name="Nav_StartKey.Title" xml:space="preserve">
     <value>スタート</value>
   </data>
+  <data name="Nav_UnattendKey.Description" xml:space="preserve">
+    <value>Windows 応答ファイルをインポートし、展開で使用する設定を選択します。</value>
+  </data>
+  <data name="Nav_UnattendKey.Title" xml:space="preserve">
+    <value>Unattend</value>
+  </data>
   <data name="Nav_WifiKey.Description" xml:space="preserve">
     <value>Wi-Fi のプロビジョニングとプロファイルを構成します。</value>
   </data>
@@ -2984,6 +2990,117 @@
   </data>
   <data name="ThemeSetting_MicaItem.Content" xml:space="preserve">
     <value>マイカ</value>
+  </data>
+  <data name="Unattend.AutopilotWarning" xml:space="preserve">
+    <value>Autopilot 登録を妨げる可能性のある設定が含まれています。互換性のない登録モードは展開時にブロックされます。</value>
+  </data>
+  <data name="Unattend.CatalogDescription" xml:space="preserve">
+    <value>名前の変更、更新、または削除を行うファイルを選択してください。メディアの作成が完了するまで、ソースファイルにアクセスできる必要があります。ソースが変更された場合は更新が必要です。</value>
+  </data>
+  <data name="Unattend.CatalogLabel" xml:space="preserve">
+    <value>応答ファイル</value>
+  </data>
+  <data name="Unattend.CheckSourcesLabel" xml:space="preserve">
+    <value>ソースの確認</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>コマンドが含まれています。Foundry のカスタマイズやセットアップ処理との競合を確認してください。</value>
+  </data>
+  <data name="Unattend.CompatibilityDescription" xml:space="preserve">
+    <value>specialize と oobeSystem の設定のみサポートされています。Foundry の他の展開操作は引き続き有効で、カスタム設定やコマンドと競合する可能性があります。Windows SIM で検証し、構成全体を仮想マシンでテストしてください。外部スクリプトファイルはインポートされません。</value>
+  </data>
+  <data name="Unattend.DefaultDescription" xml:space="preserve">
+    <value>オペレーターは「ターゲット」ページで、Foundry の設定またはメディアに含まれるファイルを 1 つ選択できます。ファイルをインポートしても既定の選択は変更されません。</value>
+  </data>
+  <data name="Unattend.DefaultLabel" xml:space="preserve">
+    <value>展開時の既定の選択</value>
+  </data>
+  <data name="Unattend.DisplayNameLabel" xml:space="preserve">
+    <value>表示名</value>
+  </data>
+  <data name="Unattend.DuplicateMessage" xml:space="preserve">
+    <value>カタログに既に存在する {0} 個のファイルをスキップしました。</value>
+  </data>
+  <data name="Unattend.EmptyCatalogMessage" xml:space="preserve">
+    <value>この機能を使用するには、応答ファイルを 1 つ以上インポートしてください。</value>
+  </data>
+  <data name="Unattend.EnableDescription" xml:space="preserve">
+    <value>インポートしたファイルをブートイメージに含めます。オフにするとカタログは保持されますが、新しいメディアにはそのファイルが含まれなくなります。</value>
+  </data>
+  <data name="Unattend.EnableLabel" xml:space="preserve">
+    <value>カスタム応答ファイルを有効にする</value>
+  </data>
+  <data name="Unattend.ImportLabel" xml:space="preserve">
+    <value>ファイルのインポート</value>
+  </data>
+  <data name="Unattend.ImportPickerTitle" xml:space="preserve">
+    <value>Windows 応答ファイルのインポート</value>
+  </data>
+  <data name="Unattend.InvalidArchitectureMessage" xml:space="preserve">
+    <value>ファイルには、サポートされているアーキテクチャと、そのアーキテクチャに適用されるコンポーネント設定を指定する必要があります。</value>
+  </data>
+  <data name="Unattend.InvalidCatalogMessage" xml:space="preserve">
+    <value>カタログに無効な項目または重複した項目が含まれています。該当するファイルを更新または削除してください。</value>
+  </data>
+  <data name="Unattend.InvalidFileMessage" xml:space="preserve">
+    <value>DTD や外部エンティティを含まない、4 MiB 以下の有効な Windows 応答ファイル XML を使用してください。Windows SIM でファイルを検証してください。</value>
+  </data>
+  <data name="Unattend.InvalidSourcesMessage" xml:space="preserve">
+    <value>一部のソースが見つからないか、変更されているか、無効です。メディアを作成する前に、該当する項目を更新または削除してください。</value>
+  </data>
+  <data name="Unattend.MissingDefaultOption" xml:space="preserve">
+    <value>既定のファイルが見つかりません — 代わりのファイルを選択してください</value>
+  </data>
+  <data name="Unattend.NativeOption" xml:space="preserve">
+    <value>Foundry の設定を使用する</value>
+  </data>
+  <data name="Unattend.OwnershipDescription" xml:space="preserve">
+    <value>選択したファイルは、Foundry が生成する応答ファイルを置き換えます。設定の結合や不足する値の補完は行わず、そのまま使用します。保存済みの構成を使用するには、「Foundry の設定を使用する」を選択してください。</value>
+  </data>
+  <data name="Unattend.ProtectionDescription" xml:space="preserve">
+    <value>カスタムファイルを使用するには、「全般構成」で展開メディアのパスワード保護を有効にする必要があります。XML には資格情報やスクリプトが含まれている場合があります。カタログにはソースへの参照のみが保存され、ブートイメージには暗号化されたコピーが含まれます。</value>
+  </data>
+  <data name="Unattend.ProtectionRequiredMessage" xml:space="preserve">
+    <value>カスタム応答ファイルを使用するには、「全般構成」で展開メディアのパスワード保護を有効にしてください。</value>
+  </data>
+  <data name="Unattend.RefreshDuplicateMessage" xml:space="preserve">
+    <value>このソースは、別のインポート済みファイルと同じ内容になっています。この項目を削除し、既存のファイルを選択してください。</value>
+  </data>
+  <data name="Unattend.RefreshLabel" xml:space="preserve">
+    <value>ソースの更新</value>
+  </data>
+  <data name="Unattend.RemoveLabel" xml:space="preserve">
+    <value>削除</value>
+  </data>
+  <data name="Unattend.RenameLabel" xml:space="preserve">
+    <value>名前の変更</value>
+  </data>
+  <data name="Unattend.SaveFailedMessage" xml:space="preserve">
+    <value>構成を保存できませんでした。Foundry の構成フォルダーへのアクセスを確認して、もう一度お試しください。</value>
+  </data>
+  <data name="Unattend.SelectedFileLabel" xml:space="preserve">
+    <value>選択したファイル</value>
+  </data>
+  <data name="Unattend.SourceChangedMessage" xml:space="preserve">
+    <value>ソースが変更されました。メディアを作成する前に、「ソースの更新」で更新済みファイルを受け入れてください。</value>
+  </data>
+  <data name="Unattend.SourceChecksBusyMessage" xml:space="preserve">
+    <value>2 件のソース確認がファイルへのアクセスを待機しています。利用できないソースの場所へのアクセスを復旧してから、ソースを再確認してください。</value>
+  </data>
+  <data name="Unattend.SourceNotCheckedMessage" xml:space="preserve">
+    <value>ソースの確認が必要です。「ソースの確認」を選択すると、内容の変更を受け入れずに現在のファイルを検証できます。</value>
+  </data>
+  <data name="Unattend.SourceReadFailedMessage" xml:space="preserve">
+    <value>ソースを読み取れませんでした。ファイルが存在し、アクセス可能であることを確認してください。</value>
+  </data>
+  <data name="Unattend.SourceTimeoutMessage" xml:space="preserve">
+    <value>ソースの検証がタイムアウトしました。ソースの場所へのアクセスを確認して、もう一度お試しください。</value>
+  </data>
+  <data name="Unattend.UnsupportedSettingsMessage" xml:space="preserve">
+    <value>specialize と oobeSystem の設定のみサポートされています。空ではない他の構成パス、オフラインサービス処理の指示、監査モードへの再シール設定を削除してください。</value>
+  </data>
+  <data name="Unattend.ValidSource" xml:space="preserve">
+    <value>ソースを検証しました。</value>
   </data>
   <data name="Update.Badge.New" xml:space="preserve">
     <value>新しい</value>

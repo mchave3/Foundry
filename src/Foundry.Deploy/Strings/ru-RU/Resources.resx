@@ -665,8 +665,14 @@
   <data name="Step.SealRecoveryPartition" xml:space="preserve">
     <value>Запечатывание раздела восстановления</value>
   </data>
+  <data name="Step.StageCustomUnattend" xml:space="preserve">
+    <value>Подготовка пользовательского файла ответов</value>
+  </data>
   <data name="Step.StagePreOobeCustomization" xml:space="preserve">
     <value>Подготовка настроек</value>
+  </data>
+  <data name="Step.ValidateCustomUnattend" xml:space="preserve">
+    <value>Проверка пользовательского файла ответов</value>
   </data>
   <data name="Step.ValidateTargetConfiguration" xml:space="preserve">
     <value>Проверка конфигурации</value>
@@ -1474,6 +1480,39 @@
   </data>
   <data name="Tools.OpenLogFile" xml:space="preserve">
     <value>Открыть файл журнала</value>
+  </data>
+  <data name="Unattend.AutopilotConflict" xml:space="preserve">
+    <value>Этот файл ответов конфликтует с настроенным режимом регистрации в Autopilot. Выберите другой файл или измените конфигурацию носителя.</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Пользовательские команды могут конфликтовать с Foundry. Протестируйте эту конфигурацию.</value>
+  </data>
+  <data name="Unattend.HashWarning" xml:space="preserve">
+    <value>Отправка хэша не гарантирует регистрацию в Autopilot.</value>
+  </data>
+  <data name="Unattend.HookCompatibility" xml:space="preserve">
+    <value>Протестируйте этот файл ответов с выбранным образом Windows и конфигурацией Foundry.</value>
+  </data>
+  <data name="Unattend.Invalid" xml:space="preserve">
+    <value>Выбранный файл ответов недоступен, недопустим или несовместим с выбранной архитектурой Windows. Выберите другой файл или пересоздайте носитель.</value>
+  </data>
+  <data name="Unattend.Managed" xml:space="preserve">
+    <value>Управляется файлом ответов</value>
+  </data>
+  <data name="Unattend.MissingDefault" xml:space="preserve">
+    <value>Настроенный файл ответов по умолчанию отсутствует. Пересоздайте загрузочный носитель.</value>
+  </data>
+  <data name="Unattend.Native" xml:space="preserve">
+    <value>Использовать параметры Foundry</value>
+  </data>
+  <data name="Unattend.Ownership" xml:space="preserve">
+    <value>Windows использует выбранный файл ответов. Foundry не объединяет и не добавляет параметры.</value>
+  </data>
+  <data name="Unattend.TimeZone" xml:space="preserve">
+    <value>Часовой пояс</value>
+  </data>
+  <data name="Unattend.Title" xml:space="preserve">
+    <value>Файл ответов</value>
   </data>
   <data name="Wizard.ReturnToSummary" xml:space="preserve">
     <value>Вернуться к сводке</value>

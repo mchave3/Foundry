@@ -2091,6 +2091,12 @@
   <data name="Nav_StartKey.Title" xml:space="preserve">
     <value>Commencer</value>
   </data>
+  <data name="Nav_UnattendKey.Description" xml:space="preserve">
+    <value>Importez des fichiers de réponses Windows et choisissez les paramètres utilisés lors des déploiements.</value>
+  </data>
+  <data name="Nav_UnattendKey.Title" xml:space="preserve">
+    <value>Unattend</value>
+  </data>
   <data name="Nav_WifiKey.Description" xml:space="preserve">
     <value>Configurer le provisionnement et les profils Wi-Fi.</value>
   </data>
@@ -2984,6 +2990,117 @@
   </data>
   <data name="ThemeSetting_MicaItem.Content" xml:space="preserve">
     <value>Mica</value>
+  </data>
+  <data name="Unattend.AutopilotWarning" xml:space="preserve">
+    <value>Contient des paramètres pouvant empêcher l’inscription à Autopilot ; les modes d’inscription incompatibles seront bloqués lors du déploiement.</value>
+  </data>
+  <data name="Unattend.CatalogDescription" xml:space="preserve">
+    <value>Sélectionnez un fichier pour le renommer, actualiser sa source ou le supprimer. Les fichiers sources doivent rester disponibles jusqu’à la création du média ; toute source modifiée doit être actualisée.</value>
+  </data>
+  <data name="Unattend.CatalogLabel" xml:space="preserve">
+    <value>Fichiers de réponses</value>
+  </data>
+  <data name="Unattend.CheckSourcesLabel" xml:space="preserve">
+    <value>Vérifier les sources</value>
+  </data>
+  <data name="Unattend.CommandsWarning" xml:space="preserve">
+    <value>Contient des commandes ; vérifiez les interactions avec la personnalisation de Foundry et les scripts d’installation.</value>
+  </data>
+  <data name="Unattend.CompatibilityDescription" xml:space="preserve">
+    <value>Seuls les paramètres specialize et oobeSystem sont pris en charge. Les autres opérations de déploiement de Foundry restent activées et peuvent entrer en conflit avec des paramètres ou commandes personnalisés. Validez avec Windows SIM et testez la configuration complète dans une machine virtuelle. Les fichiers de scripts externes ne sont pas importés.</value>
+  </data>
+  <data name="Unattend.DefaultDescription" xml:space="preserve">
+    <value>L’opérateur peut choisir les paramètres de Foundry ou un fichier intégré sur la page Cible. L’importation d’un fichier ne modifie pas le choix par défaut.</value>
+  </data>
+  <data name="Unattend.DefaultLabel" xml:space="preserve">
+    <value>Choix par défaut du déploiement</value>
+  </data>
+  <data name="Unattend.DisplayNameLabel" xml:space="preserve">
+    <value>Nom d’affichage</value>
+  </data>
+  <data name="Unattend.DuplicateMessage" xml:space="preserve">
+    <value>{0} fichier(s) déjà présent(s) dans le catalogue ont été ignorés.</value>
+  </data>
+  <data name="Unattend.EmptyCatalogMessage" xml:space="preserve">
+    <value>Importez au moins un fichier de réponses pour utiliser cette fonctionnalité.</value>
+  </data>
+  <data name="Unattend.EnableDescription" xml:space="preserve">
+    <value>Intégrez les fichiers importés à l’image de démarrage. La désactivation conserve le catalogue, mais exclut ses fichiers des nouveaux médias.</value>
+  </data>
+  <data name="Unattend.EnableLabel" xml:space="preserve">
+    <value>Activer les fichiers de réponses personnalisés</value>
+  </data>
+  <data name="Unattend.ImportLabel" xml:space="preserve">
+    <value>Importer des fichiers</value>
+  </data>
+  <data name="Unattend.ImportPickerTitle" xml:space="preserve">
+    <value>Importer des fichiers de réponses Windows</value>
+  </data>
+  <data name="Unattend.InvalidArchitectureMessage" xml:space="preserve">
+    <value>Le fichier doit déclarer une architecture prise en charge et contenir des paramètres de composants applicables à celle-ci.</value>
+  </data>
+  <data name="Unattend.InvalidCatalogMessage" xml:space="preserve">
+    <value>Le catalogue contient des entrées invalides ou en double. Actualisez ou supprimez les fichiers concernés.</value>
+  </data>
+  <data name="Unattend.InvalidFileMessage" xml:space="preserve">
+    <value>Utilisez un fichier XML de réponses Windows valide de 4 MiB maximum, sans DTD ni entités externes. Validez le fichier avec Windows SIM.</value>
+  </data>
+  <data name="Unattend.InvalidSourcesMessage" xml:space="preserve">
+    <value>Certaines sources sont manquantes, modifiées ou invalides. Actualisez ou supprimez ces entrées avant de créer un média.</value>
+  </data>
+  <data name="Unattend.MissingDefaultOption" xml:space="preserve">
+    <value>Choix par défaut manquant — choisissez un remplacement</value>
+  </data>
+  <data name="Unattend.NativeOption" xml:space="preserve">
+    <value>Utiliser les paramètres de Foundry</value>
+  </data>
+  <data name="Unattend.OwnershipDescription" xml:space="preserve">
+    <value>Le fichier sélectionné remplace le fichier de réponses généré par Foundry. Ses paramètres sont utilisés tels quels, sans fusion ni ajout des valeurs manquantes. Sélectionnez Utiliser les paramètres de Foundry pour utiliser votre configuration enregistrée.</value>
+  </data>
+  <data name="Unattend.ProtectionDescription" xml:space="preserve">
+    <value>Les fichiers personnalisés nécessitent la protection du média de déploiement par mot de passe dans la configuration générale. Le XML peut contenir des identifiants ou des scripts. Le catalogue ne conserve que les références aux sources ; l’image de démarrage contient des copies chiffrées.</value>
+  </data>
+  <data name="Unattend.ProtectionRequiredMessage" xml:space="preserve">
+    <value>Activez la protection du média de déploiement par mot de passe dans la configuration générale pour utiliser des fichiers de réponses personnalisés.</value>
+  </data>
+  <data name="Unattend.RefreshDuplicateMessage" xml:space="preserve">
+    <value>Cette source est désormais identique à un autre fichier importé. Supprimez cette entrée et choisissez le fichier existant.</value>
+  </data>
+  <data name="Unattend.RefreshLabel" xml:space="preserve">
+    <value>Actualiser la source</value>
+  </data>
+  <data name="Unattend.RemoveLabel" xml:space="preserve">
+    <value>Supprimer</value>
+  </data>
+  <data name="Unattend.RenameLabel" xml:space="preserve">
+    <value>Renommer</value>
+  </data>
+  <data name="Unattend.SaveFailedMessage" xml:space="preserve">
+    <value>Impossible d’enregistrer la configuration. Vérifiez l’accès au dossier de configuration de Foundry et réessayez.</value>
+  </data>
+  <data name="Unattend.SelectedFileLabel" xml:space="preserve">
+    <value>Fichier sélectionné</value>
+  </data>
+  <data name="Unattend.SourceChangedMessage" xml:space="preserve">
+    <value>La source a changé. Utilisez Actualiser la source pour accepter le fichier mis à jour avant de créer un média.</value>
+  </data>
+  <data name="Unattend.SourceChecksBusyMessage" xml:space="preserve">
+    <value>Deux vérifications de sources attendent toujours l’accès aux fichiers. Rétablissez l’accès aux emplacements indisponibles, puis vérifiez à nouveau les sources.</value>
+  </data>
+  <data name="Unattend.SourceNotCheckedMessage" xml:space="preserve">
+    <value>Vérification de la source en attente. Choisissez Vérifier les sources pour valider le fichier actuel sans accepter les modifications de son contenu.</value>
+  </data>
+  <data name="Unattend.SourceReadFailedMessage" xml:space="preserve">
+    <value>Impossible de lire la source. Vérifiez que le fichier existe toujours et qu’il est accessible.</value>
+  </data>
+  <data name="Unattend.SourceTimeoutMessage" xml:space="preserve">
+    <value>La validation de la source a expiré. Vérifiez l’accès à son emplacement et réessayez.</value>
+  </data>
+  <data name="Unattend.UnsupportedSettingsMessage" xml:space="preserve">
+    <value>Seuls les paramètres specialize et oobeSystem sont pris en charge. Supprimez les autres passes non vides, les instructions de maintenance hors connexion et le scellement en mode audit.</value>
+  </data>
+  <data name="Unattend.ValidSource" xml:space="preserve">
+    <value>Source validée.</value>
   </data>
   <data name="Update.Badge.New" xml:space="preserve">
     <value>Nouveau</value>

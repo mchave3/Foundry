@@ -23,6 +23,35 @@
                     Margin="0,0,0,12"
                     Style="{StaticResource SubtitleTextBlockStyle}"
                     Text="{Binding DataContext.Strings[TargetDevice.DeploymentSettings], ElementName=ViewRoot}" />
+                <StackPanel
+                    Margin="0,0,0,16"
+                    Visibility="{Binding HasUnattendCatalog, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock
+                        Margin="0,0,0,8"
+                        Style="{StaticResource BodyStrongTextBlockStyle}"
+                        Text="{Binding Strings[Unattend.Title]}" />
+                    <ComboBox
+                        AutomationProperties.Name="{Binding Strings[Unattend.Title]}"
+                        DisplayMemberPath="DisplayName"
+                        ItemsSource="{Binding UnattendOptions}"
+                        SelectedItem="{Binding SelectedUnattendOption}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        Text="{Binding Strings[Unattend.Ownership]}"
+                        TextWrapping="Wrap"
+                        Visibility="{Binding UsesCustomUnattend, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        Foreground="{DynamicResource SystemFillColorCriticalBrush}"
+                        Text="{Binding UnattendValidationMessage}"
+                        TextWrapping="Wrap"
+                        Visibility="{Binding HasUnattendValidationError, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    <TextBlock
+                        Margin="0,4,0,0"
+                        Text="{Binding UnattendWarning}"
+                        TextWrapping="Wrap"
+                        Visibility="{Binding HasUnattendWarning, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                </StackPanel>
                 <Grid Margin="0,0,0,16">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -36,16 +65,31 @@
                             Text="{Binding DataContext.Strings[Preparation.ComputerName], ElementName=ViewRoot}" />
                         <TextBox x:Name="TargetComputerNameTextBox"
                             AutomationProperties.Name="{Binding DataContext.Strings[Preparation.ComputerName], ElementName=ViewRoot}"
-                            IsReadOnly="{Binding IsTargetComputerNameReadOnly}"
+                            IsReadOnly="{Binding IsComputerNameInputReadOnly}"
                             MaxLength="15"
                             PreviewTextInput="TargetComputerNameTextBox_PreviewTextInput"
-                            Text="{Binding TargetComputerName, UpdateSourceTrigger=PropertyChanged}" />
+                            Text="{Binding EffectiveComputerName, UpdateSourceTrigger=PropertyChanged}" />
                         <TextBlock
                             Margin="0,4,0,0"
                             Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                            Style="{StaticResource CaptionTextBlockStyle}"
-                            Text="{Binding DataContext.Strings[Preparation.ComputerNameHint], ElementName=ViewRoot}"
-                            TextWrapping="Wrap" />
+                            Text="{Binding Strings[Preparation.ComputerNameHint]}"
+                            TextWrapping="Wrap">
+                            <TextBlock.Style>
+                                <Style
+                                    BasedOn="{StaticResource CaptionTextBlockStyle}"
+                                    TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger
+                                            Binding="{Binding UsesCustomUnattend}"
+                                            Value="True">
+                                            <Setter
+                                                Property="Visibility"
+                                                Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                         <TextBlock
                             Margin="0,4,0,0"
                             Foreground="{DynamicResource SystemFillColorCriticalBrush}"

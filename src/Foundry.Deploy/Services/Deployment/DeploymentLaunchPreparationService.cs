@@ -16,10 +16,12 @@ namespace Foundry.Deploy.Services.Deployment;
 public sealed class DeploymentLaunchPreparationService : IDeploymentLaunchPreparationService
 {
     private readonly IApplicationShellService _applicationShellService;
+    private readonly Unattend.UnattendContentService? _unattendContentService;
 
-    public DeploymentLaunchPreparationService(IApplicationShellService applicationShellService)
+    public DeploymentLaunchPreparationService(IApplicationShellService applicationShellService, Unattend.UnattendContentService? unattendContentService = null)
     {
         _applicationShellService = applicationShellService;
+        _unattendContentService = unattendContentService;
     }
 
     /// <summary>
@@ -37,9 +39,26 @@ public sealed class DeploymentLaunchPreparationService : IDeploymentLaunchPrepar
         }
 
         string normalizedComputerName = ComputerNameRules.Normalize(request.TargetComputerName);
-        if (!ComputerNameRules.IsValid(normalizedComputerName))
+        if (!request.UsesCustomUnattend && !ComputerNameRules.IsValid(normalizedComputerName))
         {
             return DeploymentLaunchPreparationResult.Failure(normalizedComputerName);
+        }
+
+        bool hasCustomCommands = false;
+        if (request.Unattend is not null)
+        {
+            try
+            {
+                if (_unattendContentService is null) return DeploymentLaunchPreparationResult.Failure(normalizedComputerName);
+                using Unattend.UnattendSnapshot snapshot = _unattendContentService.Read(request.Unattend,
+                    request.SelectedOperatingSystem.Architecture, request.IsAutopilotEnabled, request.AutopilotProvisioningMode);
+                hasCustomCommands = snapshot.Inspection.HasCommands;
+            }
+            catch (Exception ex) when (ex is global::System.IO.InvalidDataException or global::System.IO.IOException or InvalidOperationException)
+            {
+                return DeploymentLaunchPreparationResult.Failure(normalizedComputerName, LocalizationText.GetString(
+                    ex is InvalidOperationException ? "Unattend.AutopilotConflict" : "Unattend.Invalid"));
+            }
         }
 
         TargetDiskInfo? effectiveTargetDisk = request.SelectedTargetDisk;
@@ -71,7 +90,7 @@ public sealed class DeploymentLaunchPreparationService : IDeploymentLaunchPrepar
             return DeploymentLaunchPreparationResult.Failure(normalizedComputerName);
         }
 
-        if (!request.IsDryRun && !ConfirmDestructiveDeployment(effectiveTargetDisk, request.SelectedOperatingSystem))
+        if (!request.IsDryRun && !ConfirmDestructiveDeployment(effectiveTargetDisk, request.SelectedOperatingSystem, request, hasCustomCommands))
         {
             return DeploymentLaunchPreparationResult.Failure(normalizedComputerName);
         }
@@ -81,8 +100,9 @@ public sealed class DeploymentLaunchPreparationService : IDeploymentLaunchPrepar
             Mode = request.Mode,
             CacheRootPath = request.CacheRootPath,
             TargetDiskNumber = effectiveTargetDisk.DiskNumber,
-            TargetComputerName = normalizedComputerName,
-            DefaultTimeZoneId = string.IsNullOrWhiteSpace(request.DefaultTimeZoneId) ? null : request.DefaultTimeZoneId.Trim(),
+            Unattend = request.Unattend,
+            TargetComputerName = request.UsesCustomUnattend ? string.Empty : normalizedComputerName,
+            DefaultTimeZoneId = request.UsesCustomUnattend || string.IsNullOrWhiteSpace(request.DefaultTimeZoneId) ? null : request.DefaultTimeZoneId.Trim(),
             OperatingSystem = request.SelectedOperatingSystem,
             DriverPackSelectionKind = request.DriverPackSelectionKind,
             DriverPack = request.SelectedDriverPack,
@@ -92,7 +112,7 @@ public sealed class DeploymentLaunchPreparationService : IDeploymentLaunchPrepar
             SelectedAutopilotProfile = request.SelectedAutopilotProfile,
             AutopilotHardwareHashUpload = request.AutopilotHardwareHashUpload,
             Network = request.Network,
-            Oobe = request.Oobe,
+            Oobe = request.UsesCustomUnattend ? new DeployOobeSettings() : request.Oobe,
             AppxRemoval = request.AppxRemoval,
             AiComponentRemoval = request.AiComponentRemoval,
             WindowsOptionalFeatures = request.WindowsOptionalFeatures,
@@ -111,8 +131,10 @@ public sealed class DeploymentLaunchPreparationService : IDeploymentLaunchPrepar
     /// </summary>
     /// <param name="targetDisk">The disk that will be repartitioned.</param>
     /// <param name="operatingSystem">The operating system image that will be applied.</param>
+    /// <param name="request">Effective customization and answer-file ownership shown in the confirmation.</param>
+    /// <param name="hasCustomCommands">Whether preserved commands require an overlap warning.</param>
     /// <returns><see langword="true"/> when the user confirms the destructive operation.</returns>
-    private bool ConfirmDestructiveDeployment(TargetDiskInfo targetDisk, OperatingSystemCatalogItem operatingSystem)
+    private bool ConfirmDestructiveDeployment(TargetDiskInfo targetDisk, OperatingSystemCatalogItem operatingSystem, DeploymentLaunchRequest request, bool hasCustomCommands)
     {
         string sizeGiB = targetDisk.SizeBytes > 0
             ? $"{(targetDisk.SizeBytes / 1024d / 1024d / 1024d):0.0} GiB"
@@ -125,6 +147,16 @@ public sealed class DeploymentLaunchPreparationService : IDeploymentLaunchPrepar
             targetDisk.BusType,
             sizeGiB,
             operatingSystem.DisplayLabel);
+
+        if (request.UsesCustomUnattend)
+        {
+            message += Environment.NewLine + Environment.NewLine + request.Unattend!.File.DisplayName + Environment.NewLine +
+                LocalizationText.GetString("Unattend.Ownership") + Environment.NewLine +
+                LocalizationText.GetString("Unattend.HookCompatibility");
+            if (hasCustomCommands) message += Environment.NewLine + LocalizationText.GetString("Unattend.CommandsWarning");
+            if (request.IsAutopilotEnabled && request.AutopilotProvisioningMode == AutopilotProvisioningMode.HardwareHashUpload)
+                message += Environment.NewLine + LocalizationText.GetString("Unattend.HashWarning");
+        }
 
         return _applicationShellService.ConfirmWarning(LocalizationText.GetString("Launch.ConfirmDiskEraseTitle"), message);
     }
