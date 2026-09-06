@@ -64,6 +64,9 @@ public sealed record WinPeDriverCatalogEntry
     /// </summary>
     public string Sha256 { get; init; } = string.Empty;
 
+    /// <summary>Identifies the freshly read catalog used to authorize signature-only acquisition.</summary>
+    internal string CatalogRevision { get; init; } = string.Empty;
+
     /// <summary>
     /// Gets the vendor release date when the catalog provides one.
     /// </summary>

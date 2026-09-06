@@ -8,6 +8,32 @@ namespace Foundry.Core.Tests.WinPe;
 
 public sealed class WinPeDriverCatalogServiceTests
 {
+    [Theory]
+    [InlineData("http://example.test/catalog.xml", false)]
+    [InlineData("https://example.test/catalog.xml", true)]
+    public async Task GetCatalogAsync_InsecureOrOversizedMetadata_IsRejected(string source, bool expectedRequest)
+    {
+        var handler = new OversizedCatalogHandler();
+        var service = new WinPeDriverCatalogService(new HttpClient(handler));
+        WinPeResult<IReadOnlyList<WinPeDriverCatalogEntry>> result = await service.GetCatalogAsync(
+            new WinPeDriverCatalogOptions { CatalogUri = source, Architecture = WinPeArchitecture.X64 }, TestContext.Current.CancellationToken);
+        Assert.False(result.IsSuccess);
+        Assert.Equal(expectedRequest ? 1 : 0, handler.RequestCount);
+    }
+
+    private sealed class OversizedCatalogHandler : HttpMessageHandler
+    {
+        public int RequestCount { get; private set; }
+
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            RequestCount++;
+            var content = new ByteArrayContent([]);
+            content.Headers.ContentLength = 33 * 1024 * 1024;
+            return Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = content });
+        }
+    }
+
     [Fact]
     public async Task GetCatalogAsync_WhenHttpRequestTimesOut_ReturnsNetworkTimeoutDiagnostic()
     {

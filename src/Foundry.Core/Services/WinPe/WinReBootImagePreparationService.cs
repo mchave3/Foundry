@@ -3,11 +3,12 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
+using System.Security.Cryptography;
 using System.Text.RegularExpressions;
 using System.Xml.Linq;
 using Foundry.Utilities.IO;
 using Foundry.Utilities.Networking;
-using Foundry.Utilities.Progress;
+using Foundry.Utilities.Processes;
 
 namespace Foundry.Core.Services.WinPe;
 
@@ -24,16 +25,18 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
 
     private readonly IWinPeProcessRunner _processRunner;
     private readonly HttpClient _httpClient;
+    private readonly HttpClient _catalogHttpClient;
 
     public WinReBootImagePreparationService()
-        : this(new WinPeProcessRunner(), new HttpClient())
+        : this(new WinPeProcessRunner(), CreateHttpClient(allowWindowsUpdateHttp: true), CreateHttpClient(allowWindowsUpdateHttp: false))
     {
     }
 
-    internal WinReBootImagePreparationService(IWinPeProcessRunner processRunner, HttpClient httpClient)
+    internal WinReBootImagePreparationService(IWinPeProcessRunner processRunner, HttpClient httpClient, HttpClient? catalogHttpClient = null)
     {
         _processRunner = processRunner;
         _httpClient = httpClient;
+        _catalogHttpClient = catalogHttpClient ?? httpClient;
     }
 
     public async Task<WinPeResult<WinReBootImagePreparationResult>> ReplaceBootWimAsync(
@@ -70,6 +73,11 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
                 cancellationToken).ConfigureAwait(false);
 
             if (result.IsSuccess)
+            {
+                return result;
+            }
+
+            if (result.Error?.Exception is { } error && NativeFileLease.HasRetainedProtection(error))
             {
                 return result;
             }
@@ -150,7 +158,7 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
 
             return WinPeResult<IReadOnlyList<WinReSourceCandidate>>.Success(candidates);
         }
-        catch (Exception ex) when (ex is InvalidOperationException or FormatException)
+        catch (Exception ex) when (ex is InvalidOperationException or FormatException or System.Xml.XmlException)
         {
             return WinPeResult<IReadOnlyList<WinReSourceCandidate>>.Failure(
                 WinPeErrorCodes.OperatingSystemCatalogParseFailed,
@@ -164,19 +172,13 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
         string? expectedHash,
         CancellationToken cancellationToken)
     {
-        if (string.IsNullOrWhiteSpace(expectedHash))
+        if (string.IsNullOrEmpty(expectedHash) || expectedHash.Length != 64 || !expectedHash.All(Uri.IsHexDigit))
         {
-            return WinPeResult.Success();
-        }
-
-        string normalizedExpectedHash = expectedHash.Trim().Replace("-", string.Empty, StringComparison.OrdinalIgnoreCase);
-        if (normalizedExpectedHash.Length != 64)
-        {
-            return WinPeResult.Success();
+            return WinPeResult.Failure(WinPeErrorCodes.ValidationFailed, "WinRE source integrity requires an explicit valid SHA256 digest.");
         }
 
         string actualHash = await FileHash.ComputeSha256Async(filePath, cancellationToken).ConfigureAwait(false);
-        if (normalizedExpectedHash.Equals(actualHash, StringComparison.OrdinalIgnoreCase))
+        if (expectedHash.Equals(actualHash, StringComparison.OrdinalIgnoreCase))
         {
             return WinPeResult.Success();
         }
@@ -184,7 +186,7 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
         return WinPeResult.Failure(
             WinPeErrorCodes.HashMismatch,
             "The cached WinRE source package failed hash validation.",
-            $"Expected SHA256={normalizedExpectedHash}; Actual SHA256={actualHash}.");
+            $"Expected SHA256={expectedHash}; Actual SHA256={actualHash}.");
     }
 
     internal static WinPeResult<int> ResolveImageIndexFromOutput(string output, string requestedEdition)
@@ -267,15 +269,30 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
     {
         try
         {
-            string catalogXml = await _httpClient.GetStringAsync(catalogUri, cancellationToken).ConfigureAwait(false);
+            if (!catalogUri.IsAbsoluteUri || catalogUri.Scheme != Uri.UriSchemeHttps)
+            {
+                throw new InvalidDataException("Operating system catalog requests require HTTPS.");
+            }
+            string catalogXml = await HttpRetry.ExecuteAsync(async token =>
+            {
+                using HttpResponseMessage response = await _catalogHttpClient.GetAsync(catalogUri, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
+                if (response.RequestMessage?.RequestUri is { Scheme: not "https" })
+                {
+                    throw new InvalidDataException("Operating system catalog redirects require HTTPS.");
+                }
+                return await BoundedHttpContent.ReadStringAsync(response, 32 * 1024 * 1024, token).ConfigureAwait(false);
+            }, new HttpRetryOptions(3, TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(10)), cancellationToken).ConfigureAwait(false);
             return SelectCatalogCandidates(catalogXml, architecture, languageCode);
         }
-        catch (Exception ex) when (ex is HttpRequestException or TaskCanceledException or InvalidOperationException)
+        catch (Exception ex) when (ex is InvalidDataException or HttpRequestException or IOException or InvalidOperationException or TimeoutException ||
+            ex is OperationCanceledException && !cancellationToken.IsCancellationRequested)
         {
             return WinPeResult<IReadOnlyList<WinReSourceCandidate>>.Failure(
                 WinPeErrorCodes.OperatingSystemCatalogFetchFailed,
                 "Failed to download the operating system catalog.",
-                ex.Message);
+                failureKind: WinPeDriverPackageService.CreateAcquisitionFailure(ex).FailureKind,
+                failureReason: WinPeDriverPackageService.CreateAcquisitionFailure(ex).FailureReason,
+                exception: ex);
         }
     }
 
@@ -294,8 +311,6 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
         WinPeMountSession? session = null;
         try
         {
-            DirectoryOperations.Recreate(sourceDirectory);
-            Directory.CreateDirectory(exportDirectory);
             ReportProgress(options.Progress, 5, "Preparing WinRE source package.");
 
             WinPeResult<string> sourcePathResult = await EnsureDownloadedAsync(
@@ -309,12 +324,22 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
                 return WinPeResult<WinReBootImagePreparationResult>.Failure(sourcePathResult.Error!);
             }
 
+            using NativeFileLease sourceLock = NativeFileLease.OpenRead(sourcePathResult.Value!);
+            WinPeResult sourceIntegrity = await ValidateHashIfRequestedAsync(sourcePathResult.Value!, candidate.Source.Sha256, cancellationToken).ConfigureAwait(false);
+            if (!sourceIntegrity.IsSuccess)
+            {
+                return WinPeResult<WinReBootImagePreparationResult>.Failure(sourceIntegrity.Error!);
+            }
+            DirectoryOperations.Recreate(sourceDirectory);
+            Directory.CreateDirectory(exportDirectory);
+
             ReportProgress(options.Progress, 16, "Resolving WinRE image index.");
             WinPeResult<int> indexResult = await ResolveImageIndexAsync(
                 options.Tools.DismPath,
                 sourcePathResult.Value!,
                 candidate.RequestedEdition,
                 options.Artifact.WorkingDirectoryPath,
+                sourceLock,
                 CreateDismProgress(options.Progress, 16, "Resolving WinRE image index."),
                 cancellationToken).ConfigureAwait(false);
 
@@ -324,14 +349,14 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
             }
 
             ReportProgress(options.Progress, 19, "Exporting Windows image for WinRE extraction.");
-            WinPeProcessExecution exportResult = await WinPeDismProcessRunner.RunAsync(
+            WinPeProcessExecution exportResult = await sourceLock.RunAsync(() => WinPeDismProcessRunner.RunAsync(
                 _processRunner,
                 options.Tools.DismPath,
                 ["/Export-Image", $"/SourceImageFile:{sourcePathResult.Value!}", $"/SourceIndex:{indexResult.Value}", $"/DestinationImageFile:{installWimPath}", "/Compress:max", "/CheckIntegrity"],
                 options.Artifact.WorkingDirectoryPath,
                 "Exporting Windows image with DISM.",
                 CreateDismProgress(options.Progress, 19, "Exporting Windows image for WinRE extraction."),
-                cancellationToken).ConfigureAwait(false);
+                cancellationToken), cancellationToken).ConfigureAwait(false);
 
             if (!exportResult.IsSuccess || !File.Exists(installWimPath))
             {
@@ -395,6 +420,10 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
             ReportProgress(options.Progress, 30, "WinRE Wi-Fi boot image is ready.");
             return dependencyResult;
         }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
         catch (Exception ex)
         {
             if (session is not null)
@@ -403,7 +432,8 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
                     new WinPeDiagnostic(
                         WinPeErrorCodes.WinReExtractionFailed,
                         "Failed to replace boot.wim with a WinRE Wi-Fi source image.",
-                        ex.Message),
+                        ex.Message,
+                        exception: ex),
                     session,
                     cancellationToken).ConfigureAwait(false);
             }
@@ -411,7 +441,8 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
             return WinPeResult<WinReBootImagePreparationResult>.Failure(
                 WinPeErrorCodes.WinReExtractionFailed,
                 "Failed to replace boot.wim with a WinRE Wi-Fi source image.",
-                ex.Message);
+                ex.Message,
+                exception: ex);
         }
         finally
         {
@@ -422,151 +453,89 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
         }
     }
 
-    private async Task<WinPeResult<string>> EnsureDownloadedAsync(
+    internal async Task<WinPeResult<string>> EnsureDownloadedAsync(
         string cacheDirectoryPath,
         WinReCatalogItem source,
         IProgress<WinPeDownloadProgress>? progress,
         CancellationToken cancellationToken)
     {
-        string sourceCachePath = BuildCachedSourcePath(cacheDirectoryPath, source);
-        Directory.CreateDirectory(Path.GetDirectoryName(sourceCachePath)!);
-        string temporaryDownloadPath = $"{sourceCachePath}.{Guid.NewGuid():N}.download";
-
-        if (File.Exists(sourceCachePath))
+        cancellationToken.ThrowIfCancellationRequested();
+        if (string.IsNullOrEmpty(source.Sha256) || source.Sha256.Length != 64 || !source.Sha256.All(Uri.IsHexDigit))
         {
-            WinPeResult cachedHashResult = await ValidateHashIfRequestedAsync(
-                sourceCachePath,
-                source.Sha256,
-                cancellationToken).ConfigureAwait(false);
-
-            if (cachedHashResult.IsSuccess)
-            {
-                return WinPeResult<string>.Success(sourceCachePath);
-            }
-
-            TryDeleteFile(sourceCachePath);
+            return WinPeResult<string>.Failure(WinPeErrorCodes.ValidationFailed, "WinRE source integrity requires an explicit valid SHA256 digest.");
         }
-
+        string sourceCachePath = BuildCachedSourcePath(cacheDirectoryPath, source);
+        if (Path.GetFileName(sourceCachePath) is "." or ".." ||
+            (!string.IsNullOrEmpty(source.FileName) && (Path.GetFileName(source.FileName) != source.FileName ||
+                source.FileName.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 || source.FileName.EndsWith('.') || source.FileName.EndsWith(' '))))
+        {
+            return WinPeResult<string>.Failure(WinPeErrorCodes.ValidationFailed, "WinRE source filename must be a contained filename.");
+        }
         if (!Uri.TryCreate(WindowsUpdateContentUrl.Normalize(source.Url), UriKind.Absolute, out Uri? sourceUri))
         {
-            return WinPeResult<string>.Failure(
-                WinPeErrorCodes.DownloadFailed,
-                "The WinRE source package URL is invalid.",
-                source.Url);
+            return WinPeResult<string>.Failure(WinPeErrorCodes.ValidationFailed, "The WinRE source URL is invalid.");
         }
 
         try
         {
-            ReportDownloadProgress(progress, 0, "Downloading WinRE source package.");
-            using HttpResponseMessage response = await _httpClient.GetAsync(
-                sourceUri,
-                HttpCompletionOption.ResponseHeadersRead,
-                cancellationToken).ConfigureAwait(false);
-
-            response.EnsureSuccessStatusCode();
-            long? totalBytes = response.Content.Headers.ContentLength;
-            await using Stream sourceStream = await response.Content.ReadAsStreamAsync(cancellationToken).ConfigureAwait(false);
-            await using (FileStream destinationStream = new(
-                             temporaryDownloadPath,
-                             FileMode.Create,
-                             FileAccess.Write,
-                             FileShare.None,
-                             81920,
-                             useAsync: true))
+            ValidateSourceUri(sourceUri, allowWindowsUpdateHttp: true);
+            if (File.Exists(sourceCachePath))
             {
-                await CopyDownloadToFileAsync(
-                    sourceStream,
-                    destinationStream,
-                    totalBytes,
-                    progress,
-                    cancellationToken).ConfigureAwait(false);
+                await using FileStream cacheLock = new(sourceCachePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                WinPeResult cachedHash = await ValidateHashIfRequestedAsync(sourceCachePath, source.Sha256, cancellationToken).ConfigureAwait(false);
+                if (cachedHash.IsSuccess)
+                {
+                    ReportDownloadProgress(progress, 100, "Using verified cached WinRE source package.");
+                    return WinPeResult<string>.Success(sourceCachePath);
+                }
             }
 
-            File.Move(temporaryDownloadPath, sourceCachePath, overwrite: true);
+            ReportDownloadProgress(progress, 0, "Downloading WinRE source package.");
+            long bytes = await HttpRetry.ExecuteAsync(token => ValidatedFileTransfer.DownloadAsync(
+                _httpClient, sourceUri, sourceCachePath, new FileIntegrity(new FileDigest(HashAlgorithmName.SHA256, source.Sha256), null),
+                new TransferLimits(TimeSpan.FromMinutes(60), TimeSpan.FromMinutes(2)),
+                progress: new DownloadProgress(progress), cancellationToken: token),
+                new HttpRetryOptions(3, TimeSpan.FromMinutes(60), TimeSpan.FromMinutes(60), TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(10)),
+                cancellationToken).ConfigureAwait(false);
+            ReportDownloadProgress(progress, 100, $"Downloaded WinRE source package ({FormatBytes(bytes)}).");
+            return WinPeResult<string>.Success(sourceCachePath);
         }
-        catch (Exception ex) when (ex is HttpRequestException or IOException or UnauthorizedAccessException)
+        catch (Exception ex) when (ex is InvalidDataException or HttpRequestException or IOException or UnauthorizedAccessException or TimeoutException ||
+            ex is OperationCanceledException && !cancellationToken.IsCancellationRequested)
         {
-            TryDeleteFile(sourceCachePath);
-            TryDeleteFile(temporaryDownloadPath);
-            return WinPeResult<string>.Failure(
-                WinPeErrorCodes.DownloadFailed,
-                "Failed to download the WinRE source package.",
-                ex.Message);
+            return WinPeResult<string>.Failure(WinPeDriverPackageService.CreateAcquisitionFailure(ex));
         }
-        finally
-        {
-            TryDeleteFile(temporaryDownloadPath);
-        }
-
-        WinPeResult hashResult = await ValidateHashIfRequestedAsync(
-            sourceCachePath,
-            source.Sha256,
-            cancellationToken).ConfigureAwait(false);
-
-        if (!hashResult.IsSuccess)
-        {
-            TryDeleteFile(sourceCachePath);
-            return WinPeResult<string>.Failure(hashResult.Error!);
-        }
-
-        return WinPeResult<string>.Success(sourceCachePath);
     }
 
-    private static async Task CopyDownloadToFileAsync(
-        Stream sourceStream,
-        FileStream destinationStream,
-        long? totalBytes,
-        IProgress<WinPeDownloadProgress>? progress,
-        CancellationToken cancellationToken)
+    private static HttpClient CreateHttpClient(bool allowWindowsUpdateHttp) => new(new ValidatedRedirectHandler(
+        new HttpClientHandler { AllowAutoRedirect = false, UseCookies = false },
+        uri => ValidateSourceUri(uri, allowWindowsUpdateHttp))) { Timeout = TimeSpan.FromSeconds(30) };
+
+    private static void ValidateSourceUri(Uri source, bool allowWindowsUpdateHttp)
     {
-        int lastReportedPercent = -1;
-        long bytesWritten = await StreamCopy.CopyAsync(
-            sourceStream,
-            destinationStream,
-            copiedBytes =>
-            {
-                double? percentage = TransferProgress.CalculatePercentage(copiedBytes, totalBytes);
-                if (percentage.HasValue)
-                {
-                    int downloadPercent = (int)percentage.Value;
-                    if (downloadPercent == lastReportedPercent)
-                    {
-                        return;
-                    }
-
-                    lastReportedPercent = downloadPercent;
-                    ReportDownloadProgress(
-                        progress,
-                        downloadPercent,
-                        $"Downloading WinRE source package ({FormatBytes(copiedBytes)} / {FormatBytes(totalBytes.GetValueOrDefault())}).");
-                    return;
-                }
-
-                ReportDownloadProgress(
-                    progress,
-                    null,
-                    $"Downloading WinRE source package ({FormatBytes(copiedBytes)} downloaded).");
-            },
-            cancellationToken).ConfigureAwait(false);
-
-        if (totalBytes is > 0)
+        bool microsoftContent = source.Host.Equals("dl.delivery.mp.microsoft.com", StringComparison.OrdinalIgnoreCase) ||
+            source.Host.EndsWith(".dl.delivery.mp.microsoft.com", StringComparison.OrdinalIgnoreCase);
+        if (source.Scheme != Uri.UriSchemeHttps &&
+            !(allowWindowsUpdateHttp && source.Scheme == Uri.UriSchemeHttp && microsoftContent && source.IsDefaultPort))
         {
-            ReportDownloadProgress(
-                progress,
-                100,
-                $"Downloading WinRE source package ({FormatBytes(bytesWritten)} / {FormatBytes(totalBytes.Value)}).");
+            throw new InvalidDataException("WinRE requests require HTTPS except authenticated-digest Microsoft ESD delivery.");
         }
     }
 
+    private sealed class DownloadProgress(IProgress<WinPeDownloadProgress>? progress) : IProgress<long>
+    {
+        public void Report(long bytes) => ReportDownloadProgress(progress, null, $"Downloading WinRE source package ({FormatBytes(bytes)} downloaded).");
+    }
     private async Task<WinPeResult<int>> ResolveImageIndexAsync(
         string dismPath,
         string sourceImagePath,
         string requestedEdition,
         string workingDirectory,
+        NativeFileLease sourceLease,
         IProgress<WinPeDismProgress>? dismProgress,
         CancellationToken cancellationToken)
     {
-        WinPeProcessExecution imageInfoResult = await WinPeDismProcessRunner.RunAsync(
+        WinPeProcessExecution imageInfoResult = await sourceLease.RunAsync(() => WinPeDismProcessRunner.RunAsync(
             _processRunner,
             dismPath,
             ["/English", "/Get-ImageInfo", $"/ImageFile:{sourceImagePath}"],
@@ -574,7 +543,7 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
             "Resolving WinRE image index with DISM.",
             dismProgress,
             cancellationToken,
-            executionTimeout: TimeSpan.FromMinutes(2)).ConfigureAwait(false);
+            executionTimeout: TimeSpan.FromMinutes(2)), cancellationToken).ConfigureAwait(false);
 
         if (!imageInfoResult.IsSuccess)
         {
@@ -743,21 +712,6 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
             if (Directory.Exists(path))
             {
                 Directory.Delete(path, recursive: true);
-            }
-        }
-        catch
-        {
-            // Best-effort cleanup.
-        }
-    }
-
-    private static void TryDeleteFile(string path)
-    {
-        try
-        {
-            if (File.Exists(path))
-            {
-                File.Delete(path);
             }
         }
         catch
