@@ -67,7 +67,7 @@ public sealed class OfflineWindowsComputerNameService : IOfflineWindowsComputerN
         try
         {
             ProcessExecutionResult loadResult = await _processRunner
-                .RunAsync("reg.exe", $@"load ""{TempHiveKeyPath}"" ""{hivePath}""", Path.GetTempPath(), cancellationToken)
+                .RunAsync("reg.exe", ["load", TempHiveKeyPath, hivePath], Path.GetTempPath(), cancellationToken, TimeSpan.FromMinutes(2))
                 .ConfigureAwait(false);
 
             if (!loadResult.IsSuccess)
@@ -145,7 +145,7 @@ public sealed class OfflineWindowsComputerNameService : IOfflineWindowsComputerN
             GC.WaitForPendingFinalizers();
 
             ProcessExecutionResult unloadResult = await _processRunner
-                .RunAsync("reg.exe", $@"unload ""{TempHiveKeyPath}""", Path.GetTempPath(), cancellationToken)
+                .RunAsync("reg.exe", ["unload", TempHiveKeyPath], Path.GetTempPath(), cancellationToken, TimeSpan.FromMinutes(2))
                 .ConfigureAwait(false);
 
             if (!unloadResult.IsSuccess)

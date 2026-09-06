@@ -4,10 +4,12 @@
 
 using System.IO;
 using System.Linq;
+using Foundry.Core.Services.Security;
 using Foundry.Deploy.Services.Deployment;
 using Foundry.Deploy.Services.System;
 using Foundry.Utilities.IO;
 using Foundry.Utilities.Processes;
+using Foundry.Utilities.Security;
 using Microsoft.Extensions.Logging;
 
 namespace Foundry.Deploy.Services.DriverPacks;
@@ -18,6 +20,7 @@ public sealed class DriverPackExtractionService : IDriverPackExtractionService
     private readonly IMicrosoftUpdateCatalogDriverService _microsoftUpdateCatalogDriverService;
     private readonly IProcessRunner _processRunner;
     private readonly ILogger<DriverPackExtractionService> _logger;
+    private readonly Func<string, IReadOnlySet<string>, CancellationToken, Task> _verifySignature;
 
     public DriverPackExtractionService(
         IArchiveExtractionService archiveExtractionService,
@@ -29,6 +32,18 @@ public sealed class DriverPackExtractionService : IDriverPackExtractionService
         _microsoftUpdateCatalogDriverService = microsoftUpdateCatalogDriverService;
         _processRunner = processRunner;
         _logger = logger;
+        _verifySignature = AuthenticodeVerifier.VerifyAsync;
+    }
+
+    internal DriverPackExtractionService(
+        IArchiveExtractionService archiveExtractionService,
+        IMicrosoftUpdateCatalogDriverService microsoftUpdateCatalogDriverService,
+        IProcessRunner processRunner,
+        ILogger<DriverPackExtractionService> logger,
+        Func<string, IReadOnlySet<string>, CancellationToken, Task> verifySignature)
+        : this(archiveExtractionService, microsoftUpdateCatalogDriverService, processRunner, logger)
+    {
+        _verifySignature = verifySignature;
     }
 
     public async Task<DriverPackExtractionResult> ExtractAsync(
@@ -156,8 +171,11 @@ public sealed class DriverPackExtractionService : IDriverPackExtractionService
         CancellationToken cancellationToken,
         IProgress<double>? progress)
     {
+        // Keep these exact bytes protected through signature verification and native process completion.
+        using NativeFileLease packageLock = NativeFileLease.OpenRead(packagePath);
+        await _verifySignature(packagePath, VendorExecutableTrustPolicy.GetExpectedPublisherSubjects("DellDriverPack"), cancellationToken).ConfigureAwait(false);
         progress?.Report(10d);
-        ProcessExecutionResult execution = await _processRunner
+        ProcessExecutionResult execution = await packageLock.RunAsync(() => _processRunner
             .RunAsync(
                 packagePath,
                 [
@@ -165,7 +183,8 @@ public sealed class DriverPackExtractionService : IDriverPackExtractionService
                     $"/e={extractedPath}"
                 ],
                 workingDirectory,
-                cancellationToken)
+                cancellationToken,
+                TimeSpan.FromHours(4)), cancellationToken)
             .ConfigureAwait(false);
 
         if (!execution.IsSuccess)

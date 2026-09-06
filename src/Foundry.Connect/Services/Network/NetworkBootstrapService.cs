@@ -32,7 +32,7 @@ public sealed class NetworkBootstrapService : INetworkBootstrapService
     private readonly IConnectConfigurationService _configurationService;
     private readonly INetworkProfileRoamingService _networkProfileRoamingService;
     private readonly ILogger<NetworkBootstrapService> _logger;
-    private readonly ConnectProcessExecutor _processExecutor;
+    private readonly Func<IReadOnlyList<string>, CancellationToken, Task<ProcessExecutionResult>> _executeNetsh;
     private readonly Func<IReadOnlyList<Guid>> _getWifiInterfaceIds;
     private readonly INetworkAdapterSnapshotProvider _networkAdapterSnapshotProvider;
 
@@ -66,19 +66,52 @@ public sealed class NetworkBootstrapService : INetworkBootstrapService
         INetworkProfileRoamingService networkProfileRoamingService,
         ILogger<NetworkBootstrapService> logger,
         Func<IReadOnlyList<Guid>> getWifiInterfaceIds,
-        INetworkAdapterSnapshotProvider? networkAdapterSnapshotProvider = null)
+        INetworkAdapterSnapshotProvider? networkAdapterSnapshotProvider = null,
+        Func<IReadOnlyList<string>, CancellationToken, Task<ProcessExecutionResult>>? executeNetsh = null)
     {
         _configuration = configuration;
         _configurationService = configurationService;
         _networkProfileRoamingService = networkProfileRoamingService;
         _logger = logger;
-        _processExecutor = new ConnectProcessExecutor(logger);
+        var processExecutor = new ConnectProcessExecutor(logger);
+        _executeNetsh = executeNetsh ?? ((arguments, cancellationToken) =>
+            processExecutor.ExecuteAsync("netsh", arguments, cancellationToken, TimeSpan.FromSeconds(30)));
         _getWifiInterfaceIds = getWifiInterfaceIds;
         _networkAdapterSnapshotProvider = networkAdapterSnapshotProvider ?? new WindowsNetworkAdapterSnapshotProvider();
     }
 
     /// <inheritdoc />
-    public async Task<NetworkBootstrapResult> ApplyProvisionedSettingsAsync(CancellationToken cancellationToken)
+    public Task<NetworkBootstrapResult> ApplyProvisionedSettingsAsync(CancellationToken cancellationToken) =>
+        HandleCommandTimeoutAsync(() => ApplyProvisionedSettingsCoreAsync(cancellationToken));
+
+    /// <inheritdoc />
+    public Task<NetworkBootstrapResult> ConnectConfiguredWifiAsync(CancellationToken cancellationToken) =>
+        HandleCommandTimeoutAsync(() => ConnectConfiguredWifiCoreAsync(cancellationToken));
+
+    /// <inheritdoc />
+    public Task<NetworkBootstrapResult> ConnectWifiNetworkAsync(string ssid, string? ssidHex, string authentication, string? passphrase, CancellationToken cancellationToken) =>
+        HandleCommandTimeoutAsync(() => ConnectWifiNetworkCoreAsync(ssid, ssidHex, authentication, passphrase, cancellationToken));
+
+    /// <inheritdoc />
+    public Task<NetworkBootstrapResult> DisconnectWifiAsync(CancellationToken cancellationToken) =>
+        HandleCommandTimeoutAsync(() => DisconnectWifiCoreAsync(cancellationToken));
+
+    private async Task<NetworkBootstrapResult> HandleCommandTimeoutAsync(Func<Task<NetworkBootstrapResult>> operation)
+    {
+        try
+        {
+            return await operation().ConfigureAwait(false);
+        }
+        catch (TimeoutException ex)
+        {
+            _logger.LogWarning(ex, "Network command timed out; the operation stopped without retrying.");
+            return NetworkBootstrapResult.Failed(
+                "The network command timed out. Check the current connection before retrying.",
+                CreateHandledFailure("timeout", "network_command_timeout"));
+        }
+    }
+
+    private async Task<NetworkBootstrapResult> ApplyProvisionedSettingsCoreAsync(CancellationToken cancellationToken)
     {
         List<string> messages = [];
         List<NetworkBootstrapHandledFailure> handledFailures = [];
@@ -121,8 +154,7 @@ public sealed class NetworkBootstrapService : INetworkBootstrapService
             handledFailures);
     }
 
-    /// <inheritdoc />
-    public async Task<NetworkBootstrapResult> ConnectConfiguredWifiAsync(CancellationToken cancellationToken)
+    private async Task<NetworkBootstrapResult> ConnectConfiguredWifiCoreAsync(CancellationToken cancellationToken)
     {
         List<string> messages = [];
         List<NetworkBootstrapHandledFailure> handledFailures = [];
@@ -154,9 +186,9 @@ public sealed class NetworkBootstrapService : INetworkBootstrapService
             return new NetworkBootstrapResult(JoinMessages(messages), handledFailures);
         }
 
-        string arguments = $"wlan connect name=\"{EscapeNetshArgument(profileName)}\"";
+        string[] arguments = ["wlan", "connect", $"name={profileName}"];
 
-        ProcessExecutionResult result = await _processExecutor.ExecuteAsync("netsh", arguments, cancellationToken).ConfigureAwait(false);
+        ProcessExecutionResult result = await _executeNetsh(arguments, cancellationToken).ConfigureAwait(false);
         if (result.ExitCode != 0)
         {
             _logger.LogInformation(
@@ -188,8 +220,7 @@ public sealed class NetworkBootstrapService : INetworkBootstrapService
         return new NetworkBootstrapResult(JoinMessages(messages), handledFailures);
     }
 
-    /// <inheritdoc />
-    public async Task<NetworkBootstrapResult> ConnectWifiNetworkAsync(string ssid, string? ssidHex, string authentication, string? passphrase, CancellationToken cancellationToken)
+    private async Task<NetworkBootstrapResult> ConnectWifiNetworkCoreAsync(string ssid, string? ssidHex, string authentication, string? passphrase, CancellationToken cancellationToken)
     {
         if (!_configuration.Capabilities.WifiProvisioned && !Debugger.IsAttached)
         {
@@ -240,9 +271,8 @@ public sealed class NetworkBootstrapService : INetworkBootstrapService
                     CreateHandledFailure("profile_import_failed", "wifi_profile_import_failed"));
             }
 
-            ProcessExecutionResult connectResult = await _processExecutor.ExecuteAsync(
-                "netsh",
-                $"wlan connect name=\"{EscapeNetshArgument(trimmedSsid)}\"",
+            ProcessExecutionResult connectResult = await _executeNetsh(
+                ["wlan", "connect", $"name={trimmedSsid}"],
                 cancellationToken).ConfigureAwait(false);
             if (connectResult.ExitCode != 0)
             {
@@ -278,8 +308,7 @@ public sealed class NetworkBootstrapService : INetworkBootstrapService
         }
     }
 
-    /// <inheritdoc />
-    public async Task<NetworkBootstrapResult> DisconnectWifiAsync(CancellationToken cancellationToken)
+    private async Task<NetworkBootstrapResult> DisconnectWifiCoreAsync(CancellationToken cancellationToken)
     {
         IReadOnlyList<Guid> wirelessInterfaceIds = _getWifiInterfaceIds();
         if (wirelessInterfaceIds.Count == 0)
@@ -295,9 +324,8 @@ public sealed class NetworkBootstrapService : INetworkBootstrapService
             return NetworkBootstrapResult.Success("Wi-Fi is already disconnected.");
         }
 
-        ProcessExecutionResult disconnectResult = await _processExecutor.ExecuteAsync(
-            "netsh",
-            "wlan disconnect",
+        ProcessExecutionResult disconnectResult = await _executeNetsh(
+            ["wlan", "disconnect"],
             cancellationToken).ConfigureAwait(false);
         if (disconnectResult.ExitCode != 0)
         {
@@ -352,9 +380,8 @@ public sealed class NetworkBootstrapService : INetworkBootstrapService
             AddHandledFailure(handledFailures, CreateHandledFailure("unsupported", "wired_runtime_not_supported"));
         }
 
-        ProcessExecutionResult addProfileResult = await _processExecutor.ExecuteAsync(
-            "netsh",
-            $"lan add profile filename=\"{profilePath}\"",
+        ProcessExecutionResult addProfileResult = await _executeNetsh(
+            ["lan", "add", "profile", $"filename={profilePath}"],
             cancellationToken).ConfigureAwait(false);
         if (addProfileResult.ExitCode != 0)
         {
@@ -381,9 +408,8 @@ public sealed class NetworkBootstrapService : INetworkBootstrapService
         string? ethernetInterfaceName = GetEthernetInterfaceName();
         if (!string.IsNullOrWhiteSpace(ethernetInterfaceName))
         {
-            ProcessExecutionResult reconnectResult = await _processExecutor.ExecuteAsync(
-                "netsh",
-                $"lan reconnect interface=\"{ethernetInterfaceName}\"",
+            ProcessExecutionResult reconnectResult = await _executeNetsh(
+                ["lan", "reconnect", $"interface={ethernetInterfaceName}"],
                 cancellationToken).ConfigureAwait(false);
             if (reconnectResult.ExitCode == 0)
             {
@@ -518,9 +544,8 @@ public sealed class NetworkBootstrapService : INetworkBootstrapService
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            lastResult = await _processExecutor.ExecuteAsync(
-                "netsh",
-                $"wlan add profile filename=\"{profilePath}\"",
+            lastResult = await _executeNetsh(
+                ["wlan", "add", "profile", $"filename={profilePath}"],
                 cancellationToken).ConfigureAwait(false);
 
             if (lastResult.ExitCode == 0)
@@ -758,11 +783,6 @@ public sealed class NetworkBootstrapService : INetworkBootstrapService
         string extension = Path.GetExtension(certificatePath);
         return string.Equals(extension, ".pfx", StringComparison.OrdinalIgnoreCase) ||
             string.Equals(extension, ".p12", StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static string EscapeNetshArgument(string value)
-    {
-        return value.Replace("\"", "\"\"", StringComparison.Ordinal);
     }
 
     private static bool IsConnectionInProgress(NativeWifiApi.WlanInterfaceState state)

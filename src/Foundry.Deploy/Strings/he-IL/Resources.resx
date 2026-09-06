@@ -254,6 +254,9 @@ ErrorCode=0x80070005
   <data name="Disk.WarningSuffixFormat" xml:space="preserve">
     <value>| {0}</value>
   </data>
+  <data name="DriverPack.ManualSelectionWarning" xml:space="preserve">
+    <value>Manual selection: verify that this pack supports the detected hardware and selected Windows release. Package integrity and publisher checks still apply.</value>
+  </data>
   <data name="DriverPack.MicrosoftUpdateCatalog" xml:space="preserve">
     <value>Microsoft Update Catalog</value>
   </data>
@@ -989,6 +992,9 @@ ErrorCode=0x80070005
   <data name="StepResult.CacheStrategyResolvedSimulation" xml:space="preserve">
     <value>אסטרטגיית המטמון נפתרה (סימולציה).</value>
   </data>
+  <data name="StepResult.ConfirmedDiskMismatch" xml:space="preserve">
+    <value>The confirmed target disk is unavailable, changed, or unsafe.</value>
+  </data>
   <data name="StepResult.DeferredDriverPackStagingUnsupportedCommand" xml:space="preserve">
     <value>התבקשה שלב חבילת מנהל התקן אתחול ראשון ללא פקודה נתמכת.</value>
   </data>
@@ -1177,6 +1183,9 @@ ErrorCode=0x80070005
   </data>
   <data name="StepResult.TargetWindowsPartitionUnavailableForInteractiveAutopilotRegistration" xml:space="preserve">
     <value>מחיצת ה-Windows היעד אינה זמינה להכנת מסייע הרישום האינטראקטיבי של Autopilot.</value>
+  </data>
+  <data name="StepResult.UefiRequired" xml:space="preserve">
+    <value>Deployment requires UEFI boot mode.</value>
   </data>
   <data name="StepResult.UnsupportedDriverPackInstallMode" xml:space="preserve">
     <value>מצב התקנת חבילת מנהלי התקנים לא נתמך.</value>

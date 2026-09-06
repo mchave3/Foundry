@@ -3,7 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
+using System.Security.Cryptography;
+using System.Text;
 using System.Xml.Linq;
+using Foundry.Utilities.Networking;
 
 namespace Foundry.Core.Services.WinPe;
 
@@ -18,7 +21,15 @@ public sealed class WinPeDriverCatalogService : IWinPeDriverCatalogService
     /// Initializes a driver catalog service with a default HTTP client.
     /// </summary>
     public WinPeDriverCatalogService()
-        : this(new HttpClient())
+        : this(new HttpClient(new ValidatedRedirectHandler(new HttpClientHandler { AllowAutoRedirect = false, UseCookies = false },
+            static uri =>
+            {
+                if (uri.Scheme != Uri.UriSchemeHttps)
+                {
+                    throw new InvalidDataException("Driver catalog requests require HTTPS.");
+                }
+            }))
+        { Timeout = TimeSpan.FromSeconds(30) })
     {
     }
 
@@ -47,30 +58,42 @@ public sealed class WinPeDriverCatalogService : IWinPeDriverCatalogService
                 (uri.Scheme.Equals(Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) ||
                  uri.Scheme.Equals(Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase)))
             {
-                xmlContent = await _httpClient.GetStringAsync(uri, cancellationToken).ConfigureAwait(false);
+                if (uri.Scheme != Uri.UriSchemeHttps)
+                {
+                    throw new InvalidDataException("Driver catalog requests require HTTPS.");
+                }
+
+                xmlContent = await HttpRetry.ExecuteAsync(async token =>
+                {
+                    using HttpResponseMessage response = await _httpClient.GetAsync(uri, HttpCompletionOption.ResponseHeadersRead, token).ConfigureAwait(false);
+                    if (response.RequestMessage?.RequestUri is { Scheme: not "https" })
+                    {
+                        throw new InvalidDataException("Driver catalog redirects require HTTPS.");
+                    }
+                    return await BoundedHttpContent.ReadStringAsync(response, 32 * 1024 * 1024, token).ConfigureAwait(false);
+                }, new HttpRetryOptions(3, TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(10)), cancellationToken).ConfigureAwait(false);
             }
             else
             {
                 // Local catalog paths are supported to allow offline media creation and catalog testing.
-                xmlContent = await File.ReadAllTextAsync(options.CatalogUri, cancellationToken).ConfigureAwait(false);
+                await using FileStream catalog = new(options.CatalogUri, FileMode.Open, FileAccess.Read, FileShare.Read);
+                if (catalog.Length > 32 * 1024 * 1024)
+                {
+                    throw new InvalidDataException("The local driver catalog exceeds the permitted size.");
+                }
+                using var reader = new StreamReader(catalog, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+                xmlContent = await reader.ReadToEndAsync(cancellationToken).ConfigureAwait(false);
             }
         }
         catch (Exception ex) when (
-            ex is HttpRequestException or IOException or UnauthorizedAccessException ||
-            ex is TaskCanceledException && !cancellationToken.IsCancellationRequested)
+            ex is InvalidDataException or HttpRequestException or IOException or UnauthorizedAccessException or TimeoutException ||
+            ex is OperationCanceledException && !cancellationToken.IsCancellationRequested)
         {
             return WinPeResult<IReadOnlyList<WinPeDriverCatalogEntry>>.Failure(
                 WinPeErrorCodes.DriverCatalogFetchFailed,
                 "Failed to retrieve the WinPE driver catalog.",
-                $"Catalog URI/path: '{options.CatalogUri}'.{Environment.NewLine}{ex}",
-                failureKind: ex is UnauthorizedAccessException ? WinPeFailureKinds.FileSystem : WinPeFailureKinds.Network,
-                failureReason: ex switch
-                {
-                    UnauthorizedAccessException => WinPeFailureReasons.AccessDenied,
-                    TaskCanceledException => WinPeFailureReasons.Timeout,
-                    HttpRequestException { StatusCode: not null } => WinPeFailureReasons.HttpStatus,
-                    _ => WinPeFailureReasons.Transport
-                },
+                failureKind: WinPeDriverPackageService.CreateAcquisitionFailure(ex).FailureKind,
+                failureReason: WinPeDriverPackageService.CreateAcquisitionFailure(ex).FailureReason,
                 errorSummary: ex.Message,
                 exception: ex);
         }
@@ -78,10 +101,12 @@ public sealed class WinPeDriverCatalogService : IWinPeDriverCatalogService
         try
         {
             XDocument document = XDocument.Parse(xmlContent);
-            IReadOnlyList<WinPeDriverCatalogEntry> entries = ParseDriverPacks(document, options);
+            string revision = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(xmlContent)));
+            IReadOnlyList<WinPeDriverCatalogEntry> entries = ParseDriverPacks(document, options)
+                .Select(entry => entry with { CatalogRevision = revision }).ToArray();
             return WinPeResult<IReadOnlyList<WinPeDriverCatalogEntry>>.Success(entries);
         }
-        catch (Exception ex) when (ex is InvalidOperationException or FormatException)
+        catch (Exception ex) when (ex is InvalidOperationException or FormatException or System.Xml.XmlException)
         {
             return WinPeResult<IReadOnlyList<WinPeDriverCatalogEntry>>.Failure(
                 WinPeErrorCodes.DriverCatalogParseFailed,

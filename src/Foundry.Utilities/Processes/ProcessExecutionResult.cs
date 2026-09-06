@@ -17,8 +17,19 @@ public sealed record ProcessExecutionResult
     public string WorkingDirectory { get; init; } = string.Empty;
     public string StandardOutput { get; init; } = string.Empty;
     public string StandardError { get; init; } = string.Empty;
+    public bool StandardOutputTruncated { get; init; }
+    public bool StandardErrorTruncated { get; init; }
 
     public bool IsSuccess => ExitCode == 0;
+
+    /// <summary>Rejects partial command output before a consumer parses metadata from it.</summary>
+    public void EnsureCompleteOutput()
+    {
+        if (StandardOutputTruncated || StandardErrorTruncated)
+        {
+            throw new InvalidDataException("Process output exceeded the capture limit; complete output is required.");
+        }
+    }
 
     /// <summary>
     /// Formats a local diagnostic containing command metadata and non-empty captured streams.
@@ -30,15 +41,15 @@ public sealed record ProcessExecutionResult
         builder.AppendLine($"WorkingDirectory: {WorkingDirectory}");
         builder.AppendLine($"ExitCode: {ExitCode}");
 
-        if (!string.IsNullOrWhiteSpace(StandardOutput))
+        if (StandardOutputTruncated || !string.IsNullOrWhiteSpace(StandardOutput))
         {
-            builder.AppendLine("StdOut:");
+            builder.AppendLine(StandardOutputTruncated ? "StdOut (truncated tail):" : "StdOut:");
             builder.AppendLine(StandardOutput.Trim());
         }
 
-        if (!string.IsNullOrWhiteSpace(StandardError))
+        if (StandardErrorTruncated || !string.IsNullOrWhiteSpace(StandardError))
         {
-            builder.AppendLine("StdErr:");
+            builder.AppendLine(StandardErrorTruncated ? "StdErr (truncated tail):" : "StdErr:");
             builder.AppendLine(StandardError.Trim());
         }
 

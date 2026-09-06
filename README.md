@@ -42,6 +42,12 @@ Foundry separates the deployment into three focused stages:
 
 Operating system, driver pack, firmware, and WinPE metadata come from the maintained [`foundry-osd/catalog`](https://github.com/foundry-osd/catalog).
 
+Online catalog requests validate HTTPS certificates against Windows trust stores. Environments that inspect HTTPS traffic need their trusted corporate root certificates in the administrator workstation and WinPE image. Microsoft ESD content retains its supported HTTP delivery path, with SHA-256 verification against authenticated catalog metadata.
+
+Cached payloads are rechecked before reuse. Downloads replace existing files only after validation, and downloaded driver installers require a valid signature from the expected publisher. A verified cached file can be reused from read-only media without reserving space for another download.
+
+Automatic OEM driver selection requires a matching manufacturer, model or documented machine type, architecture, exact Windows release, and an established system-pack role. Unmatched or ambiguous entries require an explicit model and version choice; verify their applicability before deployment. Manual selection retains package integrity and publisher checks.
+
 ## What you can configure
 
 - **Deployment content** — Windows release, language, edition, licensing channel, drivers, and optional firmware.

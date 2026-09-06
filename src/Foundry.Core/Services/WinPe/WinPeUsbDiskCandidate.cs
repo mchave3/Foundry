@@ -15,6 +15,8 @@ public sealed record WinPeUsbDiskCandidate
     public bool? IsRemovable { get; init; }
     public bool IsSystem { get; init; }
     public bool IsBoot { get; init; }
+    public bool IsOffline { get; init; }
+    public bool IsReadOnly { get; init; }
     public ulong SizeBytes { get; init; }
     public bool IsFoundryMedia { get; init; }
 }

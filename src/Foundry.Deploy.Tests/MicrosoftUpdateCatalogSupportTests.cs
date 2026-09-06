@@ -10,11 +10,11 @@ namespace Foundry.Deploy.Tests;
 public sealed class MicrosoftUpdateCatalogSupportTests
 {
     [Fact]
-    public void BuildReleaseSearchOrder_PutsSupportedTargetReleaseFirstWithoutDuplicates()
+    public void BuildReleaseSearchOrder_UsesOnlyTargetRelease()
     {
         string[] order = MicrosoftUpdateCatalogSupport.BuildReleaseSearchOrder("24H2");
 
-        Assert.Equal(["24H2", "25H2", "23H2"], order);
+        Assert.Equal(["24H2"], order);
     }
 
     [Fact]
@@ -28,7 +28,7 @@ public sealed class MicrosoftUpdateCatalogSupportTests
 
         string? hardwareId = MicrosoftUpdateCatalogSupport.TryExtractDriverSearchHardwareId(device);
 
-        Assert.Equal("VEN_8086&DEV_15B7", hardwareId);
+        Assert.Equal(@"PCI\VEN_8086&DEV_15B7&SUBSYS_00000000", hardwareId);
     }
 
     [Fact]
@@ -54,7 +54,7 @@ public sealed class MicrosoftUpdateCatalogSupportTests
     }
 
     [Fact]
-    public void SelectPreferredCab_WhenNoExactMatch_FallsBackToCompatibleCab()
+    public void SelectPreferredCab_WhenNoExactMatch_RequiresInfEvidence()
     {
         MicrosoftUpdateCatalogDownload? download = MicrosoftUpdateCatalogSupport.SelectPreferredCab(
             [
@@ -63,23 +63,16 @@ public sealed class MicrosoftUpdateCatalogSupportTests
             ],
             "x64");
 
-        Assert.Equal("https://example.test/driver-generic.cab", download?.DownloadUrl);
+        Assert.Null(download);
     }
 
-    [Fact]
-    public void ResolvePreferredHash_PrefersSha256OverSha1()
+    [Theory]
+    [InlineData("driver-arm64.cab", "x64")]
+    [InlineData("driver-amd64.cab", "arm64")]
+    [InlineData("driver132.cab", "x86")]
+    public void SelectPreferredCab_DoesNotGuessArchitecture(string fileName, string target)
     {
-        var download = new MicrosoftUpdateCatalogDownload
-        {
-            DownloadUrl = "https://example.test/driver.cab",
-            FileName = "driver.cab",
-            Sha1 = new string('A', 40),
-            Sha256 = new string('B', 64)
-        };
-
-        string hash = MicrosoftUpdateCatalogSupport.ResolvePreferredHash(download);
-
-        Assert.Equal(new string('B', 64), hash);
+        Assert.Null(MicrosoftUpdateCatalogSupport.SelectPreferredCab([CreateDownload($"https://example.test/{fileName}")], target));
     }
 
     private static MicrosoftUpdateCatalogDownload CreateDownload(string url)

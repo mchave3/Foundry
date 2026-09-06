@@ -2,8 +2,11 @@
 // Licensed under the MIT License.
 // See the LICENSE file in the project root for more information.
 
+using System.Security.Cryptography;
+using System.Text;
 using Foundry.Deploy.Models;
 using Foundry.Deploy.Services.Download;
+using Foundry.Deploy.Services.Cache;
 using Foundry.Deploy.Services.DriverPacks;
 using Foundry.Deploy.Services.System;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -12,38 +15,48 @@ namespace Foundry.Deploy.Tests;
 
 public sealed class MicrosoftUpdateCatalogServiceTests
 {
-    [Fact]
-    public async Task DriverDownload_WhenCatalogHashExists_UsesPersistentCacheAndStagesCab()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task DriverDownload_PublishesExactlyOneInspectedPackage(bool preferredCacheAvailable)
     {
         using TempDirectory temp = TempDirectory.Create();
         string rawDirectory = Path.Combine(temp.Path, "raw");
         string cacheDirectory = Path.Combine(temp.Path, "cache");
         var catalogClient = new FakeMicrosoftUpdateCatalogClient();
         var downloadService = new CapturingArtifactDownloadService();
+        var extraction = new FakeArchiveExtractionService();
         var service = new MicrosoftUpdateCatalogDriverService(
-            new FakeArchiveExtractionService(),
+            extraction,
             catalogClient,
             downloadService,
-            NullLogger<MicrosoftUpdateCatalogDriverService>.Instance);
+            NullLogger<MicrosoftUpdateCatalogDriverService>.Instance,
+            new PayloadCachePlacementService(downloadService, new AvailableStorage(cacheDirectory, preferredCacheAvailable)));
 
         MicrosoftUpdateCatalogDriverResult result = await service.DownloadAsync(
             CreateHardwareProfile(),
-            new OperatingSystemCatalogItem { ReleaseId = "24H2", Architecture = "x64" },
+            Target,
             rawDirectory,
             cacheDirectory,
             TestContext.Current.CancellationToken);
 
-        string expectedCachePath = Path.Combine(cacheDirectory, "update-1", "driver-amd64.cab");
-        string expectedRawPath = Path.Combine(rawDirectory, "update-1", "driver-amd64.cab");
+        await service.ExpandAsync(rawDirectory, Path.Combine(temp.Path, "extracted"), TestContext.Current.CancellationToken);
+        Assert.Empty(Directory.EnumerateFiles(rawDirectory, "*.cab", SearchOption.AllDirectories));
+        Assert.Single(Directory.EnumerateFiles(rawDirectory, "*.inf", SearchOption.AllDirectories));
+        Assert.Equal(1, extraction.ExtractionCount);
+        AssertCacheIsOutsideStaging(downloadService, rawDirectory, cacheDirectory, preferredCacheAvailable);
         Assert.True(result.IsPayloadAvailable);
-        Assert.Equal(expectedCachePath, downloadService.DestinationPath);
-        Assert.Equal(new string('B', 64), downloadService.ExpectedHash);
+        Assert.Equal(CabDigest, downloadService.ExpectedHash);
         Assert.Equal("MicrosoftUpdateCatalogDriver", downloadService.ArtifactKind);
-        Assert.True(File.Exists(expectedRawPath));
+        await service.DownloadAsync(CreateHardwareProfile(), Target, rawDirectory, cacheDirectory, TestContext.Current.CancellationToken);
+        Assert.Equal(1, downloadService.DownloadCount);
+        Assert.Equal(2, extraction.ExtractionCount);
     }
 
-    [Fact]
-    public async Task FirmwareDownload_WhenCatalogHashExists_UsesPersistentCacheAndStagesCab()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task FirmwareDownload_PublishesExactlyOneInspectedPackage(bool preferredCacheAvailable)
     {
         using TempDirectory temp = TempDirectory.Create();
         string rawDirectory = Path.Combine(temp.Path, "raw");
@@ -51,27 +64,51 @@ public sealed class MicrosoftUpdateCatalogServiceTests
         string cacheDirectory = Path.Combine(temp.Path, "cache");
         var catalogClient = new FakeMicrosoftUpdateCatalogClient();
         var downloadService = new CapturingArtifactDownloadService();
+        var extraction = new FakeArchiveExtractionService(firmware: true);
         var service = new MicrosoftUpdateCatalogFirmwareService(
-            new FakeArchiveExtractionService(),
+            extraction,
             catalogClient,
             downloadService,
-            NullLogger<MicrosoftUpdateCatalogFirmwareService>.Instance);
+            NullLogger<MicrosoftUpdateCatalogFirmwareService>.Instance,
+            new PayloadCachePlacementService(downloadService, new AvailableStorage(cacheDirectory, preferredCacheAvailable)));
 
         MicrosoftUpdateCatalogFirmwareResult result = await service.DownloadAsync(
-            new HardwareProfile { SystemFirmwareHardwareId = "UEFI\\RES_{FIRMWARE}" },
-            "x64",
+            new HardwareProfile { SystemFirmwareHardwareId = FirmwareId },
+            Target,
             rawDirectory,
             extractedDirectory,
             cacheDirectory,
             TestContext.Current.CancellationToken);
 
-        string expectedCachePath = Path.Combine(cacheDirectory, "update-1", "driver-amd64.cab");
-        string expectedRawPath = Path.Combine(rawDirectory, "update-1", "driver-amd64.cab");
+        Assert.Empty(Directory.EnumerateFiles(rawDirectory, "*.cab", SearchOption.AllDirectories));
+        Assert.Single(Directory.EnumerateFiles(extractedDirectory, "*.inf", SearchOption.AllDirectories));
+        Assert.Equal(1, extraction.ExtractionCount);
+        AssertCacheIsOutsideStaging(downloadService, rawDirectory, cacheDirectory, preferredCacheAvailable);
         Assert.True(result.IsUpdateAvailable);
-        Assert.Equal(expectedCachePath, downloadService.DestinationPath);
-        Assert.Equal(new string('B', 64), downloadService.ExpectedHash);
+        Assert.Equal(CabDigest, downloadService.ExpectedHash);
         Assert.Equal("MicrosoftUpdateCatalogFirmware", downloadService.ArtifactKind);
-        Assert.True(File.Exists(expectedRawPath));
+        await service.DownloadAsync(new HardwareProfile { SystemFirmwareHardwareId = FirmwareId }, Target, rawDirectory,
+            extractedDirectory, cacheDirectory, TestContext.Current.CancellationToken);
+        Assert.Equal(1, downloadService.DownloadCount);
+        Assert.Equal(2, extraction.ExtractionCount);
+    }
+
+    private const string FirmwareId = @"UEFI\RES_{12345678-1234-1234-1234-123456789ABC}";
+    private static string CabDigest => Convert.ToHexString(SHA256.HashData("cab"u8));
+    private static OperatingSystemCatalogItem Target => new() { WindowsRelease = "11", ReleaseId = "24H2", Architecture = "x64", BuildMajor = 26100 };
+
+    private static void AssertCacheIsOutsideStaging(CapturingArtifactDownloadService downloadService, string stagingRoot, string cacheRoot, bool preferredCacheAvailable)
+    {
+        Assert.NotNull(downloadService.Artifact);
+        Assert.NotNull(downloadService.DestinationPath);
+        string relativePath = Path.GetRelativePath(stagingRoot, downloadService.DestinationPath);
+        Assert.StartsWith($"..{Path.DirectorySeparatorChar}", relativePath, StringComparison.Ordinal);
+        Assert.Equal(downloadService.Artifact.CacheKey, new DirectoryInfo(Path.GetDirectoryName(downloadService.DestinationPath)!).Name);
+        if (preferredCacheAvailable)
+        {
+            string sourceKey = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes("update-1")));
+            Assert.Equal(Path.Combine(cacheRoot, sourceKey, downloadService.Artifact.CacheKey, "driver-amd64.cab"), downloadService.DestinationPath);
+        }
     }
 
     private static HardwareProfile CreateHardwareProfile()
@@ -125,10 +162,10 @@ public sealed class MicrosoftUpdateCatalogServiceTests
             [
                 new MicrosoftUpdateCatalogDownload
                 {
+                    CatalogRevision = "trusted-revision",
                     DownloadUrl = "https://example.test/driver-amd64.cab",
                     FileName = "driver-amd64.cab",
-                    Sha1 = new string('A', 40),
-                    Sha256 = new string('B', 64)
+                    Sha256 = CabDigest
                 }
             ];
 
@@ -142,18 +179,27 @@ public sealed class MicrosoftUpdateCatalogServiceTests
         public string? ExpectedHash { get; private set; }
         public string? ArtifactKind { get; private set; }
 
+        public ArtifactIdentity? Artifact { get; private set; }
+        public int DownloadCount { get; private set; }
+        public async Task<ArtifactDownloadResult?> TryUseCachedAsync(ArtifactIdentity artifact, string path, CancellationToken cancellationToken = default)
+        {
+            if (!File.Exists(path)) return null;
+            byte[] bytes = await File.ReadAllBytesAsync(path, cancellationToken);
+            return Convert.ToHexString(SHA256.HashData(bytes)) == artifact.Integrity.Digest?.Hex
+                ? new ArtifactDownloadResult { DestinationPath = path, Downloaded = false, Method = "validated fixture cache", SizeBytes = bytes.Length }
+                : null;
+        }
         public async Task<ArtifactDownloadResult> DownloadAsync(
-            string sourceUrl,
+            ArtifactIdentity artifact,
             string destinationPath,
-            string? expectedHash = null,
-            long? expectedSizeBytes = null,
-            string? artifactKind = null,
             CancellationToken cancellationToken = default,
             IProgress<DownloadProgress>? progress = null)
         {
             DestinationPath = destinationPath;
-            ExpectedHash = expectedHash;
-            ArtifactKind = artifactKind;
+            DownloadCount++;
+            Artifact = artifact;
+            ExpectedHash = artifact.Integrity.Digest?.Hex;
+            ArtifactKind = artifact.Kind;
             Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
             await File.WriteAllTextAsync(destinationPath, "cab", cancellationToken).ConfigureAwait(false);
 
@@ -167,8 +213,16 @@ public sealed class MicrosoftUpdateCatalogServiceTests
         }
     }
 
-    private sealed class FakeArchiveExtractionService : IArchiveExtractionService
+    private sealed class AvailableStorage(string preferredRoot, bool preferredAvailable) : IVolumeStorageProbe
     {
+        public VolumeStorageStatus Inspect(string directory) => !preferredAvailable &&
+            directory.StartsWith(preferredRoot + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase)
+            ? new(false, false, null) : new(true, true, 1024L * 1024 * 1024);
+    }
+
+    private sealed class FakeArchiveExtractionService(bool firmware = false) : IArchiveExtractionService
+    {
+        public int ExtractionCount { get; private set; }
         public Task ExtractWithSevenZipAsync(
             string archivePath,
             string extractedPath,
@@ -176,8 +230,19 @@ public sealed class MicrosoftUpdateCatalogServiceTests
             CancellationToken cancellationToken = default,
             IProgress<double>? progress = null)
         {
+            ExtractionCount++;
             Directory.CreateDirectory(extractedPath);
-            File.WriteAllText(Path.Combine(extractedPath, "driver.inf"), "; test");
+            File.WriteAllText(Path.Combine(extractedPath, "driver.inf"), $$"""
+                [Version]
+                Signature="$WINDOWS NT$"
+                Class={{(firmware ? "Firmware" : "Net")}}
+                ClassGuid={{(firmware ? "{f2e7dd72-6468-4e36-b6f1-6488f42c1b52}" : "{4d36e972-e325-11ce-bfc1-08002be10318}")}}
+                [Manufacturer]
+                Example=Models,NTamd64.10.0...26100
+                [Models.NTamd64.10.0...26100]
+                Example=Install,{{(firmware ? FirmwareId : @"PCI\VEN_8086&DEV_15B7&SUBSYS_00000000")}}
+                [Install]
+                """);
             return Task.CompletedTask;
         }
     }

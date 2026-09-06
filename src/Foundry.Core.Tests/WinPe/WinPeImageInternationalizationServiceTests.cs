@@ -50,10 +50,10 @@ public sealed class WinPeImageInternationalizationServiceTests
             Assert.True(result.IsSuccess, result.Error?.Details);
             Assert.Collection(
                 runner.Executions,
-                execution => Assert.Contains($"/PackagePath:{WinPeProcessRunner.Quote(languagePack)}", execution.Arguments),
-                execution => Assert.Contains($"/PackagePath:{WinPeProcessRunner.Quote(neutralWmi)}", execution.Arguments),
-                execution => Assert.Contains($"/PackagePath:{WinPeProcessRunner.Quote(localizedWmi)}", execution.Arguments),
-                execution => Assert.Contains($"/PackagePath:{WinPeProcessRunner.Quote(secureStartup)}", execution.Arguments),
+                execution => Assert.Contains($"/PackagePath:{languagePack}", execution.Arguments),
+                execution => Assert.Contains($"/PackagePath:{neutralWmi}", execution.Arguments),
+                execution => Assert.Contains($"/PackagePath:{localizedWmi}", execution.Arguments),
+                execution => Assert.Contains($"/PackagePath:{secureStartup}", execution.Arguments),
                 execution => Assert.Contains("/Set-AllIntl:fr-FR", execution.Arguments),
                 execution => Assert.Contains("/Set-InputLocale:", execution.Arguments));
         }
@@ -103,7 +103,7 @@ public sealed class WinPeImageInternationalizationServiceTests
             Assert.True(result.IsSuccess, result.Error?.Details);
             Assert.Contains(
                 runner.Executions,
-                execution => execution.Arguments.Contains($"/PackagePath:{WinPeProcessRunner.Quote(secureStartup)}", StringComparison.Ordinal));
+                execution => execution.Arguments.Contains($"/PackagePath:{secureStartup}", StringComparison.Ordinal));
         }
         finally
         {
@@ -347,8 +347,21 @@ public sealed class WinPeImageInternationalizationServiceTests
             string arguments,
             string workingDirectory,
             CancellationToken cancellationToken,
-            IReadOnlyDictionary<string, string>? environmentOverrides = null)
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
         {
+            throw new NotSupportedException("Executable calls must pass argument tokens.");
+        }
+
+        public Task<WinPeProcessExecution> RunAsync(
+            string fileName,
+            IReadOnlyList<string> argumentList,
+            string workingDirectory,
+            CancellationToken cancellationToken,
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
+        {
+            string arguments = string.Join(' ', argumentList);
             bool shouldFailPackage = arguments.Contains("/Add-Package", StringComparison.OrdinalIgnoreCase) &&
                                      (string.IsNullOrWhiteSpace(FailPackagePathContains) ||
                                       arguments.Contains(FailPackagePathContains, StringComparison.OrdinalIgnoreCase));
@@ -373,7 +386,8 @@ public sealed class WinPeImageInternationalizationServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }
@@ -382,7 +396,8 @@ public sealed class WinPeImageInternationalizationServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }

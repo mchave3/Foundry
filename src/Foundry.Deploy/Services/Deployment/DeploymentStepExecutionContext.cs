@@ -379,27 +379,16 @@ public sealed class DeploymentStepExecutionContext : IDisposable
         CancellationToken cancellationToken = default)
     {
         IReadOnlyList<TargetDiskInfo> disks = await _targetDiskService.GetDisksAsync(cancellationToken).ConfigureAwait(false);
-        TargetDiskInfo? selectedDisk = disks.FirstOrDefault(disk => disk.DiskNumber == Request.TargetDiskNumber);
-        if (selectedDisk is null)
+        TargetDiskInfo? selectedDisk = Request.ConfirmedTargetDisk?.Match(disks);
+        if (selectedDisk is null || Request.ConfirmedTargetDisk?.DiskNumber != Request.TargetDiskNumber)
         {
             return (null, DeploymentStepResult.Failed(
-                $"Target disk {Request.TargetDiskNumber} is no longer present.",
-                DeploymentFailure.Guard(
-                    DeploymentOperationNames.ValidateTargetDisk,
-                    DeploymentFailureReasons.MissingResource,
-                    "target_disk_not_found")));
-        }
-
-        if (!selectedDisk.IsSelectable)
-        {
-            return (null, DeploymentStepResult.Failed(
-                $"Target disk {Request.TargetDiskNumber} is blocked: {selectedDisk.SelectionWarning}",
+                "The confirmed target disk is unavailable, changed, or unsafe.",
                 DeploymentFailure.Guard(
                     DeploymentOperationNames.ValidateTargetDisk,
                     DeploymentFailureReasons.InvalidState,
-                    "target_disk_not_selectable")));
+                    "confirmed_target_disk_mismatch")));
         }
-
         await AppendLogAsync(DeploymentLogLevel.Info, $"Target disk revalidated: {selectedDisk.DisplayLabel}", cancellationToken).ConfigureAwait(false);
         return (selectedDisk, null);
     }
@@ -443,18 +432,9 @@ public sealed class DeploymentStepExecutionContext : IDisposable
     /// <returns>The operating system cache root.</returns>
     public string ResolveOperatingSystemCacheRoot()
     {
-        return ResolvePayloadCacheRoot(OperatingSystemsFolderName, requiredBytes: 0);
+        return ResolvePayloadCacheRoot(OperatingSystemsFolderName);
     }
 
-    /// <summary>
-    /// Resolves the operating system cache root and falls back to the target workspace when the USB cache is too small.
-    /// </summary>
-    /// <param name="requiredBytes">Expected payload size in bytes.</param>
-    /// <returns>The operating system cache root.</returns>
-    public string ResolveOperatingSystemCacheRoot(long requiredBytes)
-    {
-        return ResolvePayloadCacheRoot(OperatingSystemsFolderName, requiredBytes);
-    }
 
     /// <summary>
     /// Resolves the driver pack cache root for the current deployment mode.
@@ -462,27 +442,18 @@ public sealed class DeploymentStepExecutionContext : IDisposable
     /// <returns>The driver pack cache root.</returns>
     public string ResolveDriverPackCacheRoot()
     {
-        return ResolvePayloadCacheRoot(DriverPacksFolderName, requiredBytes: 0);
+        return ResolvePayloadCacheRoot(DriverPacksFolderName);
     }
 
-    /// <summary>
-    /// Resolves the driver pack cache root and falls back to the target workspace when the USB cache is too small.
-    /// </summary>
-    /// <param name="requiredBytes">Expected payload size in bytes.</param>
-    /// <returns>The driver pack cache root.</returns>
-    public string ResolveDriverPackCacheRoot(long requiredBytes)
-    {
-        return ResolvePayloadCacheRoot(DriverPacksFolderName, requiredBytes);
-    }
 
     public string ResolveMicrosoftUpdateCatalogDriverCacheRoot()
     {
-        return Path.Combine(ResolvePayloadCacheRoot(MicrosoftUpdateCatalogFolderName, requiredBytes: 0), DriversFolderName);
+        return Path.Combine(ResolvePayloadCacheRoot(MicrosoftUpdateCatalogFolderName), DriversFolderName);
     }
 
     public string ResolveMicrosoftUpdateCatalogFirmwareCacheRoot()
     {
-        return Path.Combine(ResolvePayloadCacheRoot(MicrosoftUpdateCatalogFolderName, requiredBytes: 0), FirmwareFolderName);
+        return Path.Combine(ResolvePayloadCacheRoot(MicrosoftUpdateCatalogFolderName), FirmwareFolderName);
     }
 
     /// <summary>
@@ -590,22 +561,6 @@ public sealed class DeploymentStepExecutionContext : IDisposable
     }
 
     /// <summary>
-    /// Chooses the primary hash when available, otherwise falls back to a secondary hash.
-    /// </summary>
-    /// <param name="primaryHash">Preferred hash value.</param>
-    /// <param name="secondaryHash">Fallback hash value.</param>
-    /// <returns>The trimmed hash value, or an empty string.</returns>
-    public static string ResolvePreferredHash(string? primaryHash, string? secondaryHash)
-    {
-        if (!string.IsNullOrWhiteSpace(primaryHash))
-        {
-            return primaryHash.Trim();
-        }
-
-        return secondaryHash?.Trim() ?? string.Empty;
-    }
-
-    /// <summary>
     /// Resolves a safe artifact file name from a preferred name or source URL.
     /// </summary>
     /// <param name="preferredFileName">Preferred catalog file name.</param>
@@ -658,7 +613,7 @@ public sealed class DeploymentStepExecutionContext : IDisposable
         return ResolveCacheBaseRoot(EnsureResolvedCache());
     }
 
-    private string ResolvePayloadCacheRoot(string payloadFolderName, long requiredBytes)
+    private string ResolvePayloadCacheRoot(string payloadFolderName)
     {
         if (RuntimeState.Mode == DeploymentMode.Iso &&
             !string.IsNullOrWhiteSpace(RuntimeState.TargetFoundryRoot))
@@ -666,35 +621,14 @@ public sealed class DeploymentStepExecutionContext : IDisposable
             return Path.Combine(RuntimeState.TargetFoundryRoot, CacheFolderName, payloadFolderName);
         }
 
-        string cacheRoot = Path.Combine(EnsureCacheBaseRoot(), CacheFolderName, payloadFolderName);
-        if (RuntimeState.Mode == DeploymentMode.Usb &&
-            requiredBytes > 0 &&
-            !string.IsNullOrWhiteSpace(RuntimeState.TargetFoundryRoot) &&
-            !HasAvailableSpace(cacheRoot, requiredBytes))
-        {
-            return Path.Combine(RuntimeState.TargetFoundryRoot, CacheFolderName, payloadFolderName);
-        }
-
-        return cacheRoot;
+        return Path.Combine(EnsureCacheBaseRoot(), CacheFolderName, payloadFolderName);
     }
 
-    private static bool HasAvailableSpace(string path, long requiredBytes)
+    /// <summary>Returns target storage only after the deployment has prepared its Windows partition.</summary>
+    public string? ResolveTargetPayloadCacheRoot(string payloadFolderName)
     {
-        try
-        {
-            string rootPath = Path.GetPathRoot(Path.GetFullPath(path)) ?? string.Empty;
-            if (string.IsNullOrWhiteSpace(rootPath))
-            {
-                return true;
-            }
-
-            var drive = new DriveInfo(rootPath);
-            return drive.IsReady && drive.AvailableFreeSpace >= requiredBytes;
-        }
-        catch
-        {
-            return true;
-        }
+        return string.IsNullOrWhiteSpace(RuntimeState.TargetFoundryRoot)
+            ? null : Path.Combine(RuntimeState.TargetFoundryRoot, CacheFolderName, payloadFolderName);
     }
 
     private static string ResolveWorkspaceRoot(DeploymentRuntimeState runtimeState)

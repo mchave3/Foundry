@@ -9,62 +9,41 @@ using Foundry.Localization;
 
 namespace Foundry.Localization.Tests;
 
-public sealed class ResourceManagerLocalizationServiceTests
+[CollectionDefinition(Name, DisableParallelization = true)]
+public sealed class CultureSensitiveTestCollection
+{
+    public const string Name = "CultureSensitive";
+}
+
+[Collection(CultureSensitiveTestCollection.Name)]
+public sealed class ResourceManagerLocalizationServiceCultureTests
 {
     [Fact]
     public void SetCulture_UpdatesCurrentCulturesAndRaisesSingleLanguageChangedEvent()
     {
-        CultureInfo previousCulture = CultureInfo.CurrentCulture;
-        CultureInfo previousUiCulture = CultureInfo.CurrentUICulture;
-        CultureInfo? previousDefaultCulture = CultureInfo.DefaultThreadCurrentCulture;
-        CultureInfo? previousDefaultUiCulture = CultureInfo.DefaultThreadCurrentUICulture;
+        using var cultureScope = new CultureScope();
+        ResourceManagerLocalizationService service = ResourceManagerLocalizationServiceTestFactory.Create("en-US");
+        List<ApplicationLanguageChangedEventArgs> events = [];
 
-        try
-        {
-            ResourceManagerLocalizationService service = CreateService("en-US");
-            ApplicationLanguageChangedEventArgs? eventArgs = null;
+        service.LanguageChanged += (_, args) => events.Add(args);
 
-            service.LanguageChanged += (_, args) => eventArgs = args;
-
-            service.SetCulture(CultureInfo.GetCultureInfo("fr-FR"));
-
-            Assert.Equal("fr-FR", service.CurrentCulture.Name);
-            Assert.Equal("fr-FR", CultureInfo.CurrentCulture.Name);
-            Assert.Equal("fr-FR", CultureInfo.CurrentUICulture.Name);
-            Assert.Equal("fr-FR", CultureInfo.DefaultThreadCurrentCulture?.Name);
-            Assert.Equal("fr-FR", CultureInfo.DefaultThreadCurrentUICulture?.Name);
-            Assert.NotNull(eventArgs);
-            Assert.Equal("en-US", eventArgs.OldLanguage);
-            Assert.Equal("fr-FR", eventArgs.NewLanguage);
-        }
-        finally
-        {
-            CultureInfo.CurrentCulture = previousCulture;
-            CultureInfo.CurrentUICulture = previousUiCulture;
-            CultureInfo.DefaultThreadCurrentCulture = previousDefaultCulture;
-            CultureInfo.DefaultThreadCurrentUICulture = previousDefaultUiCulture;
-        }
-    }
-
-    [Fact]
-    public void Constructor_WhenInitialCultureMatchesSupportedLanguageFamily_UsesConfiguredCulture()
-    {
-        SupportedCultureCatalog catalog = new(
-            "en-US",
-            [
-                new SupportedCultureDefinition("en-US", "Language.English", 10),
-                new SupportedCultureDefinition("fr-FR", "Language.French", 20)
-            ]);
-
-        ResourceManagerLocalizationService service = CreateService("fr-CA", catalog);
+        service.SetCulture(CultureInfo.GetCultureInfo("fr-FR"));
 
         Assert.Equal("fr-FR", service.CurrentCulture.Name);
+        Assert.Equal("fr-FR", CultureInfo.CurrentCulture.Name);
+        Assert.Equal("fr-FR", CultureInfo.CurrentUICulture.Name);
+        Assert.Equal("fr-FR", CultureInfo.DefaultThreadCurrentCulture?.Name);
+        Assert.Equal("fr-FR", CultureInfo.DefaultThreadCurrentUICulture?.Name);
+        ApplicationLanguageChangedEventArgs eventArgs = Assert.Single(events);
+        Assert.Equal("en-US", eventArgs.OldLanguage);
+        Assert.Equal("fr-FR", eventArgs.NewLanguage);
     }
 
     [Fact]
     public void SetCulture_WhenCultureMatchesSupportedLanguageFamily_AppliesConfiguredCulture()
     {
-        ResourceManagerLocalizationService service = CreateService("en-US");
+        using var cultureScope = new CultureScope();
+        ResourceManagerLocalizationService service = ResourceManagerLocalizationServiceTestFactory.Create("en-US");
         ApplicationLanguageChangedEventArgs? eventArgs = null;
 
         service.LanguageChanged += (_, args) => eventArgs = args;
@@ -80,7 +59,8 @@ public sealed class ResourceManagerLocalizationServiceTests
     [Fact]
     public void SetCulture_WhenCultureDoesNotChange_DoesNotRaiseLanguageChanged()
     {
-        ResourceManagerLocalizationService service = CreateService("en-US");
+        using var cultureScope = new CultureScope();
+        ResourceManagerLocalizationService service = ResourceManagerLocalizationServiceTestFactory.Create("en-US");
         int changeCount = 0;
 
         service.LanguageChanged += (_, _) => changeCount++;
@@ -93,7 +73,8 @@ public sealed class ResourceManagerLocalizationServiceTests
     [Fact]
     public void Strings_ReturnsLocalizedValueAndNotifiesIndexerChange()
     {
-        ResourceManagerLocalizationService service = CreateService("en-US");
+        using var cultureScope = new CultureScope();
+        ResourceManagerLocalizationService service = ResourceManagerLocalizationServiceTestFactory.Create("en-US");
         List<string?> changedProperties = [];
 
         service.Strings.PropertyChanged += (_, args) => changedProperties.Add(args.PropertyName);
@@ -105,11 +86,29 @@ public sealed class ResourceManagerLocalizationServiceTests
         Assert.Equal("Bonjour", service.Strings["Greeting"]);
         Assert.Contains("Item[]", changedProperties);
     }
+}
+
+public sealed class ResourceManagerLocalizationServiceTests
+{
+    [Fact]
+    public void Constructor_WhenInitialCultureMatchesSupportedLanguageFamily_UsesConfiguredCulture()
+    {
+        SupportedCultureCatalog catalog = new(
+            "en-US",
+            [
+                new SupportedCultureDefinition("en-US", "Language.English", 10),
+                new SupportedCultureDefinition("fr-FR", "Language.French", 20)
+            ]);
+
+        ResourceManagerLocalizationService service = ResourceManagerLocalizationServiceTestFactory.Create("fr-CA", catalog);
+
+        Assert.Equal("fr-FR", service.CurrentCulture.Name);
+    }
 
     [Fact]
     public void GetString_WhenKeyIsMissing_ReturnsKey()
     {
-        ResourceManagerLocalizationService service = CreateService("en-US");
+        ResourceManagerLocalizationService service = ResourceManagerLocalizationServiceTestFactory.Create("en-US");
 
         string result = service.GetString("Missing.Key");
 
@@ -126,7 +125,7 @@ public sealed class ResourceManagerLocalizationServiceTests
                 new SupportedCultureDefinition("es-ES", "Language.Spanish", 20),
                 new SupportedCultureDefinition("it-IT", "Language.Italian", 30)
             ]);
-        ResourceManagerLocalizationService service = CreateService("it-IT", catalog);
+        ResourceManagerLocalizationService service = ResourceManagerLocalizationServiceTestFactory.Create("it-IT", catalog);
 
         IReadOnlyList<SupportedCultureOption> options = service.CreateSupportedCultureOptions();
 
@@ -134,13 +133,32 @@ public sealed class ResourceManagerLocalizationServiceTests
         Assert.Equal("Language.Italian", options.Single(option => option.Code == "it-IT").DisplayName);
         Assert.True(options.Single(option => option.Code == "it-IT").IsSelected);
     }
+}
 
-    private static ResourceManagerLocalizationService CreateService(string cultureName)
+file sealed class CultureScope : IDisposable
+{
+    private readonly CultureInfo currentCulture = CultureInfo.CurrentCulture;
+    private readonly CultureInfo currentUiCulture = CultureInfo.CurrentUICulture;
+    private readonly CultureInfo? defaultThreadCurrentCulture = CultureInfo.DefaultThreadCurrentCulture;
+    private readonly CultureInfo? defaultThreadCurrentUiCulture = CultureInfo.DefaultThreadCurrentUICulture;
+
+    public void Dispose()
     {
-        return CreateService(cultureName, CreateTestCatalog());
+        CultureInfo.DefaultThreadCurrentCulture = defaultThreadCurrentCulture;
+        CultureInfo.DefaultThreadCurrentUICulture = defaultThreadCurrentUiCulture;
+        CultureInfo.CurrentCulture = currentCulture;
+        CultureInfo.CurrentUICulture = currentUiCulture;
+    }
+}
+
+file static class ResourceManagerLocalizationServiceTestFactory
+{
+    public static ResourceManagerLocalizationService Create(string cultureName)
+    {
+        return Create(cultureName, CreateTestCatalog());
     }
 
-    private static ResourceManagerLocalizationService CreateService(string cultureName, SupportedCultureCatalog catalog)
+    public static ResourceManagerLocalizationService Create(string cultureName, SupportedCultureCatalog catalog)
     {
         ResourceManager resourceManager = new(
             "Foundry.Localization.Tests.Strings.Resources",

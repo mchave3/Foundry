@@ -200,7 +200,7 @@ public sealed class WinPeImageInternationalizationService : IWinPeImageInternati
         WinPeProcessExecution execution = await WinPeDismProcessRunner.RunAsync(
             _processRunner,
             dismPath,
-            $"/Image:{WinPeProcessRunner.Quote(mountedImagePath)} /Add-Package /PackagePath:{WinPeProcessRunner.Quote(packagePath)}",
+            [$"/Image:{mountedImagePath}", "/Add-Package", $"/PackagePath:{packagePath}"],
             workingDirectoryPath,
             progressStatus,
             dismProgress,
@@ -228,13 +228,13 @@ public sealed class WinPeImageInternationalizationService : IWinPeImageInternati
         IProgress<WinPeDismProgress>? dismProgress,
         CancellationToken cancellationToken)
     {
-        string[] arguments =
+        string[][] arguments =
         [
-            $"/Image:{WinPeProcessRunner.Quote(mountedImagePath)} /Set-AllIntl:{canonicalLocale}",
-            $"/Image:{WinPeProcessRunner.Quote(mountedImagePath)} /Set-InputLocale:{inputLocale}"
+            [$"/Image:{mountedImagePath}", $"/Set-AllIntl:{canonicalLocale}"],
+            [$"/Image:{mountedImagePath}", $"/Set-InputLocale:{inputLocale}"]
         ];
 
-        foreach (string args in arguments)
+        foreach (string[] args in arguments)
         {
             WinPeProcessExecution execution = await WinPeDismProcessRunner.RunAsync(
                 _processRunner,
@@ -338,6 +338,7 @@ public sealed class WinPeImageInternationalizationService : IWinPeImageInternati
 
     private static bool IsAlreadyInstalledPackageFailure(WinPeProcessExecution execution)
     {
+        execution.EnsureCompleteOutput();
         string diagnostic = $"{execution.StandardOutput}{Environment.NewLine}{execution.StandardError}";
         return diagnostic.Contains("already installed", StringComparison.OrdinalIgnoreCase) ||
                diagnostic.Contains("already exists", StringComparison.OrdinalIgnoreCase);
@@ -345,6 +346,7 @@ public sealed class WinPeImageInternationalizationService : IWinPeImageInternati
 
     private static bool IsNonBlockingPackageFailure(WinPeProcessExecution execution)
     {
+        execution.EnsureCompleteOutput();
         string diagnostic = $"{execution.StandardOutput}{Environment.NewLine}{execution.StandardError}";
         return diagnostic.Contains("0x800f081e", StringComparison.OrdinalIgnoreCase) ||
                diagnostic.Contains("not applicable", StringComparison.OrdinalIgnoreCase);

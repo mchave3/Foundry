@@ -34,6 +34,9 @@ public sealed record DeploymentContext
     /// </summary>
     public required int TargetDiskNumber { get; init; }
 
+    /// <summary>Gets the original device snapshot approved for live erasure; simulations never carry one.</summary>
+    public TargetDiskIdentity? ConfirmedTargetDisk { get; init; }
+
     /// <summary>
     /// Gets the target computer name written into unattend.xml.
     /// </summary>

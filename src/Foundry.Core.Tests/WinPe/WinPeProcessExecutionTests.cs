@@ -98,11 +98,4 @@ public sealed class WinPeProcessExecutionTests
         "Operation failed.",
         exception: exception);
 
-    [Theory]
-    [InlineData("C:\\Tools\\copype.cmd", "C:\\Tools\\copype.cmd")]
-    [InlineData("C:\\Program Files\\copype.cmd", "\"C:\\Program Files\\copype.cmd\"")]
-    public void Quote_QuotesOnlyWhenValueContainsSpaces(string value, string expected)
-    {
-        Assert.Equal(expected, WinPeProcessRunner.Quote(value));
-    }
 }

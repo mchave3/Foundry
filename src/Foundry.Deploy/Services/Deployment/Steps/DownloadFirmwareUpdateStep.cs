@@ -56,7 +56,7 @@ public sealed class DownloadFirmwareUpdateStep : DeploymentStepBase
         IProgress<double> progress = context.CreateStepPercentProgressReporter("Downloading firmware update...", "Downloading");
 
         MicrosoftUpdateCatalogFirmwareResult result = await _firmwareService
-            .DownloadAsync(hardwareProfile, context.Request.OperatingSystem.Architecture, rawDirectory, extractedDirectory, cacheDirectory, cancellationToken, progress)
+            .DownloadAsync(hardwareProfile, context.Request.OperatingSystem, rawDirectory, extractedDirectory, cacheDirectory, cancellationToken, progress)
             .ConfigureAwait(false);
 
         await context.AppendLogAsync(DeploymentLogLevel.Info, result.Message, cancellationToken).ConfigureAwait(false);

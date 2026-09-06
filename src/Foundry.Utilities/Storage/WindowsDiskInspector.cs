@@ -21,6 +21,7 @@ public sealed class WindowsDiskInspector : IWindowsDiskInspector
             [pscustomobject]@{
                 Number = [int]$disk.Number
                 FriendlyName = [string]$disk.FriendlyName
+                UniqueId = [string]$disk.UniqueId
                 SerialNumber = [string]$disk.SerialNumber
                 BusType = [string]$disk.BusType
                 PartitionStyle = [string]$disk.PartitionStyle
@@ -149,9 +150,14 @@ if ($null -eq $partition) {{
                 "Bypass",
                 .. PowerShellCommand.CreateEncodedArguments(script)
             ],
-            Path.GetTempPath());
+            Path.GetTempPath())
+        {
+            ExecutionTimeout = TimeSpan.FromMinutes(1)
+        };
 
-        return await _executeProcess(request, cancellationToken).ConfigureAwait(false);
+        ProcessExecutionResult execution = await _executeProcess(request, cancellationToken).ConfigureAwait(false);
+        execution.EnsureCompleteOutput();
+        return execution;
     }
 
     private static DiskInfo ParseDisk(JsonElement element)
@@ -167,7 +173,8 @@ if ($null -eq $partition) {{
             ReadRequiredBool(element, "IsBoot"),
             ReadRequiredBool(element, "IsReadOnly"),
             ReadRequiredBool(element, "IsOffline"),
-            ReadBool(element, "IsRemovable"));
+            ReadBool(element, "IsRemovable"))
+        { UniqueId = ReadString(element, "UniqueId") };
     }
 
     private static string ReadString(JsonElement root, string propertyName)

@@ -49,11 +49,11 @@ public static class Program
         catch (Exception ex)
         {
             startupLogFilePath = "<unavailable>";
-            Log.Logger = FoundryLogConfiguration.CreateDebugLogger(
+            Log.Logger = VolumePathDiagnostics.WrapLogger(FoundryLogConfiguration.CreateDebugLogger(
                 "Foundry.Deploy",
                 DiagnosticSessionContext.CurrentSessionId,
                 Serilog.Events.LogEventLevel.Debug,
-                additionalSink: RemoteDiagnosticsSink.Instance);
+                additionalSink: RemoteDiagnosticsSink.Instance));
             Log.ForContext(typeof(Program)).Error(ex, "File logging initialization failed. Falling back to debugger output.");
         }
 

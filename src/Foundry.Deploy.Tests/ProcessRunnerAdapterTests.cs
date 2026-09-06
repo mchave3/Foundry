@@ -13,6 +13,22 @@ namespace Foundry.Deploy.Tests;
 
 public sealed class ProcessRunnerAdapterTests
 {
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task RunAsync_EncodedPowerShellDataIsExcludedFromLogs(bool raw)
+    {
+        using var workspace = new TemporaryDirectory();
+        var logger = new RecordingLogger<DeployProcessRunner>();
+        var runner = new DeployProcessRunner(new UtilityProcessRunner(), logger);
+        string encoded = Convert.ToBase64String(Encoding.Unicode.GetBytes("[Console]::Out.WriteLine('IDENTITY-SENTINEL')"));
+        ProcessExecutionResult result = raw
+            ? await runner.RunAsync(GetPowerShellPath(), $"-NoProfile -EncodedCommand {encoded}", workspace.Path, TestContext.Current.CancellationToken)
+            : await runner.RunAsync(GetPowerShellPath(), new[] { "-NoProfile", "-EncodedCommand", encoded }, workspace.Path, TestContext.Current.CancellationToken);
+        Assert.True(result.IsSuccess);
+        Assert.Equal("IDENTITY-SENTINEL", result.StandardOutput.Trim());
+        Assert.DoesNotContain(logger.Messages, message => message.Contains(encoded, StringComparison.Ordinal));
+    }
     [Fact]
     public async Task RunAsync_WithRawPowerShellCommand_PreservesArgumentsAndOutput()
     {
@@ -150,6 +166,7 @@ public sealed class ProcessRunnerAdapterTests
     private sealed class RecordingLogger<T> : ILogger<T>
     {
         public int WarningCount { get; private set; }
+        public List<string> Messages { get; } = [];
 
         public IDisposable? BeginScope<TState>(TState state)
             where TState : notnull
@@ -169,6 +186,7 @@ public sealed class ProcessRunnerAdapterTests
             Exception? exception,
             Func<TState, Exception?, string> formatter)
         {
+            Messages.Add(formatter(state, exception));
             if (logLevel == LogLevel.Warning)
             {
                 WarningCount++;

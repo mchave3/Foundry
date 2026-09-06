@@ -6,6 +6,9 @@ namespace Foundry.Deploy.Models;
 
 public sealed record TargetDiskInfo
 {
+    public string UniqueId { get; init; } = string.Empty;
+    /// <summary>Prevents synthetic wizard targets from becoming live erasure candidates.</summary>
+    public bool IsSimulationOnly { get; init; }
     public int DiskNumber { get; init; }
     public string FriendlyName { get; init; } = string.Empty;
     public string SerialNumber { get; init; } = string.Empty;

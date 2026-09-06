@@ -9,11 +9,12 @@ internal static class WinPeDismProcessRunner
     public static Task<WinPeProcessExecution> RunAsync(
         IWinPeProcessRunner processRunner,
         string dismPath,
-        string arguments,
+        IReadOnlyList<string> arguments,
         string workingDirectory,
         string progressStatus,
         IProgress<WinPeDismProgress>? progress,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        TimeSpan? executionTimeout = null)
     {
         if (progress is not null && processRunner is IWinPeProcessOutputRunner outputRunner)
         {
@@ -24,13 +25,15 @@ internal static class WinPeDismProcessRunner
                 workingDirectory,
                 reporter.HandleOutput,
                 reporter.HandleOutput,
-                cancellationToken);
+                cancellationToken,
+                executionTimeout: executionTimeout ?? TimeSpan.FromHours(4));
         }
 
         return processRunner.RunAsync(
             dismPath,
             arguments,
             workingDirectory,
-            cancellationToken);
+            cancellationToken,
+            executionTimeout: executionTimeout ?? TimeSpan.FromHours(4));
     }
 }

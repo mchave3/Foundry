@@ -3,11 +3,22 @@
     <OutputType>Exe</OutputType>
     <IsPackable>false</IsPackable>
     <RuntimeIdentifiers></RuntimeIdentifiers>
+    <!-- Keep the referenced test child's configuration when it is not listed in the solution. -->
+    <ShouldUnsetParentConfigurationAndPlatform>false</ShouldUnsetParentConfigurationAndPlatform>
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="xunit.v3" Version="4.0.0" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Remove="ProcessTestChild\**\*.cs" />
+    <ProjectReference Include="ProcessTestChild\ProcessTestChild.csproj" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Foundry.Utilities\Foundry.Utilities.csproj" />
   </ItemGroup>
+  <Target Name="CopyProcessTestChild" AfterTargets="Build">
+    <ItemGroup>
+      <_ProcessTestChildArtifacts Include="ProcessTestChild\bin\$(Platform)\$(Configuration)\$(TargetFramework)\ProcessTestChild.*" />
+    </ItemGroup>
+    <Error Condition="'@(_ProcessTestChildArtifacts)' == ''" Text="ProcessTestChild build output was not found." />
+    <Copy SourceFiles="@(_ProcessTestChildArtifacts)" DestinationFolder="$(OutDir)ProcessTestChild" SkipUnchangedFiles="true" />
+  </Target>
 </Project>

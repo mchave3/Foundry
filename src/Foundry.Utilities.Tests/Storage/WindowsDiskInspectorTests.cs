@@ -22,6 +22,7 @@ public sealed class WindowsDiskInspectorTests
                 {
                   "Number":"2",
                   "FriendlyName":" NVMe Disk ",
+                  "UniqueId":" UNIQUE-2 ",
                   "SerialNumber":" SERIAL-2 ",
                   "BusType":" NVMe ",
                   "PartitionStyle":" GPT ",
@@ -40,6 +41,7 @@ public sealed class WindowsDiskInspectorTests
 
         Assert.Equal(2, disk.Number);
         Assert.Equal("NVMe Disk", disk.FriendlyName);
+        Assert.Equal("UNIQUE-2", disk.UniqueId);
         Assert.Equal("SERIAL-2", disk.SerialNumber);
         Assert.Equal("NVMe", disk.BusType);
         Assert.Equal("GPT", disk.PartitionStyle);

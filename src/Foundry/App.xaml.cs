@@ -3,6 +3,8 @@
 // See the LICENSE file in the project root for more information.
 
 using Foundry.DependencyInjection;
+using Foundry.Core.Services.Application;
+using Foundry.Core.Services.Configuration;
 using Foundry.Services.Configuration;
 using Foundry.Services.Appearance;
 using Foundry.Services.Localization;
@@ -81,7 +83,6 @@ namespace Foundry
             _ = Host.Services.GetRequiredService<IApplicationProxyService>();
             IAppSettingsService appSettingsService = Host.Services.GetRequiredService<IAppSettingsService>();
             SetDeveloperModeEnabled(appSettingsService.Current.Diagnostics.DeveloperMode);
-            _ = Host.Services.GetRequiredService<IFoundryConfigurationStateService>();
             Host.Services.GetRequiredService<IApplicationLocalizationService>().InitializeAsync().GetAwaiter().GetResult();
             InitializeRemoteDiagnostics(Host.Services.GetRequiredService<TelemetrySettings>());
             RegisterWinUiExceptionHandler();
@@ -98,6 +99,8 @@ namespace Foundry
         {
             try
             {
+                _ = GetService<IFoundryConfigurationStateService>();
+
                 MainWindow mainWindow = GetService<MainWindow>();
                 MainWindow = mainWindow;
                 mainWindow.Closed += OnMainWindowClosed;
@@ -111,11 +114,41 @@ namespace Foundry
 
                 await InitializeAppAsync();
             }
+            catch (UnsupportedConfigurationVersionException ex)
+            {
+                AppLogger.Error(
+                    ex,
+                    "Foundry startup blocked by an unsupported configuration schema. StatePath={StatePath}",
+                    Constants.FoundryConfigurationStatePath);
+                await ShowUnsupportedConfigurationVersionAsync(ex);
+            }
             catch (Exception ex)
             {
                 AppLogger.Error(ex, "Foundry WinUI launch failed.");
                 throw;
             }
+        }
+
+        private async Task ShowUnsupportedConfigurationVersionAsync(UnsupportedConfigurationVersionException exception)
+        {
+            var blockingWindow = new Window
+            {
+                Content = new Grid(),
+                Title = FoundryApplicationInfo.AppNameAndVersion
+            };
+            MainWindow = blockingWindow;
+            blockingWindow.Closed += OnMainWindowClosed;
+            blockingWindow.Activate();
+
+            string message = $"{exception.Message}{Environment.NewLine}{Environment.NewLine}" +
+                $"Update Foundry before opening this file. Foundry left it unchanged:{Environment.NewLine}" +
+                Constants.FoundryConfigurationStatePath;
+            IApplicationLocalizationService localizationService = GetService<IApplicationLocalizationService>();
+            await GetService<IDialogService>().ShowMessageAsync(new DialogRequest(
+                FoundryApplicationInfo.AppNameAndVersion,
+                message,
+                localizationService.GetString("Common.Close")));
+            blockingWindow.Close();
         }
 
         private static async Task InitializeAppAsync()

@@ -5,6 +5,7 @@
 using System.IO;
 using System.Text.Json;
 using Foundry.Deploy.Models.Configuration;
+using Foundry.Core.Services.Configuration;
 using ConfigurationSchemaVersions = Foundry.Core.Models.Configuration.ConfigurationSchemaVersions;
 using Microsoft.Extensions.Logging;
 
@@ -47,9 +48,14 @@ public sealed class DeployConfigurationService : IDeployConfigurationService
 
         try
         {
-            using FileStream stream = File.OpenRead(_configurationPath);
+            string json = File.ReadAllText(_configurationPath);
+            ConfigurationVersionGuard.ThrowIfUnsupported(
+                json,
+                "Foundry.Deploy",
+                ConfigurationSchemaVersions.DeployCurrent,
+                ConfigurationJsonDefaults.SerializerOptions);
             FoundryDeployConfigurationDocument? document = JsonSerializer.Deserialize<FoundryDeployConfigurationDocument>(
-                stream,
+                json,
                 ConfigurationJsonDefaults.SerializerOptions);
 
             if (document is null)
@@ -68,18 +74,17 @@ public sealed class DeployConfigurationService : IDeployConfigurationService
                 };
             }
 
-            Foundry.Deploy.Services.Deployment.Unattend.UnattendCatalog.Validate(document.Unattend, document.Protection?.IsEnabled == true);
-
-            document = DeployConfigurationMigration.ApplySchemaMigrations(document);
-
             if (document.SchemaVersion > ConfigurationSchemaVersions.DeployCurrent)
             {
-                _logger.LogWarning(
-                    "Deploy configuration at '{ConfigurationPath}' uses schema version {SchemaVersion}, newer than supported schema version {SupportedSchemaVersion}. Unknown properties will be ignored.",
-                    _configurationPath,
+                throw new UnsupportedConfigurationVersionException(
+                    "Foundry.Deploy",
                     document.SchemaVersion,
                     ConfigurationSchemaVersions.DeployCurrent);
             }
+
+            Foundry.Deploy.Services.Deployment.Unattend.UnattendCatalog.Validate(document.Unattend, document.Protection?.IsEnabled == true);
+
+            document = DeployConfigurationMigration.ApplySchemaMigrations(document);
 
             bool isBootMediaUpdateRecommended = ConfigurationSchemaVersions.IsBootMediaUpdateRecommended(
                 document.SchemaVersion,
@@ -106,7 +111,7 @@ public sealed class DeployConfigurationService : IDeployConfigurationService
                 IsBootMediaUpdateRecommended = isBootMediaUpdateRecommended
             };
         }
-        catch (Exception ex) when (ex is InvalidDataException or IOException or UnauthorizedAccessException or JsonException or InvalidOperationException or ArgumentException)
+        catch (Exception ex) when (ex is UnsupportedConfigurationVersionException or InvalidDataException or IOException or UnauthorizedAccessException or JsonException or InvalidOperationException or ArgumentException)
         {
             _logger.LogWarning(
                 ex,
@@ -117,6 +122,7 @@ public sealed class DeployConfigurationService : IDeployConfigurationService
             {
                 ConfigurationPath = _configurationPath,
                 Exists = true,
+                IsUnsupportedSchemaVersion = ex is UnsupportedConfigurationVersionException,
                 FailureMessage = ex.Message
             };
         }

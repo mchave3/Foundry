@@ -10,7 +10,7 @@ public interface IMicrosoftUpdateCatalogFirmwareService
 {
     Task<MicrosoftUpdateCatalogFirmwareResult> DownloadAsync(
         HardwareProfile hardwareProfile,
-        string targetArchitecture,
+        OperatingSystemCatalogItem operatingSystem,
         string rawDirectory,
         string extractedDirectory,
         string cacheDirectory,

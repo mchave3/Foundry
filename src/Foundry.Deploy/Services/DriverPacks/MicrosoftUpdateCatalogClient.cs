@@ -3,6 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
+using System.IO;
+using System.Text.Json;
+using Foundry.Deploy.Services.Catalog;
+using Foundry.Deploy.Services.Download;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.RegularExpressions;
@@ -14,7 +18,7 @@ namespace Foundry.Deploy.Services.DriverPacks;
 
 public sealed class MicrosoftUpdateCatalogClient : IMicrosoftUpdateCatalogClient
 {
-    private static readonly HttpClient HttpClient = InsecureHttpClientFactory.Create(TimeSpan.FromMinutes(5));
+    private static readonly HttpClient DefaultHttpClient = AcquisitionHttpClientFactory.Create(TimeSpan.FromSeconds(20));
     private static readonly Uri HomeUri = new("https://www.catalog.update.microsoft.com/Home.aspx");
     private static readonly Uri DownloadDialogUri = new("https://www.catalog.update.microsoft.com/DownloadDialog.aspx");
     private static readonly Regex DownloadPropertyRegex = new(
@@ -22,43 +26,32 @@ public sealed class MicrosoftUpdateCatalogClient : IMicrosoftUpdateCatalogClient
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     private readonly ILogger<MicrosoftUpdateCatalogClient> _logger;
+    private readonly HttpClient _httpClient;
 
-    public MicrosoftUpdateCatalogClient(ILogger<MicrosoftUpdateCatalogClient> logger)
+    public MicrosoftUpdateCatalogClient(ILogger<MicrosoftUpdateCatalogClient> logger) : this(logger, DefaultHttpClient)
+    {
+    }
+
+    internal MicrosoftUpdateCatalogClient(ILogger<MicrosoftUpdateCatalogClient> logger, HttpClient httpClient)
     {
         _logger = logger;
+        _httpClient = httpClient;
     }
 
     public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default)
     {
         try
         {
-            using HttpResponseMessage response = await SendAsync(
-                    () => new HttpRequestMessage(HttpMethod.Head, HomeUri),
-                    cancellationToken)
-                .ConfigureAwait(false);
-
-            if (response.IsSuccessStatusCode)
-            {
-                return true;
-            }
+            await SendStringAsync(HomeUri.AbsoluteUri, "Microsoft Update Catalog availability", cancellationToken).ConfigureAwait(false);
+            return true;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
         }
         catch (Exception ex)
         {
-            _logger.LogWarning(ex, "Microsoft Update Catalog HEAD request failed. Falling back to GET.");
-        }
-
-        try
-        {
-            using HttpResponseMessage response = await SendAsync(
-                    () => new HttpRequestMessage(HttpMethod.Get, HomeUri),
-                    cancellationToken)
-                .ConfigureAwait(false);
-
-            return response.IsSuccessStatusCode;
-        }
-        catch (Exception ex)
-        {
-            _logger.LogWarning(ex, "Microsoft Update Catalog GET request failed.");
+            _logger.LogWarning("Microsoft Update Catalog is unavailable. FailureType={FailureType}", ex.GetType().Name);
             return false;
         }
     }
@@ -77,12 +70,7 @@ public sealed class MicrosoftUpdateCatalogClient : IMicrosoftUpdateCatalogClient
         var document = new HtmlDocument();
         document.LoadHtml(html);
 
-        HtmlNode? errorNode = document.GetElementbyId("errorPageDisplayedError");
-        if (errorNode is not null)
-        {
-            _logger.LogWarning("Microsoft Update Catalog search returned an error page: {ErrorText}", HtmlEntity.DeEntitize(errorNode.InnerText).Trim());
-            return [];
-        }
+        ThrowIfCatalogError(document);
 
         if (document.GetElementbyId("ctl00_catalogBody_noResultText") is not null)
         {
@@ -92,21 +80,25 @@ public sealed class MicrosoftUpdateCatalogClient : IMicrosoftUpdateCatalogClient
         HtmlNode? table = document.GetElementbyId("ctl00_catalogBody_updateMatches");
         if (table is null)
         {
-            _logger.LogWarning("Microsoft Update Catalog search did not return the expected results table for query '{SearchQuery}'.", searchQuery);
-            return [];
+            throw new HttpRequestException("Microsoft Update Catalog search did not return the expected results table.");
         }
 
         HtmlNodeCollection? rows = table.SelectNodes(".//tr");
         if (rows is null || rows.Count == 0)
         {
-            return [];
+            throw new HttpRequestException("Microsoft Update Catalog search returned an empty results table without a no-results marker.");
         }
 
-        IEnumerable<MicrosoftUpdateCatalogUpdate> parsed = rows
+        MicrosoftUpdateCatalogUpdate[] parsed = rows
             .Where(row => !string.Equals(row.Id, "headerRow", StringComparison.OrdinalIgnoreCase))
             .Select(ParseUpdate)
             .Where(update => update is not null)
-            .Cast<MicrosoftUpdateCatalogUpdate>();
+            .Cast<MicrosoftUpdateCatalogUpdate>()
+            .ToArray();
+        if (parsed.Length == 0)
+        {
+            throw new HttpRequestException("Microsoft Update Catalog search returned no usable result rows without a no-results marker.");
+        }
 
         return descending
             ? parsed.OrderByDescending(update => update.LastUpdated ?? DateTimeOffset.MinValue).ThenBy(update => update.Title, StringComparer.OrdinalIgnoreCase).ToArray()
@@ -119,7 +111,7 @@ public sealed class MicrosoftUpdateCatalogClient : IMicrosoftUpdateCatalogClient
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(updateId);
 
-        string payload = $"[{{\"size\":0,\"updateID\":\"{updateId}\",\"uidInfo\":\"{updateId}\"}}]";
+        string payload = JsonSerializer.Serialize(new[] { new { size = 0, updateID = updateId, uidInfo = updateId } });
         string html = await SendFormAsync(
                 DownloadDialogUri.ToString(),
                 [new KeyValuePair<string, string>("updateIDs", payload)],
@@ -127,7 +119,18 @@ public sealed class MicrosoftUpdateCatalogClient : IMicrosoftUpdateCatalogClient
                 cancellationToken)
             .ConfigureAwait(false);
 
+        var document = new HtmlDocument();
+        document.LoadHtml(html);
+        ThrowIfCatalogError(document);
         return ParseDownloads(html, _logger);
+    }
+
+    private static void ThrowIfCatalogError(HtmlDocument document)
+    {
+        if (document.GetElementbyId("errorPageDisplayedError") is not null)
+        {
+            throw new HttpRequestException("Microsoft Update Catalog returned a remote error page.");
+        }
     }
 
     internal static IReadOnlyList<MicrosoftUpdateCatalogDownload> ParseDownloads(string html, ILogger<MicrosoftUpdateCatalogClient> logger)
@@ -137,6 +140,7 @@ public sealed class MicrosoftUpdateCatalogClient : IMicrosoftUpdateCatalogClient
             return [];
         }
 
+        string revision = CatalogContentIdentity.Calculate(html);
         Dictionary<int, Dictionary<string, string>> files = [];
         foreach (Match match in DownloadPropertyRegex.Matches(html))
         {
@@ -159,6 +163,7 @@ public sealed class MicrosoftUpdateCatalogClient : IMicrosoftUpdateCatalogClient
             .Select(pair => CreateDownload(pair.Value, logger))
             .Where(download => download is not null)
             .Cast<MicrosoftUpdateCatalogDownload>()
+            .Select(download => download with { CatalogRevision = revision })
             .ToArray();
     }
 
@@ -170,11 +175,17 @@ public sealed class MicrosoftUpdateCatalogClient : IMicrosoftUpdateCatalogClient
             return null;
         }
 
-        string fileName = properties.GetValueOrDefault("fileName") ?? MicrosoftUpdateCatalogSupport.ResolveFileNameFromUrl(downloadUrl);
+        var sourceUri = new Uri(downloadUrl, UriKind.Absolute);
+        if (sourceUri.Host.Equals("www.download.windowsupdate.com", StringComparison.OrdinalIgnoreCase))
+        {
+            sourceUri = new UriBuilder(sourceUri) { Host = "download.windowsupdate.com" }.Uri;
+        }
+        string fileName = properties.GetValueOrDefault("fileName") ?? Path.GetFileName(sourceUri.LocalPath);
+        ArtifactIntegrityPolicy.ValidateFileName(fileName);
         return new MicrosoftUpdateCatalogDownload
         {
-            DownloadUrl = downloadUrl.Replace("www.download.windowsupdate", "download.windowsupdate", StringComparison.OrdinalIgnoreCase),
-            FileName = MicrosoftUpdateCatalogSupport.SanitizePathSegment(fileName),
+            DownloadUrl = sourceUri.AbsoluteUri,
+            FileName = fileName,
             Sha1 = DecodeBase64Hash(properties.GetValueOrDefault("digest"), "SHA1", logger),
             Sha256 = DecodeBase64Hash(properties.GetValueOrDefault("sha256"), "SHA256", logger),
             Architectures = properties.GetValueOrDefault("architectures") ?? string.Empty,
@@ -191,12 +202,16 @@ public sealed class MicrosoftUpdateCatalogClient : IMicrosoftUpdateCatalogClient
 
         try
         {
-            return Convert.ToHexString(Convert.FromBase64String(value));
+            byte[] digest = Convert.FromBase64String(value);
+            if (digest.Length != (algorithm == "SHA256" ? 32 : 20))
+            {
+                throw new InvalidDataException("Microsoft Update Catalog digest length is invalid.");
+            }
+            return Convert.ToHexString(digest);
         }
         catch (FormatException ex)
         {
-            logger.LogWarning(ex, "Microsoft Update Catalog returned an invalid {HashAlgorithm} hash.", algorithm);
-            return string.Empty;
+            throw new InvalidDataException("Microsoft Update Catalog digest encoding is invalid.", ex);
         }
     }
 
@@ -207,74 +222,25 @@ public sealed class MicrosoftUpdateCatalogClient : IMicrosoftUpdateCatalogClient
             .Replace("\\\\", "\\", StringComparison.Ordinal);
     }
 
-    private async Task<HttpResponseMessage> SendAsync(
-        Func<HttpRequestMessage> requestFactory,
-        CancellationToken cancellationToken)
+    private Task<string> SendStringAsync(string requestUri, string operationName, CancellationToken cancellationToken)
     {
-        return await HttpRetryPolicy
-            .ExecuteAsync(
-                async ct =>
-                {
-                    using HttpRequestMessage request = requestFactory();
-                    ApplyNoCacheHeaders(request);
-                    return await HttpClient
-                        .SendAsync(request, HttpCompletionOption.ResponseHeadersRead, ct)
-                        .ConfigureAwait(false);
-                },
-                _logger,
-                "Microsoft Update Catalog request",
-                cancellationToken)
-            .ConfigureAwait(false);
+        return HttpTextFetcher.SendStringWithRetryAsync(_httpClient, () =>
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
+            ApplyNoCacheHeaders(request);
+            return request;
+        }, _logger, operationName, cancellationToken);
     }
 
-    private async Task<string> SendStringAsync(
-        string requestUri,
-        string operationName,
-        CancellationToken cancellationToken)
+    private Task<string> SendFormAsync(string requestUri, IReadOnlyList<KeyValuePair<string, string>> formValues,
+        string operationName, CancellationToken cancellationToken)
     {
-        return await HttpRetryPolicy
-            .ExecuteAsync(
-                async ct =>
-                {
-                    using HttpRequestMessage request = new(HttpMethod.Get, requestUri);
-                    ApplyNoCacheHeaders(request);
-                    using HttpResponseMessage response = await HttpClient
-                        .SendAsync(request, HttpCompletionOption.ResponseContentRead, ct)
-                        .ConfigureAwait(false);
-                    response.EnsureSuccessStatusCode();
-                    return await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-                },
-                _logger,
-                operationName,
-                cancellationToken)
-            .ConfigureAwait(false);
-    }
-
-    private async Task<string> SendFormAsync(
-        string requestUri,
-        IReadOnlyList<KeyValuePair<string, string>> formValues,
-        string operationName,
-        CancellationToken cancellationToken)
-    {
-        return await HttpRetryPolicy
-            .ExecuteAsync(
-                async ct =>
-                {
-                    using HttpRequestMessage request = new(HttpMethod.Post, requestUri)
-                    {
-                        Content = new FormUrlEncodedContent(formValues)
-                    };
-                    ApplyNoCacheHeaders(request);
-                    using HttpResponseMessage response = await HttpClient
-                        .SendAsync(request, HttpCompletionOption.ResponseContentRead, ct)
-                        .ConfigureAwait(false);
-                    response.EnsureSuccessStatusCode();
-                    return await response.Content.ReadAsStringAsync(ct).ConfigureAwait(false);
-                },
-                _logger,
-                operationName,
-                cancellationToken)
-            .ConfigureAwait(false);
+        return HttpTextFetcher.SendStringWithRetryAsync(_httpClient, () =>
+        {
+            var request = new HttpRequestMessage(HttpMethod.Post, requestUri) { Content = new FormUrlEncodedContent(formValues) };
+            ApplyNoCacheHeaders(request);
+            return request;
+        }, _logger, operationName, cancellationToken);
     }
 
     private static void ApplyNoCacheHeaders(HttpRequestMessage request)

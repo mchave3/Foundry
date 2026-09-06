@@ -65,7 +65,7 @@ function Invoke-ProcessAndWait {
 
     Write-FoundryLog "Starting ${OperationName}: $FilePath $($ArgumentList -join ' ')"
     $operationStartedAt = [DateTimeOffset]::Now
-    $process = Start-Process -FilePath $FilePath -ArgumentList $ArgumentList -Wait -PassThru
+    $process = Start-Process -FilePath $FilePath -ArgumentList $ArgumentList -WindowStyle Hidden -Wait -PassThru
     $operationDuration = [DateTimeOffset]::Now - $operationStartedAt
     Write-FoundryLog "$OperationName exited with code $($process.ExitCode) after $($operationDuration.ToString('c'))."
 
@@ -75,6 +75,43 @@ function Invoke-ProcessAndWait {
 }
 
 $DriverPathRegistered = $false
+$PackageLock = $null
+$InstallationCompleted = $false
+
+function Assert-DriverPackageTrust {
+    param([string]$Path, [string]$Kind)
+
+    # Exact subjects qualified from official driver-package signature tables; never accept a substring match.
+    $expectedSubject = switch ($Kind) {
+        'LenovoExecutable' { 'CN=Lenovo, OU=G10, O=Lenovo, L=Morrisville, S=North Carolina, C=US' }
+        'SurfaceMsi' { 'CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US' }
+        default { throw 'Trusted publisher policy is unavailable for this driver package family.' }
+    }
+
+    $job = Start-Job -ScriptBlock {
+        param($FilePath)
+        $ErrorActionPreference = 'Stop'
+        $signature = Microsoft.PowerShell.Security\Get-AuthenticodeSignature -LiteralPath $FilePath
+        [pscustomobject]@{ Status = $signature.Status.ToString(); Subject = $signature.SignerCertificate.Subject }
+    } -ArgumentList $Path
+
+    try {
+        if (-not (Wait-Job -Job $job -Timeout 120)) {
+            throw 'Driver package signature verification exceeded its two-minute deadline.'
+        }
+        if ($job.State -ne 'Completed') {
+            throw 'Windows could not complete the driver package signature check.'
+        }
+        $result = @(Receive-Job -Job $job -ErrorAction Stop)
+        if ($result.Count -ne 1 -or $result[0].Status -cne 'Valid' -or $result[0].Subject -cne $expectedSubject) {
+            throw 'The driver package does not have a valid signature from the expected publisher.'
+        }
+    }
+    finally {
+        Stop-Job -Job $job -ErrorAction SilentlyContinue
+        Remove-Job -Job $job -Force -ErrorAction SilentlyContinue
+    }
+}
 
 try {
     Start-FoundryTranscript
@@ -82,9 +119,13 @@ try {
     Write-FoundryLog "CommandKind=$CommandKind"
     Write-FoundryLog "PackagePath=$ResolvedPackagePath"
 
-    if (-not (Test-Path -Path $ResolvedPackagePath -PathType Leaf)) {
+    if (-not (Test-Path -LiteralPath $ResolvedPackagePath -PathType Leaf)) {
         throw "Driver package was not found: $ResolvedPackagePath"
     }
+
+    $ResolvedPackagePath = [IO.Path]::GetFullPath($ResolvedPackagePath)
+    $PackageLock = [IO.File]::Open($ResolvedPackagePath, [IO.FileMode]::Open, [IO.FileAccess]::Read, [IO.FileShare]::Read)
+    Assert-DriverPackageTrust -Path $ResolvedPackagePath -Kind $CommandKind
 
     switch ($CommandKind) {
         'LenovoExecutable' {
@@ -116,6 +157,7 @@ try {
     }
 
     Write-FoundryLog "Foundry driver pack installation completed."
+    $InstallationCompleted = $true
 }
 finally {
     if ($DriverPathRegistered) {
@@ -130,9 +172,13 @@ finally {
         }
     }
 
-    if (Test-Path -Path $ResolvedPackagePath -PathType Leaf) {
+    if ($null -ne $PackageLock) {
+        $PackageLock.Dispose()
+    }
+
+    if ($InstallationCompleted -and (Test-Path -LiteralPath $ResolvedPackagePath -PathType Leaf)) {
         Write-FoundryLog "Removing staged package: $ResolvedPackagePath"
-        Remove-Item -Path $ResolvedPackagePath -Force
+        Remove-Item -LiteralPath $ResolvedPackagePath -Force
     }
 
     Stop-FoundryTranscript

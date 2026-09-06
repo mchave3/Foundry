@@ -253,7 +253,7 @@ public sealed class AutopilotHardwareHashCaptureServiceTests
             string fileName,
             string arguments,
             string workingDirectory,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }
@@ -262,7 +262,7 @@ public sealed class AutopilotHardwareHashCaptureServiceTests
             string fileName,
             IEnumerable<string> arguments,
             string workingDirectory,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null)
         {
             return RunAsync(fileName, arguments, workingDirectory, null, null, cancellationToken);
         }
@@ -273,7 +273,7 @@ public sealed class AutopilotHardwareHashCaptureServiceTests
             string workingDirectory,
             Action<string>? onOutputData,
             Action<string>? onErrorData,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null)
         {
             WasCalled = true;
             WorkingDirectory = workingDirectory;

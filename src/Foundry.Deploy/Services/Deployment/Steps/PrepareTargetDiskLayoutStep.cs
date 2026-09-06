@@ -21,6 +21,12 @@ public sealed class PrepareTargetDiskLayoutStep : DeploymentStepBase
 
     protected override async Task<DeploymentStepResult> ExecuteLiveAsync(DeploymentStepExecutionContext context, CancellationToken cancellationToken)
     {
+        if (context.RuntimeState.HardwareProfile?.FirmwareType != Foundry.Utilities.Hardware.WindowsFirmwareType.Uefi)
+        {
+            return DeploymentStepResult.Failed("Deployment requires UEFI boot mode.",
+                DeploymentFailure.Guard(DeploymentOperationNames.ValidateTarget, DeploymentFailureReasons.InvalidState, "unsupported_boot_firmware"));
+        }
+
         string workingDirectory = context.ResolveWorkspaceTempPath("Deployment");
         Directory.CreateDirectory(workingDirectory);
 
@@ -40,11 +46,12 @@ public sealed class PrepareTargetDiskLayoutStep : DeploymentStepBase
             DeploymentOperationNames.PartitionTargetDisk);
         DeploymentTargetLayout layout = await _windowsDeploymentService
             .PrepareTargetDiskAsync(
-                context.Request.TargetDiskNumber,
+                context.Request.ConfirmedTargetDisk!,
                 workingDirectory,
                 cancellationToken)
             .ConfigureAwait(false);
 
+        context.RuntimeState.TargetLayout = layout;
         context.RuntimeState.TargetSystemPartitionRoot = layout.SystemPartitionRoot;
         context.RuntimeState.TargetWindowsPartitionRoot = layout.WindowsPartitionRoot;
         context.RuntimeState.TargetRecoveryPartitionRoot = layout.RecoveryPartitionRoot;

@@ -17,21 +17,6 @@ namespace Foundry.Deploy.Tests;
 [Collection(nameof(SerilogCollection))]
 public sealed class DeploymentStepExecutionContextTests
 {
-    [Fact]
-    public void ResolvePreferredHash_PrefersPrimaryHashWhenPresent()
-    {
-        string hash = DeploymentStepExecutionContext.ResolvePreferredHash("  ABC123  ", "DEF456");
-
-        Assert.Equal("ABC123", hash);
-    }
-
-    [Fact]
-    public void ResolvePreferredHash_FallsBackToSecondaryHash()
-    {
-        string hash = DeploymentStepExecutionContext.ResolvePreferredHash(null, "  DEF456  ");
-
-        Assert.Equal("DEF456", hash);
-    }
 
     [Fact]
     public void ResolveFileName_WhenPreferredFileNameExists_SanitizesPreferredName()
@@ -119,8 +104,8 @@ public sealed class DeploymentStepExecutionContextTests
         Assert.NotNull(result?.Failure);
         Assert.Equal(DeploymentOperationNames.ValidateTargetDisk, result.Failure.OperationName);
         Assert.Equal(DeploymentFailureKinds.Validation, result.Failure.Kind);
-        Assert.Equal(DeploymentFailureReasons.MissingResource, result.Failure.Reason);
-        Assert.Equal("target_disk_not_found", result.Failure.Code);
+        Assert.Equal(DeploymentFailureReasons.InvalidState, result.Failure.Reason);
+        Assert.Equal("confirmed_target_disk_mismatch", result.Failure.Code);
     }
 
     [Fact]
@@ -144,7 +129,7 @@ public sealed class DeploymentStepExecutionContextTests
         Assert.Equal(DeploymentOperationNames.ValidateTargetDisk, result.Failure.OperationName);
         Assert.Equal(DeploymentFailureKinds.Validation, result.Failure.Kind);
         Assert.Equal(DeploymentFailureReasons.InvalidState, result.Failure.Reason);
-        Assert.Equal("target_disk_not_selectable", result.Failure.Code);
+        Assert.Equal("confirmed_target_disk_mismatch", result.Failure.Code);
     }
 
     [Fact]

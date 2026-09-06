@@ -6,6 +6,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text.Json;
 using Foundry.Connect.Models.Configuration;
+using Foundry.Core.Services.Configuration;
 using ConfigurationSchemaVersions = Foundry.Core.Models.Configuration.ConfigurationSchemaVersions;
 using CoreConnectNetworkSettings = Foundry.Core.Models.Configuration.ConnectNetworkSettings;
 using Foundry.Connect.Services.Runtime;
@@ -81,10 +82,23 @@ public sealed class ConnectConfigurationService : IConnectConfigurationService
         {
             _logger.LogInformation("Loading Foundry.Connect configuration from disk. ConfigurationPath={ConfigurationPath}", fullPath);
             string json = File.ReadAllText(fullPath);
+            ConfigurationVersionGuard.ThrowIfUnsupported(
+                json,
+                "Foundry.Connect",
+                ConfigurationSchemaVersions.ConnectCurrent,
+                JsonOptions);
             FoundryConnectConfiguration? configuration = JsonSerializer.Deserialize<FoundryConnectConfiguration>(json, JsonOptions);
             if (configuration is null)
             {
                 throw new FoundryConnectConfigurationException($"Configuration file is empty or invalid: {fullPath}");
+            }
+
+            if (configuration.SchemaVersion > ConfigurationSchemaVersions.ConnectCurrent)
+            {
+                throw new UnsupportedConfigurationVersionException(
+                    "Foundry.Connect",
+                    configuration.SchemaVersion,
+                    ConfigurationSchemaVersions.ConnectCurrent);
             }
 
             ApplySchemaCompatibilityState(configuration.SchemaVersion);
@@ -97,6 +111,12 @@ public sealed class ConnectConfigurationService : IConnectConfigurationService
         catch (FoundryConnectConfigurationException)
         {
             throw;
+        }
+        catch (UnsupportedConfigurationVersionException ex)
+        {
+            throw new FoundryConnectConfigurationException(
+                $"{ex.Message}{Environment.NewLine}Configuration path: {fullPath}",
+                ex);
         }
         catch (Exception ex)
         {
@@ -151,7 +171,7 @@ public sealed class ConnectConfigurationService : IConnectConfigurationService
         NetworkCapabilitiesOptions capabilities = configuration.Capabilities ?? new NetworkCapabilitiesOptions();
         InternetProbeOptions probe = configuration.InternetProbe ?? new InternetProbeOptions();
 
-        string[] probeUris = probe.ProbeUris
+        string[] probeUris = (probe.ProbeUris ?? [])
             .Where(static value => !string.IsNullOrWhiteSpace(value))
             .Select(static value => value.Trim())
             .Where(static value => Uri.TryCreate(value, UriKind.Absolute, out _))
@@ -178,14 +198,14 @@ public sealed class ConnectConfigurationService : IConnectConfigurationService
                 WifiProvisioned = capabilities.WifiProvisioned
             },
             Network = configuration.Network ?? new CoreConnectNetworkSettings(),
-            Dot1x = configuration.Dot1x ?? new Dot1xSettings(),
+            Dot1x = NormalizeDot1x(configuration.Dot1x),
             Wifi = NormalizeWifi(configuration.Wifi),
             InternetProbe = new InternetProbeOptions
             {
                 ProbeUris = probeUris,
                 TimeoutSeconds = Math.Clamp(probe.TimeoutSeconds, 1, 30)
             },
-            Telemetry = configuration.Telemetry
+            Telemetry = configuration.Telemetry ?? new Foundry.Telemetry.TelemetrySettings()
         };
     }
 
@@ -257,7 +277,25 @@ public sealed class ConnectConfigurationService : IConnectConfigurationService
     {
         return wifi is null
             ? new WifiSettings()
-            : wifi with { PassphraseSecret = null };
+            : wifi with
+            {
+                EnterpriseAuthenticationMode = Enum.IsDefined(wifi.EnterpriseAuthenticationMode)
+                    ? wifi.EnterpriseAuthenticationMode
+                    : NetworkAuthenticationMode.UserOnly,
+                PassphraseSecret = null
+            };
+    }
+
+    private static Dot1xSettings NormalizeDot1x(Dot1xSettings? dot1x)
+    {
+        return dot1x is null
+            ? new Dot1xSettings()
+            : dot1x with
+            {
+                AuthenticationMode = Enum.IsDefined(dot1x.AuthenticationMode)
+                    ? dot1x.AuthenticationMode
+                    : NetworkAuthenticationMode.MachineOnly
+            };
     }
 
     private static byte[] LoadMediaSecretsKey(string configurationPath)

@@ -31,15 +31,20 @@ public sealed class WinPeDriverInjectionService : IWinPeDriverInjectionService
         }
 
         string dismPath = ResolveDismPath(options.DismExecutablePath);
-        string recurse = options.RecurseSubdirectories ? " /Recurse" : string.Empty;
 
         foreach (string packagePath in options.DriverPackagePaths)
         {
             string normalizedPath = packagePath.Trim();
+            var arguments = new List<string> { $"/Image:{options.MountedImagePath}", "/Add-Driver", $"/Driver:{normalizedPath}" };
+            if (options.RecurseSubdirectories)
+            {
+                arguments.Add("/Recurse");
+            }
+
             WinPeProcessExecution result = await WinPeDismProcessRunner.RunAsync(
                 _processRunner,
                 dismPath,
-                $"/Image:{WinPeProcessRunner.Quote(options.MountedImagePath)} /Add-Driver /Driver:{WinPeProcessRunner.Quote(normalizedPath)}{recurse}",
+                arguments,
                 options.WorkingDirectoryPath,
                 "Injecting drivers with DISM.",
                 options.DismProgress,

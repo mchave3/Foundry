@@ -13,6 +13,43 @@ namespace Foundry.Connect.Tests;
 
 public sealed class NetworkBootstrapServiceTests
 {
+    [Theory]
+    [InlineData("provision")]
+    [InlineData("configured")]
+    [InlineData("discovered")]
+    public async Task NetworkOperation_WhenCommandTimesOut_StopsAndReturnsFailure(string operation)
+    {
+        var configuration = new FoundryConnectConfiguration
+        {
+            Capabilities = new NetworkCapabilitiesOptions { WifiProvisioned = true },
+            Wifi = new WifiSettings
+            {
+                IsEnabled = true,
+                Ssid = "Foundry",
+                SecurityType = "Open"
+            }
+        };
+        int commands = 0;
+        var service = new NetworkBootstrapService(configuration, new FakeConnectConfigurationService(configuration),
+            new CapturingNetworkProfileRoamingService(), NullLogger<NetworkBootstrapService>.Instance,
+            getWifiInterfaceIds: static () => [Guid.Parse("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee")],
+            executeNetsh: (_, _) =>
+            {
+                commands++;
+                throw new TimeoutException("Owned command deadline expired.");
+            });
+
+        NetworkBootstrapResult result = await (operation switch
+        {
+            "provision" => service.ApplyProvisionedSettingsAsync(TestContext.Current.CancellationToken),
+            "configured" => service.ConnectConfiguredWifiAsync(TestContext.Current.CancellationToken),
+            _ => service.ConnectWifiNetworkAsync("Foundry", null, "Open", null, TestContext.Current.CancellationToken)
+        });
+
+        Assert.Equal("timeout", Assert.Single(result.HandledFailures).Reason);
+        Assert.Equal(1, commands);
+    }
+
     [Fact]
     public void SelectEthernetInterfaceName_UsesFirstNamedEthernetRegardlessOfStatus()
     {

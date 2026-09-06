@@ -64,7 +64,8 @@ public sealed class ArchiveExtractionService : IArchiveExtractionService
                 workingDirectory,
                 onOutput,
                 onError,
-                cancellationToken)
+                cancellationToken,
+                TimeSpan.FromHours(4))
             .ConfigureAwait(false);
 
         if (!execution.IsSuccess)

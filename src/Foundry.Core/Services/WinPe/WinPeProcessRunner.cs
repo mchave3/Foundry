@@ -12,14 +12,26 @@ namespace Foundry.Core.Services.WinPe;
 public sealed class WinPeProcessRunner : IWinPeProcessOutputRunner
 {
     private const string InternalSetEnvKey = "FOUNDRY_ADK_SETENV_PATH";
+    private static readonly TimeSpan DefaultExecutionTimeout = TimeSpan.FromHours(4);
     private readonly UtilityProcessRunner _processRunner = new();
+
+    /// <inheritdoc />
+    public Task<WinPeProcessExecution> RunAsync(
+        string fileName,
+        IReadOnlyList<string> arguments,
+        string workingDirectory,
+        CancellationToken cancellationToken,
+        IReadOnlyDictionary<string, string>? environmentOverrides = null,
+        TimeSpan? executionTimeout = null) =>
+        RunWithOutputAsync(fileName, arguments, workingDirectory, null, null, cancellationToken, environmentOverrides, executionTimeout);
 
     public async Task<WinPeProcessExecution> RunAsync(
         string fileName,
         string arguments,
         string workingDirectory,
         CancellationToken cancellationToken,
-        IReadOnlyDictionary<string, string>? environmentOverrides = null)
+        IReadOnlyDictionary<string, string>? environmentOverrides = null,
+        TimeSpan? executionTimeout = null)
     {
         return await RunWithOutputAsync(
             fileName,
@@ -28,29 +40,50 @@ public sealed class WinPeProcessRunner : IWinPeProcessOutputRunner
             null,
             null,
             cancellationToken,
-            environmentOverrides).ConfigureAwait(false);
+            environmentOverrides,
+            executionTimeout).ConfigureAwait(false);
     }
 
-    public async Task<WinPeProcessExecution> RunWithOutputAsync(
+    /// <inheritdoc />
+    public Task<WinPeProcessExecution> RunWithOutputAsync(
+        string fileName,
+        IReadOnlyList<string> arguments,
+        string workingDirectory,
+        Action<string>? onOutputData,
+        Action<string>? onErrorData,
+        CancellationToken cancellationToken,
+        IReadOnlyDictionary<string, string>? environmentOverrides = null,
+        TimeSpan? executionTimeout = null) =>
+        RunCoreAsync(new ProcessExecutionRequest(fileName, arguments, workingDirectory), onOutputData, onErrorData, cancellationToken, environmentOverrides, executionTimeout);
+
+    public Task<WinPeProcessExecution> RunWithOutputAsync(
         string fileName,
         string arguments,
         string workingDirectory,
         Action<string>? onOutputData,
         Action<string>? onErrorData,
         CancellationToken cancellationToken,
-        IReadOnlyDictionary<string, string>? environmentOverrides = null)
-    {
-        ArgumentException.ThrowIfNullOrWhiteSpace(fileName);
-        ArgumentException.ThrowIfNullOrWhiteSpace(workingDirectory);
+        IReadOnlyDictionary<string, string>? environmentOverrides = null,
+        TimeSpan? executionTimeout = null) =>
+        RunCoreAsync(ProcessExecutionRequest.FromRawArguments(fileName, arguments, workingDirectory), onOutputData, onErrorData, cancellationToken, environmentOverrides, executionTimeout);
 
-        ProcessExecutionRequest request = ProcessExecutionRequest.FromRawArguments(
-            fileName,
-            arguments,
-            workingDirectory) with
+    private async Task<WinPeProcessExecution> RunCoreAsync(
+        ProcessExecutionRequest request,
+        Action<string>? onOutputData,
+        Action<string>? onErrorData,
+        CancellationToken cancellationToken,
+        IReadOnlyDictionary<string, string>? environmentOverrides,
+        TimeSpan? executionTimeout)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(request.FileName);
+        ArgumentException.ThrowIfNullOrWhiteSpace(request.WorkingDirectory);
+
+        request = request with
         {
             EnvironmentOverrides = FilterEnvironmentOverrides(environmentOverrides),
             OnOutputData = onOutputData,
-            OnErrorData = onErrorData
+            OnErrorData = onErrorData,
+            ExecutionTimeout = executionTimeout ?? DefaultExecutionTimeout
         };
 
         try
@@ -67,7 +100,7 @@ public sealed class WinPeProcessRunner : IWinPeProcessOutputRunner
         }
         catch (ProcessStartException ex)
         {
-            throw new InvalidOperationException($"Failed to start process '{fileName}'.", ex);
+            throw new InvalidOperationException($"Failed to start process '{request.FileName}'.", ex);
         }
     }
 
@@ -75,7 +108,8 @@ public sealed class WinPeProcessRunner : IWinPeProcessOutputRunner
         string scriptPath,
         string scriptArguments,
         string workingDirectory,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        TimeSpan? executionTimeout = null)
     {
         return RunCmdScriptCoreAsync(
             scriptPath,
@@ -83,14 +117,16 @@ public sealed class WinPeProcessRunner : IWinPeProcessOutputRunner
             workingDirectory,
             cancellationToken,
             callTargetScript: true,
-            useCommandExtensionsStripQuoteRules: true);
+            useCommandExtensionsStripQuoteRules: true,
+            executionTimeout);
     }
 
     public Task<WinPeProcessExecution> RunCmdScriptDirectAsync(
         string scriptPath,
         string scriptArguments,
         string workingDirectory,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken,
+        TimeSpan? executionTimeout = null)
     {
         return RunCmdScriptCoreAsync(
             scriptPath,
@@ -98,14 +134,58 @@ public sealed class WinPeProcessRunner : IWinPeProcessOutputRunner
             workingDirectory,
             cancellationToken,
             callTargetScript: false,
-            useCommandExtensionsStripQuoteRules: false);
+            useCommandExtensionsStripQuoteRules: false,
+            executionTimeout);
     }
 
+    /// <summary>Quotes a batch value; expansion and control syntax are unsupported, including inside quotes.</summary>
     public static string Quote(string value)
     {
-        return value.Contains(' ', StringComparison.Ordinal)
-            ? $"\"{value}\""
-            : value;
+        ArgumentNullException.ThrowIfNull(value);
+        if (value.Contains('"'))
+        {
+            throw new ArgumentException("Batch paths and values cannot contain quotation marks.", nameof(value));
+        }
+
+        string quoted = $"\"{value}\"";
+        ValidateBatchArguments(quoted);
+        return quoted;
+    }
+
+    /// <summary>Validates batch paths and grammar before a caller changes its workspace or output files.</summary>
+    internal static void ValidateCmdScript(string scriptPath, string scriptArguments)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(scriptPath);
+        _ = Quote(scriptPath);
+        ValidateBatchArguments(scriptArguments);
+        IReadOnlyDictionary<string, string>? environment = BuildAdkEnvironmentOverrides(scriptPath);
+        if (environment is not null && environment.TryGetValue(InternalSetEnvKey, out string? setEnvPath))
+        {
+            _ = Quote(setEnvPath);
+        }
+    }
+
+    private static void ValidateBatchArguments(string arguments)
+    {
+        ArgumentNullException.ThrowIfNull(arguments);
+        bool quoted = false;
+        foreach (char character in arguments)
+        {
+            if (character == '"')
+            {
+                quoted = !quoted;
+            }
+            else if (char.IsControl(character) || "%!^&|<>".Contains(character) ||
+                     (!quoted && character is '(' or ')'))
+            {
+                throw new ArgumentException("Batch paths and arguments contain unsupported command syntax. Use paths without expansion or control characters.", nameof(arguments));
+            }
+        }
+
+        if (quoted)
+        {
+            throw new ArgumentException("Batch arguments contain an unmatched quotation mark.", nameof(arguments));
+        }
     }
 
     private Task<WinPeProcessExecution> RunCmdScriptCoreAsync(
@@ -114,9 +194,10 @@ public sealed class WinPeProcessRunner : IWinPeProcessOutputRunner
         string workingDirectory,
         CancellationToken cancellationToken,
         bool callTargetScript,
-        bool useCommandExtensionsStripQuoteRules)
+        bool useCommandExtensionsStripQuoteRules,
+        TimeSpan? executionTimeout)
     {
-        ArgumentException.ThrowIfNullOrWhiteSpace(scriptPath);
+        ValidateCmdScript(scriptPath, scriptArguments);
 
         string normalizedScriptArguments = string.IsNullOrWhiteSpace(scriptArguments)
             ? string.Empty
@@ -136,8 +217,8 @@ public sealed class WinPeProcessRunner : IWinPeProcessOutputRunner
         }
 
         string switchS = useCommandExtensionsStripQuoteRules ? " /s" : string.Empty;
-        string arguments = $"/d{switchS} /c \"{command}\"";
-        return RunAsync(GetCommandProcessorPath(), arguments, workingDirectory, cancellationToken, environmentOverrides);
+        string arguments = $"/d /v:off{switchS} /c \"{command}\"";
+        return RunAsync(GetCommandProcessorPath(), arguments, workingDirectory, cancellationToken, environmentOverrides, executionTimeout);
     }
 
     private static string GetCommandProcessorPath()

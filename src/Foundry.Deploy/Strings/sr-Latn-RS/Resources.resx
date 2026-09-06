@@ -254,6 +254,9 @@ Radnja: Proverite atribute diska i pokušajte ponovo da ga primenite.</value>
   <data name="Disk.WarningSuffixFormat" xml:space="preserve">
     <value>| {0}</value>
   </data>
+  <data name="DriverPack.ManualSelectionWarning" xml:space="preserve">
+    <value>Manual selection: verify that this pack supports the detected hardware and selected Windows release. Package integrity and publisher checks still apply.</value>
+  </data>
   <data name="DriverPack.MicrosoftUpdateCatalog" xml:space="preserve">
     <value>Microsoft Update Catalog</value>
   </data>
@@ -989,6 +992,9 @@ Operativni sistem: {4}
   <data name="StepResult.CacheStrategyResolvedSimulation" xml:space="preserve">
     <value>Strategija keširanja je rešena (simulacija).</value>
   </data>
+  <data name="StepResult.ConfirmedDiskMismatch" xml:space="preserve">
+    <value>The confirmed target disk is unavailable, changed, or unsafe.</value>
+  </data>
   <data name="StepResult.DeferredDriverPackStagingUnsupportedCommand" xml:space="preserve">
     <value>Zatraženo je postavljanje paketa drajvera za prvo pokretanje bez podržane komande.</value>
   </data>
@@ -1177,6 +1183,9 @@ Operativni sistem: {4}
   </data>
   <data name="StepResult.TargetWindowsPartitionUnavailableForInteractiveAutopilotRegistration" xml:space="preserve">
     <value>Ciljna Windows particija nije dostupna za pripremu interaktivnog pomoćnika za registraciju Autopilota.</value>
+  </data>
+  <data name="StepResult.UefiRequired" xml:space="preserve">
+    <value>Deployment requires UEFI boot mode.</value>
   </data>
   <data name="StepResult.UnsupportedDriverPackInstallMode" xml:space="preserve">
     <value>Nepodržani režim instalacije paketa drajvera.</value>

@@ -40,7 +40,7 @@ public sealed class WinPeMountSession : IAsyncDisposable
     {
         Directory.CreateDirectory(mountDirectoryPath);
 
-        string args = $"/Mount-Image /ImageFile:{WinPeProcessRunner.Quote(bootWimPath)} /Index:1 /MountDir:{WinPeProcessRunner.Quote(mountDirectoryPath)}";
+        string[] args = ["/Mount-Image", $"/ImageFile:{bootWimPath}", "/Index:1", $"/MountDir:{mountDirectoryPath}"];
         WinPeProcessExecution mountResult = await WinPeDismProcessRunner.RunAsync(
             processRunner,
             dismPath,
@@ -78,7 +78,7 @@ public sealed class WinPeMountSession : IAsyncDisposable
         WinPeProcessExecution commitResult = await WinPeDismProcessRunner.RunAsync(
             _processRunner,
             _dismPath,
-            $"/Unmount-Image /MountDir:{WinPeProcessRunner.Quote(MountDirectoryPath)} /Commit",
+            ["/Unmount-Image", $"/MountDir:{MountDirectoryPath}", "/Commit"],
             _workingDirectory,
             "Committing image changes with DISM.",
             dismProgress,
@@ -92,7 +92,7 @@ public sealed class WinPeMountSession : IAsyncDisposable
 
         WinPeProcessExecution discardResult = await _processRunner.RunAsync(
             _dismPath,
-            $"/Unmount-Image /MountDir:{WinPeProcessRunner.Quote(MountDirectoryPath)} /Discard",
+            ["/Unmount-Image", $"/MountDir:{MountDirectoryPath}", "/Discard"],
             _workingDirectory,
             cancellationToken).ConfigureAwait(false);
 
@@ -121,7 +121,7 @@ public sealed class WinPeMountSession : IAsyncDisposable
 
         WinPeProcessExecution discardResult = await _processRunner.RunAsync(
             _dismPath,
-            $"/Unmount-Image /MountDir:{WinPeProcessRunner.Quote(MountDirectoryPath)} /Discard",
+            ["/Unmount-Image", $"/MountDir:{MountDirectoryPath}", "/Discard"],
             _workingDirectory,
             cancellationToken).ConfigureAwait(false);
 

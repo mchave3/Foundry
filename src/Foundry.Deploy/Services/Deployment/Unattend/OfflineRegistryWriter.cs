@@ -74,7 +74,7 @@ internal sealed class OfflineRegistryWriter
         CancellationToken cancellationToken)
     {
         ProcessExecutionResult result = await _processRunner
-            .RunAsync(fileName, arguments, workingDirectory, cancellationToken)
+            .RunAsync(fileName, arguments, workingDirectory, cancellationToken, TimeSpan.FromMinutes(2))
             .ConfigureAwait(false);
 
         if (!result.IsSuccess)

@@ -18,9 +18,9 @@ public static class OperatingSystemSelectionSettingsNormalizer
     /// </summary>
     /// <param name="settings">The user-facing OS selection policy.</param>
     /// <returns>A normalized policy that is safe to persist.</returns>
-    public static OperatingSystemSelectionSettings Normalize(OperatingSystemSelectionSettings settings)
+    public static OperatingSystemSelectionSettings Normalize(OperatingSystemSelectionSettings? settings)
     {
-        ArgumentNullException.ThrowIfNull(settings);
+        settings ??= new OperatingSystemSelectionSettings();
 
         string[] allowedLanguages = CanonicalizeLanguageCodes(settings.AllowedLanguageCodes);
         string? defaultLanguage = NormalizeDefault(
@@ -183,7 +183,7 @@ public static class OperatingSystemSelectionSettingsNormalizer
     {
         HashSet<string> seen = new(StringComparer.OrdinalIgnoreCase);
         List<string> result = [];
-        foreach (string languageCode in languageCodes)
+        foreach (string languageCode in languageCodes ?? [])
         {
             string canonicalCode = CultureCode.Canonicalize(languageCode);
             if (string.IsNullOrWhiteSpace(canonicalCode) ||
@@ -211,7 +211,7 @@ public static class OperatingSystemSelectionSettingsNormalizer
     {
         HashSet<string> seen = new(StringComparer.OrdinalIgnoreCase);
         List<string> result = [];
-        foreach (string value in values)
+        foreach (string value in values ?? [])
         {
             string? canonical = CanonicalizeKnownValue(value, supportedValues, normalize);
             if (!string.IsNullOrWhiteSpace(canonical) && seen.Add(canonical))

@@ -5,6 +5,7 @@
 using System.IO;
 using Foundry.Deploy.Models;
 using Foundry.Deploy.Services.Download;
+using Foundry.Deploy.Services.Cache;
 using Foundry.Deploy.Services.DriverPacks;
 using Foundry.Deploy.Services.Logging;
 using Foundry.Utilities.IO;
@@ -15,13 +16,16 @@ public sealed class DownloadDriverPackStep : DeploymentStepBase
 {
     private readonly IMicrosoftUpdateCatalogDriverService _microsoftUpdateCatalogDriverService;
     private readonly IArtifactDownloadService _artifactDownloadService;
+    private readonly PayloadCachePlacementService _placement;
 
     public DownloadDriverPackStep(
         IMicrosoftUpdateCatalogDriverService microsoftUpdateCatalogDriverService,
-        IArtifactDownloadService artifactDownloadService)
+        IArtifactDownloadService artifactDownloadService,
+        PayloadCachePlacementService? placement = null)
     {
         _microsoftUpdateCatalogDriverService = microsoftUpdateCatalogDriverService;
         _artifactDownloadService = artifactDownloadService;
+        _placement = placement ?? new PayloadCachePlacementService(artifactDownloadService, new VolumeStorageProbe());
     }
 
     public override string Name => DeploymentStepNames.DownloadDriverPack;
@@ -55,9 +59,12 @@ public sealed class DownloadDriverPackStep : DeploymentStepBase
                 await context.AppendLogAsync(DeploymentLogLevel.Info, result.Message, cancellationToken).ConfigureAwait(false);
                 foreach (MicrosoftUpdateCatalogDownloadedDriver downloadedDriver in result.DownloadedDrivers)
                 {
+                    string sourceHost = Uri.TryCreate(downloadedDriver.DownloadUrl, UriKind.Absolute, out Uri? source)
+                        ? source.Host : "unavailable";
+                    string updateId = new(downloadedDriver.UpdateId.Where(ch => char.IsLetterOrDigit(ch) || ch is '-' or '_').Take(64).ToArray());
                     await context.AppendLogAsync(
                         DeploymentLogLevel.Info,
-                        $"Microsoft Update Catalog driver downloaded | UpdateId={downloadedDriver.UpdateId} | Title={downloadedDriver.Title} | Version={downloadedDriver.Version} | Size={downloadedDriver.Size} | Url={downloadedDriver.DownloadUrl}",
+                        $"Microsoft Update Catalog driver downloaded | UpdateId={updateId} | SourceHost={sourceHost}",
                         cancellationToken).ConfigureAwait(false);
                 }
 
@@ -82,25 +89,21 @@ public sealed class DownloadDriverPackStep : DeploymentStepBase
                 context.RuntimeState.DriverPackName = driverPack.Name;
                 context.RuntimeState.DriverPackUrl = driverPack.DownloadUrl;
 
-                string driverPackDirectory = Path.Combine(
-                    context.ResolveDriverPackCacheRoot(driverPack.SizeBytes),
-                    DeploymentStepExecutionContext.SanitizePathSegment(driverPack.Manufacturer));
-                Directory.CreateDirectory(driverPackDirectory);
-
-                string archiveName = DeploymentStepExecutionContext.ResolveFileName(driverPack.FileName, driverPack.DownloadUrl);
-                string archivePath = Path.Combine(driverPackDirectory, archiveName);
+                ArtifactIdentity artifact = ArtifactIntegrityPolicy.FromDriverPack(driverPack);
+                string manufacturer = DeploymentStepExecutionContext.SanitizePathSegment(driverPack.Manufacturer);
+                string? targetRoot = context.ResolveTargetPayloadCacheRoot("DriverPacks");
                 context.EmitCurrentStepIndeterminate("Downloading driver pack...", "Checking cache...", DeploymentOperationNames.DownloadDriverPack);
+                PayloadCachePlacement placement = await _placement.ResolveAsync(artifact,
+                    Path.Combine(context.ResolveDriverPackCacheRoot(), manufacturer),
+                    targetRoot is null ? null : Path.Combine(targetRoot, manufacturer), cancellationToken).ConfigureAwait(false);
                 IProgress<DownloadProgress> driverPackDownloadProgress = context.CreateDownloadProgressReporter(
                     "Driver pack",
                     DeploymentOperationNames.DownloadDriverPack);
 
-                ArtifactDownloadResult download = await _artifactDownloadService
+                ArtifactDownloadResult download = placement.CachedArtifact ?? await _artifactDownloadService
                     .DownloadAsync(
-                        driverPack.DownloadUrl,
-                        archivePath,
-                        expectedHash: driverPack.Sha256,
-                        expectedSizeBytes: driverPack.SizeBytes,
-                        artifactKind: "OemDriverPack",
+                        artifact,
+                        placement.Path,
                         cancellationToken: cancellationToken,
                         progress: driverPackDownloadProgress)
                     .ConfigureAwait(false);

@@ -759,7 +759,7 @@ public sealed partial class DeploymentSessionViewModel : LocalizedViewModelBase
             }
 
             ProcessExecutionResult result = await _processRunner
-                .RunAsync(rebootExecutablePath, "Reboot", Path.GetTempPath())
+                .RunAsync(rebootExecutablePath, ["Reboot"], Path.GetTempPath(), executionTimeout: TimeSpan.FromMinutes(2))
                 .ConfigureAwait(false);
 
             if (result.ExitCode == 0)

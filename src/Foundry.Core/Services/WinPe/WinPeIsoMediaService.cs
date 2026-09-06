@@ -40,6 +40,14 @@ public sealed class WinPeIsoMediaService : IWinPeIsoMediaService
 
         try
         {
+            WinPeProcessRunner.ValidateCmdScript(
+                preparedWorkspace.Tools.MakeWinPeMediaPath,
+                $"/ISO /F {WinPeProcessRunner.Quote(preparedWorkspace.Artifact.WorkingDirectoryPath)} {WinPeProcessRunner.Quote(requestedOutputPath)}");
+            if (ContainsNonAscii(requestedOutputPath) || ContainsNonAscii(preparedWorkspace.Artifact.WorkingDirectoryPath))
+            {
+                _ = WinPeProcessRunner.Quote(options.IsoTempDirectoryPath);
+            }
+
             ReportProgress(options.Progress, 0, "Preparing ISO output path.");
             EnsureOutputDirectoryExists(requestedOutputPath);
             preparedOutputPath = PrepareOutputPath(requestedOutputPath, options.IsoTempDirectoryPath);
@@ -107,6 +115,7 @@ public sealed class WinPeIsoMediaService : IWinPeIsoMediaService
                     : WinPeFailureKinds.FileSystem,
                 failureReason: ex switch
                 {
+                    TimeoutException when currentStage == "Run MakeWinPEMedia for ISO" => WinPeFailureReasons.Timeout,
                     UnauthorizedAccessException => WinPeFailureReasons.AccessDenied,
                     IOException => WinPeFailureReasons.IoError,
                     _ when currentStage == "Run MakeWinPEMedia for ISO" => WinPeFailureReasons.ProcessStartFailed,

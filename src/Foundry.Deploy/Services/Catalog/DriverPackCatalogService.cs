@@ -3,6 +3,10 @@
 // See the LICENSE file in the project root for more information.
 
 using System.Globalization;
+using System.IO;
+using System.Security.Cryptography;
+using Foundry.Deploy.Services.Download;
+using Foundry.Utilities.Networking;
 using System.Net.Http;
 using System.Xml.Linq;
 using Foundry.Deploy.Models;
@@ -14,7 +18,7 @@ namespace Foundry.Deploy.Services.Catalog;
 public sealed class DriverPackCatalogService : IDriverPackCatalogService
 {
     private const string CatalogUri = "https://raw.githubusercontent.com/foundry-osd/catalog/refs/heads/main/Cache/DriverPack/DriverPack_Unified.xml";
-    private static readonly HttpClient HttpClient = InsecureHttpClientFactory.Create(TimeSpan.FromMinutes(60));
+    private static readonly HttpClient HttpClient = AcquisitionHttpClientFactory.Create(TimeSpan.FromSeconds(20));
     private readonly ILogger<DriverPackCatalogService> _logger;
 
     public DriverPackCatalogService(ILogger<DriverPackCatalogService> logger)
@@ -35,11 +39,12 @@ public sealed class DriverPackCatalogService : IDriverPackCatalogService
                     "Driver pack catalog download",
                     cancellationToken)
                 .ConfigureAwait(false);
-            XDocument document = XDocument.Parse(xmlContent);
+            string revision = CatalogContentIdentity.Calculate(xmlContent);
+            XDocument document = CatalogContentIdentity.ParseXml(xmlContent);
 
             DriverPackCatalogItem[] items = document
                 .Descendants("DriverPack")
-                .Select(ParseItem)
+                .Select(element => ParseItem(element) with { CatalogRevision = revision })
                 .Where(item => !string.IsNullOrWhiteSpace(item.DownloadUrl))
                 .OrderByDescending(item => item.ReleaseDate ?? DateTimeOffset.MinValue)
                 .ThenBy(item => item.Manufacturer, StringComparer.OrdinalIgnoreCase)
@@ -51,7 +56,7 @@ public sealed class DriverPackCatalogService : IDriverPackCatalogService
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Driver pack catalog load failed from {CatalogUri}.", CatalogUri);
+            _logger.LogError("Driver pack catalog load failed. FailureType={FailureType}", ex.GetType().Name);
             throw;
         }
     }
@@ -74,18 +79,21 @@ public sealed class DriverPackCatalogService : IDriverPackCatalogService
             .Distinct(StringComparer.OrdinalIgnoreCase)
             .ToArray();
 
-        return new DriverPackCatalogItem
+        var parsed = new DriverPackCatalogItem
         {
             Id = ReadAttribute(driverPack, "id"),
             PackageId = ReadAttribute(driverPack, "packageId"),
             Manufacturer = ReadAttribute(driverPack, "manufacturer"),
             Name = ReadAttribute(driverPack, "name"),
             Version = ReadAttribute(driverPack, "version"),
-            FileName = ReadAttribute(driverPack, "fileName"),
+            FileName = string.IsNullOrEmpty(ReadAttribute(driverPack, "fileName"))
+                ? Path.GetFileName(new Uri(ReadAttribute(driverPack, "downloadUrl")).LocalPath)
+                : ReadAttribute(driverPack, "fileName"),
             DownloadUrl = ReadAttribute(driverPack, "downloadUrl"),
             SizeBytes = ParseLong(ReadAttribute(driverPack, "sizeBytes")),
             Format = ReadAttribute(driverPack, "format"),
             Type = ReadAttribute(driverPack, "type"),
+            PackageRole = ResolvePackageRole(driverPack, models),
             ReleaseDate = ParseDate(ReadAttribute(driverPack, "releaseDate")),
             OsName = ReadAttribute(osInfo, "name"),
             OsReleaseId = ReadAttribute(osInfo, "releaseId"),
@@ -94,6 +102,28 @@ public sealed class DriverPackCatalogService : IDriverPackCatalogService
             SystemIds = systemIds,
             Sha256 = ReadAttribute(hashes, "sha256")
         };
+        ArtifactIntegrityPolicy.ValidateMetadata(parsed.Id, new Uri(parsed.DownloadUrl), parsed.FileName,
+            new FileIntegrity(string.IsNullOrEmpty(parsed.Sha256) ? null : new FileDigest(HashAlgorithmName.SHA256, parsed.Sha256),
+                parsed.SizeBytes == 0 ? null : parsed.SizeBytes));
+        return parsed;
+    }
+
+    private static DriverPackPackageRole ResolvePackageRole(XElement driverPack, IReadOnlyList<string> models)
+    {
+        string manufacturer = ReadAttribute(driverPack, "manufacturer").ToLowerInvariant();
+        if (manufacturer == "microsoft" && models.Any(model =>
+            string.Join(' ', model.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)).ToLowerInvariant()
+                is "surface dock 2" or "surface thunderbolt 4 dock"))
+        {
+            return DriverPackPackageRole.Accessory;
+        }
+
+        // The unified catalog defaults even Surface accessories to BaseDriverPack; only these OEM sources establish a system role.
+        return manufacturer is "dell" or "hp" or "lenovo" &&
+            ReadAttribute(driverPack, "type").Equals("Win", StringComparison.OrdinalIgnoreCase) &&
+            ReadAttribute(driverPack, "packageRole").Equals("BaseDriverPack", StringComparison.OrdinalIgnoreCase)
+                ? DriverPackPackageRole.System
+                : DriverPackPackageRole.Unknown;
     }
 
     private static string ReadAttribute(XElement? element, string attributeName)
@@ -103,9 +133,15 @@ public sealed class DriverPackCatalogService : IDriverPackCatalogService
 
     private static long ParseLong(string value)
     {
-        return long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out long parsed)
-            ? parsed
-            : 0;
+        if (string.IsNullOrEmpty(value))
+        {
+            return 0;
+        }
+        if (!long.TryParse(value, NumberStyles.Integer, CultureInfo.InvariantCulture, out long parsed) || parsed < 0)
+        {
+            throw new ArgumentException("Catalog size must be a nonnegative integer.");
+        }
+        return parsed;
     }
 
     private static DateTimeOffset? ParseDate(string value)

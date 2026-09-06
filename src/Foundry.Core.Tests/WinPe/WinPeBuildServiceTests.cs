@@ -9,6 +9,28 @@ namespace Foundry.Core.Tests.WinPe;
 public sealed class WinPeBuildServiceTests
 {
     [Fact]
+    public async Task BuildAsync_RejectsUnsupportedBatchPathBeforeDeletingTheWorkspace()
+    {
+        using TempWinPeBuildWorkspace workspace = TempWinPeBuildWorkspace.Create();
+        string workingDirectory = Path.Combine(workspace.OutputDirectoryPath, "unsafe%path");
+        Directory.CreateDirectory(workingDirectory);
+        string sentinel = Path.Combine(workingDirectory, "keep.txt");
+        await File.WriteAllTextAsync(sentinel, "original", TestContext.Current.CancellationToken);
+        var service = new WinPeBuildService(new WinPeToolResolver(() => workspace.KitsRootPath), new FakeBuildRunner());
+
+        WinPeResult<WinPeBuildArtifact> result = await service.BuildAsync(new WinPeBuildOptions
+        {
+            OutputDirectoryPath = workspace.OutputDirectoryPath,
+            WorkingDirectoryPath = workingDirectory,
+            CleanExistingWorkingDirectory = true,
+            Architecture = WinPeArchitecture.X64
+        }, TestContext.Current.CancellationToken);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal("original", await File.ReadAllTextAsync(sentinel, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
     public async Task BuildAsync_WhenOptionsAreNull_ReturnsValidationFailure()
     {
         var service = new WinPeBuildService();
@@ -93,15 +115,56 @@ public sealed class WinPeBuildServiceTests
         Assert.Equal(9, result.Error?.ExitCode);
     }
 
-    private sealed class FakeBuildRunner(int exitCode = 0) : IWinPeProcessRunner
+    [Fact]
+    public async Task BuildAsync_WhenCopypeTimesOut_PreservesProcessTimeoutAndTerminationMetadata()
+    {
+        using TempWinPeBuildWorkspace workspace = TempWinPeBuildWorkspace.Create();
+        var exception = new TimeoutException("The native operation exceeded its deadline.");
+        exception.Data["ProcessRootExitConfirmed"] = true;
+        exception.Data["ProcessTreeTerminationConfirmed"] = false;
+        var service = new WinPeBuildService(
+            new WinPeToolResolver(() => workspace.KitsRootPath),
+            new FakeBuildRunner(exception: exception));
+
+        WinPeResult<WinPeBuildArtifact> result = await service.BuildAsync(
+            new WinPeBuildOptions
+            {
+                OutputDirectoryPath = workspace.OutputDirectoryPath,
+                Architecture = WinPeArchitecture.X64
+            },
+            TestContext.Current.CancellationToken);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(WinPeFailureKinds.Process, result.Error?.FailureKind);
+        Assert.Equal(WinPeFailureReasons.Timeout, result.Error?.FailureReason);
+        Assert.Equal("copype", result.Error?.ToolName);
+        Assert.Same(exception, result.Error?.Exception);
+        Assert.Equal(true, result.Error?.Exception?.Data["ProcessRootExitConfirmed"]);
+        Assert.Equal(false, result.Error?.Exception?.Data["ProcessTreeTerminationConfirmed"]);
+    }
+
+    private sealed class FakeBuildRunner(int exitCode = 0, Exception? exception = null) : IWinPeProcessRunner
     {
         public Task<WinPeProcessExecution> RunAsync(
             string fileName,
             string arguments,
             string workingDirectory,
             CancellationToken cancellationToken,
-            IReadOnlyDictionary<string, string>? environmentOverrides = null)
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
         {
+            throw new NotSupportedException("Executable calls must pass argument tokens.");
+        }
+
+        public Task<WinPeProcessExecution> RunAsync(
+            string fileName,
+            IReadOnlyList<string> argumentList,
+            string workingDirectory,
+            CancellationToken cancellationToken,
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
+        {
+            string arguments = string.Join(' ', argumentList);
             return Task.FromResult(new WinPeProcessExecution
             {
                 ExitCode = 0,
@@ -115,11 +178,17 @@ public sealed class WinPeBuildServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
+            if (exception is not null)
+            {
+                throw exception;
+            }
+
             if (exitCode == 0)
             {
-                string workingRoot = scriptArguments.Split(' ', StringSplitOptions.RemoveEmptyEntries).Last().Trim('"');
+                string workingRoot = scriptArguments[(scriptArguments.IndexOf('"') + 1)..^1];
                 string bootWimPath = Path.Combine(workingRoot, "media", "sources", "boot.wim");
                 Directory.CreateDirectory(Path.GetDirectoryName(bootWimPath)!);
                 File.WriteAllText(bootWimPath, "boot");
@@ -139,7 +208,8 @@ public sealed class WinPeBuildServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             return RunCmdScriptAsync(scriptPath, scriptArguments, workingDirectory, cancellationToken);
         }

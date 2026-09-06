@@ -19,6 +19,63 @@ namespace Foundry.Deploy.Tests;
 public sealed class WindowsDeploymentServiceTests
 {
     [Fact]
+    public async Task ResolveImageIndexAsync_PassesImagePathToRealChild()
+    {
+        using var workspace = new TemporaryWorkspace();
+        string imagePath = Path.Combine(workspace.RootPath, "image with spaces.esd");
+        await File.WriteAllTextAsync(imagePath, string.Empty, TestContext.Current.CancellationToken);
+        var runner = new ArgumentChildRunner { Output = "Index : 1\nEdition : Professional" };
+        var service = new WindowsDeploymentService(runner, NullLogger<WindowsDeploymentService>.Instance);
+
+        int index = await service.ResolveImageIndexAsync(imagePath, "Pro", workspace.RootPath, TestContext.Current.CancellationToken);
+
+        Assert.Equal(1, index);
+        Assert.Equal(new[] { "/English", "/Get-ImageInfo", $"/ImageFile:{imagePath}", "/Index:1" }, runner.Received);
+    }
+
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ResolveImageIndexAsync_RejectsTruncatedMetadata(bool truncateDetail)
+    {
+        using var workspace = new TemporaryWorkspace();
+        string imagePath = Path.Combine(workspace.RootPath, "image with spaces.esd");
+        await File.WriteAllTextAsync(imagePath, string.Empty, TestContext.Current.CancellationToken);
+        var runner = new RecordingProcessRunner
+        {
+            ResultFactory = arguments => arguments.Contains("/Index:", StringComparison.Ordinal)
+                ? new ProcessExecutionResult { ExitCode = 0, StandardOutput = "Index : 1\nEdition : Professional", StandardErrorTruncated = truncateDetail }
+                : new ProcessExecutionResult { ExitCode = 0, StandardOutput = "Index : 1\nName : Windows 11 Pro", StandardOutputTruncated = !truncateDetail }
+        };
+        var service = new WindowsDeploymentService(runner, NullLogger<WindowsDeploymentService>.Instance);
+
+        await Assert.ThrowsAsync<InvalidDataException>(() => service.ResolveImageIndexAsync(
+            imagePath, "Pro", workspace.RootPath, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task GetAppliedWindowsEditionAsync_RejectsTruncatedMetadata()
+    {
+        var runner = new RecordingProcessRunner
+        {
+            Result = new ProcessExecutionResult { ExitCode = 0, StandardOutput = "Current Edition : Professional", StandardOutputTruncated = true }
+        };
+        var service = new WindowsDeploymentService(runner, NullLogger<WindowsDeploymentService>.Instance);
+
+        await Assert.ThrowsAsync<InvalidDataException>(() => service.GetAppliedWindowsEditionAsync(
+            @"W:\", Path.GetTempPath(), TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task ConfigureBootAsync_RejectsMissingRetainedLayout()
+    {
+        var runner = new RecordingProcessRunner();
+        var service = new WindowsDeploymentService(runner, NullLogger<WindowsDeploymentService>.Instance);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.ConfigureBootAsync(@"W:\", @"S:\", 26200,
+            Path.GetTempPath(), TestContext.Current.CancellationToken));
+        Assert.Empty(runner.Calls);
+    }
+    [Fact]
     public async Task ConfigureOfflineWindowsOptionalFeaturesAsync_WhenDisabled_DoesNotRunDism()
     {
         using var workspace = new TemporaryWorkspace();
@@ -604,34 +661,6 @@ public sealed class WindowsDeploymentServiceTests
         Assert.Contains("found 2", exception.Message, StringComparison.Ordinal);
     }
 
-    [Fact]
-    public async Task PrepareTargetDiskAsync_CreatesPartitionsInExpectedOrder_Efi_Msr_Recovery_Windows()
-    {
-        using var workspace = new TemporaryWorkspace();
-        string workingDirectory = Path.Combine(workspace.RootPath, "Work");
-        var processRunner = new RecordingProcessRunner();
-        var service = new WindowsDeploymentService(processRunner, NullLogger<WindowsDeploymentService>.Instance);
-
-        await service.PrepareTargetDiskAsync(1, workingDirectory, TestContext.Current.CancellationToken);
-
-        string scriptPath = Path.Combine(workingDirectory, "diskpart-os-target.txt");
-        string[] scriptLines = await File.ReadAllLinesAsync(scriptPath, TestContext.Current.CancellationToken);
-        int efiIndex = Array.IndexOf(scriptLines, "create partition efi size=260");
-        int msrIndex = Array.IndexOf(scriptLines, "create partition msr size=16");
-        int recoveryIndex = Array.IndexOf(scriptLines, "create partition primary size=5120");
-        int windowsIndex = Array.IndexOf(scriptLines, "create partition primary");
-        int recoveryFormatIndex = Array.IndexOf(scriptLines, "format quick fs=ntfs label=Recovery");
-        int windowsFormatIndex = Array.IndexOf(scriptLines, "format quick fs=ntfs label=Windows");
-
-        Assert.True(efiIndex >= 0);
-        Assert.True(msrIndex > efiIndex);
-        Assert.True(recoveryIndex > msrIndex);
-        Assert.True(windowsIndex > recoveryIndex);
-        Assert.True(recoveryFormatIndex > recoveryIndex);
-        Assert.True(windowsFormatIndex > recoveryFormatIndex);
-        Assert.DoesNotContain(scriptLines, line => line.StartsWith("shrink ", StringComparison.OrdinalIgnoreCase));
-    }
-
     [Theory]
     [InlineData(26199, "/c /v")]
     [InlineData(26200, "/c /bootex /v")]
@@ -650,7 +679,7 @@ public sealed class WindowsDeploymentServiceTests
         var processRunner = new RecordingProcessRunner();
         var service = new WindowsDeploymentService(processRunner, NullLogger<WindowsDeploymentService>.Instance);
 
-        await service.ConfigureBootAsync(
+        await service.RunBcdBootAsync(
             windowsRoot,
             systemRoot,
             operatingSystemBuildMajor,
@@ -659,11 +688,44 @@ public sealed class WindowsDeploymentServiceTests
 
         Assert.Equal(bcdBootPath, processRunner.LastFileName);
         Assert.Equal(
-            $"\"{windowsPath}\" /s \"{systemRoot}\" /f UEFI {expectedArguments}",
-            processRunner.LastArguments);
+            new[] { windowsPath, "/s", "S:", "/f", "UEFI" }.Concat(expectedArguments.Split(' ')),
+            processRunner.LastArgumentTokens);
         Assert.Equal(workingDirectory, processRunner.LastWorkingDirectory);
     }
 
+    [Fact]
+    public async Task ConfigureBootAsync_PassesSeparateTokensToRealChild()
+    {
+        using var workspace = new TemporaryWorkspace();
+        string windowsRoot = Path.Combine(workspace.RootPath, "Target Windows");
+        string bcdBootPath = Path.Combine(windowsRoot, "Windows", "System32", "bcdboot.exe");
+        Directory.CreateDirectory(Path.GetDirectoryName(bcdBootPath)!);
+        await File.WriteAllTextAsync(bcdBootPath, string.Empty, TestContext.Current.CancellationToken);
+        var runner = new ArgumentChildRunner();
+        var service = new WindowsDeploymentService(runner, NullLogger<WindowsDeploymentService>.Instance);
+        await service.RunBcdBootAsync(windowsRoot, @"S:\", 26200, workspace.RootPath, TestContext.Current.CancellationToken);
+        Assert.Equal(new[] { Path.Combine(windowsRoot, "Windows"), "/s", "S:", "/f", "UEFI", "/c", "/bootex", "/v" }, runner.Received);
+    }
+
+    private sealed class ArgumentChildRunner : IProcessRunner
+    {
+        public string? Output { get; init; }
+        public string[]? Received { get; private set; }
+        public Task<ProcessExecutionResult> RunAsync(string fileName, string arguments, string workingDirectory, CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null)
+            => throw new InvalidOperationException("Native commands must use separate tokens.");
+        public Task<ProcessExecutionResult> RunAsync(string fileName, IEnumerable<string> arguments, string workingDirectory, CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null)
+            => RunAsync(fileName, arguments, workingDirectory, null, null, cancellationToken);
+        public async Task<ProcessExecutionResult> RunAsync(string fileName, IEnumerable<string> arguments, string workingDirectory,
+            Action<string>? onOutputData, Action<string>? onErrorData, CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null)
+        {
+            var runner = new Foundry.Deploy.Services.System.ProcessRunner(new Foundry.Utilities.Processes.ProcessRunner(),
+                NullLogger<Foundry.Deploy.Services.System.ProcessRunner>.Instance);
+            ProcessExecutionResult result = await runner.RunAsync(
+                Path.Combine(AppContext.BaseDirectory, "ProcessTestChild", "ProcessTestChild.exe"), ["argv", .. arguments], workingDirectory, cancellationToken, executionTimeout);
+            Received = System.Text.Json.JsonSerializer.Deserialize<string[]>(result.StandardOutput.Trim());
+            return Output is null ? result : result with { StandardOutput = Output };
+        }
+    }
     [Fact]
     public async Task ConfigureBootAsync_WhenAppliedBcdBootIsMissing_ThrowsFileNotFoundException()
     {
@@ -674,7 +736,7 @@ public sealed class WindowsDeploymentServiceTests
         var service = new WindowsDeploymentService(processRunner, NullLogger<WindowsDeploymentService>.Instance);
 
         FileNotFoundException exception = await Assert.ThrowsAsync<FileNotFoundException>(() =>
-            service.ConfigureBootAsync(
+            service.RunBcdBootAsync(
                 windowsRoot,
                 @"S:\",
                 26200,
@@ -705,7 +767,7 @@ public sealed class WindowsDeploymentServiceTests
         var service = new WindowsDeploymentService(processRunner, NullLogger<WindowsDeploymentService>.Instance);
 
         DeploymentProcessException exception = await Assert.ThrowsAsync<DeploymentProcessException>(() =>
-            service.ConfigureBootAsync(
+            service.RunBcdBootAsync(
                 windowsRoot,
                 @"S:\",
                 26200,
@@ -1193,7 +1255,7 @@ public sealed class WindowsDeploymentServiceTests
             string fileName,
             string arguments,
             string workingDirectory,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null)
         {
             return Task.FromResult(new ProcessExecutionResult { ExitCode = 0 });
         }
@@ -1202,7 +1264,7 @@ public sealed class WindowsDeploymentServiceTests
             string fileName,
             IEnumerable<string> arguments,
             string workingDirectory,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null)
         {
             return Task.FromResult(new ProcessExecutionResult { ExitCode = 0 });
         }
@@ -1213,7 +1275,7 @@ public sealed class WindowsDeploymentServiceTests
             string workingDirectory,
             Action<string>? onOutputData,
             Action<string>? onErrorData,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null)
         {
             return Task.FromResult(new ProcessExecutionResult { ExitCode = 0 });
         }
@@ -1224,6 +1286,7 @@ public sealed class WindowsDeploymentServiceTests
         public List<string> Calls { get; } = [];
         public string? LastFileName { get; private set; }
         public string? LastArguments { get; private set; }
+        public IReadOnlyList<string>? LastArgumentTokens { get; private set; }
         public string? LastWorkingDirectory { get; private set; }
         public ProcessExecutionResult Result { get; init; } = new() { ExitCode = 0 };
         public Func<string, ProcessExecutionResult>? ResultFactory { get; init; }
@@ -1232,7 +1295,7 @@ public sealed class WindowsDeploymentServiceTests
             string fileName,
             string arguments,
             string workingDirectory,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null)
         {
             Calls.Add($"{fileName} {arguments}");
             LastFileName = fileName;
@@ -1245,9 +1308,10 @@ public sealed class WindowsDeploymentServiceTests
             string fileName,
             IEnumerable<string> arguments,
             string workingDirectory,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null)
         {
-            string joinedArguments = string.Join(' ', arguments);
+            LastArgumentTokens = arguments.ToArray();
+            string joinedArguments = string.Join(' ', LastArgumentTokens);
             Calls.Add($"{fileName} {joinedArguments}");
             LastFileName = fileName;
             LastArguments = joinedArguments;
@@ -1261,9 +1325,10 @@ public sealed class WindowsDeploymentServiceTests
             string workingDirectory,
             Action<string>? onOutputData,
             Action<string>? onErrorData,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default, TimeSpan? executionTimeout = null)
         {
-            string joinedArguments = string.Join(' ', arguments);
+            LastArgumentTokens = arguments.ToArray();
+            string joinedArguments = string.Join(' ', LastArgumentTokens);
             Calls.Add($"{fileName} {joinedArguments}");
             LastFileName = fileName;
             LastArguments = joinedArguments;

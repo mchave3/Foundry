@@ -101,8 +101,10 @@ public sealed class WinPeToolResolver
             toolPaths.MakeWinPeMediaPath,
             "/?",
             workingDirectory,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken,
+            executionTimeout: TimeSpan.FromMinutes(2)).ConfigureAwait(false);
 
+        helpResult.EnsureCompleteOutput();
         string combined = string.Concat(helpResult.StandardOutput, "\n", helpResult.StandardError);
         return combined.IndexOf("/bootex", StringComparison.OrdinalIgnoreCase) >= 0;
     }

@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Foundry.Core.Models.Configuration;
 using Foundry.Core.Services.WinPe;
+using Foundry.Utilities.IO;
 using Serilog;
 
 namespace Foundry.Services.Settings;
@@ -53,7 +54,7 @@ internal sealed partial class JsonAppSettingsService : IAppSettingsService
             {
                 Directory.CreateDirectory(Constants.SettingsDirectoryPath);
                 string json = JsonSerializer.Serialize(Current, FoundryAppSettingsJsonContext.Default.FoundryAppSettings);
-                File.WriteAllText(Constants.AppSettingsPath, json);
+                AtomicFile.WriteAllText(Constants.AppSettingsPath, json);
             }
             catch (Exception ex)
             {
@@ -75,20 +76,16 @@ internal sealed partial class JsonAppSettingsService : IAppSettingsService
         {
             string json = File.ReadAllText(Constants.AppSettingsPath);
             migratedGeneralSettings = LegacyAppSettingsMediaMigration.TryReadGeneralSettings(json);
-            FoundryAppSettings settings = JsonSerializer.Deserialize(json, FoundryAppSettingsJsonContext.Default.FoundryAppSettings) ?? new FoundryAppSettings();
+            FoundryAppSettings settings = NormalizeLoadedSettings(
+                JsonSerializer.Deserialize(json, FoundryAppSettingsJsonContext.Default.FoundryAppSettings) ?? new FoundryAppSettings());
             ApplyLegacyAppearanceSettings(settings, json);
             return settings;
         }
         catch (Exception ex)
         {
-            string backupPath = Constants.AppSettingsPath + ".invalid";
+            string backupPath = CreateInvalidBackupPath(Constants.AppSettingsPath);
             try
             {
-                if (File.Exists(backupPath))
-                {
-                    File.Delete(backupPath);
-                }
-
                 File.Move(Constants.AppSettingsPath, backupPath);
                 logger.Warning(
                     ex,
@@ -109,6 +106,48 @@ internal sealed partial class JsonAppSettingsService : IAppSettingsService
 
             return new FoundryAppSettings();
         }
+    }
+
+    private static FoundryAppSettings NormalizeLoadedSettings(FoundryAppSettings settings)
+    {
+        settings.Appearance ??= new AppearanceSettings();
+        settings.Localization ??= new LocalizationSettings();
+        settings.Updates ??= new UpdateSettings();
+        settings.Diagnostics ??= new DiagnosticsSettings();
+        settings.Telemetry ??= new TelemetryAppSettings();
+        settings.Proxy ??= new ProxyAppSettings();
+
+        settings.Appearance.ElementTheme = string.IsNullOrWhiteSpace(settings.Appearance.ElementTheme)
+            ? "Default"
+            : settings.Appearance.ElementTheme;
+        settings.Appearance.BackdropType = string.IsNullOrWhiteSpace(settings.Appearance.BackdropType)
+            ? "Mica"
+            : settings.Appearance.BackdropType;
+        settings.Localization.Language = string.IsNullOrWhiteSpace(settings.Localization.Language)
+            ? Foundry.Localization.FoundrySupportedCultures.DefaultCultureCode
+            : settings.Localization.Language;
+        settings.Updates.Channel = string.IsNullOrWhiteSpace(settings.Updates.Channel)
+            ? Constants.DefaultUpdateChannel
+            : settings.Updates.Channel;
+        settings.Updates.FeedUrl = string.IsNullOrWhiteSpace(settings.Updates.FeedUrl)
+            ? Constants.DefaultUpdateFeedUrl
+            : settings.Updates.FeedUrl;
+        settings.Proxy.Method = Enum.IsDefined(settings.Proxy.Method) ? settings.Proxy.Method : ProxyMethod.System;
+        settings.Proxy.AuthenticationMode = Enum.IsDefined(settings.Proxy.AuthenticationMode)
+            ? settings.Proxy.AuthenticationMode
+            : ProxyAuthenticationMode.Automatic;
+        settings.Proxy.Address ??= string.Empty;
+        settings.Proxy.BypassList ??= string.Empty;
+        settings.Proxy.Port = settings.Proxy.Port is >= 1 and <= 65535 ? settings.Proxy.Port : 8080;
+        return settings;
+    }
+
+    private static string CreateInvalidBackupPath(string sourcePath)
+    {
+        string firstBackupPath = sourcePath + ".invalid";
+        return !File.Exists(firstBackupPath)
+            ? firstBackupPath
+            : $"{firstBackupPath}.{DateTime.UtcNow:yyyyMMddHHmmssfff}.{Guid.NewGuid():N}";
     }
 
     private static void EnsureTelemetryInstallId(FoundryAppSettings settings)

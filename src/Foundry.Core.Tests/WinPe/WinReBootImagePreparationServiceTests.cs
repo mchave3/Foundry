@@ -6,11 +6,123 @@ using Foundry.Core.Services.WinPe;
 using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using Foundry.Utilities.Processes;
 
 namespace Foundry.Core.Tests.WinPe;
 
 public sealed class WinReBootImagePreparationServiceTests
 {
+    [Theory]
+    [InlineData("/Get-ImageInfo", false, false)]
+    [InlineData("/Get-ImageInfo", true, true)]
+    [InlineData("/Export-Image", false, true)]
+    [InlineData("/Export-Image", true, false)]
+    public async Task ReplaceBootWimAsync_UnconfirmedNativeInterruption_RetainsSourceAndWorkingInputs(string command, bool rootExited, bool cancellation)
+    {
+        string root = Path.Combine(Path.GetTempPath(), $"foundry-winre-retained-{Guid.NewGuid():N}");
+        string working = Path.Combine(root, "workspace");
+        string cache = Path.Combine(root, "cache");
+        Directory.CreateDirectory(working);
+        Directory.CreateDirectory(cache);
+        string sourcePath = Path.Combine(cache, "source.esd");
+        string bootPath = Path.Combine(root, "boot.wim");
+        await File.WriteAllTextAsync(sourcePath, "source fixture", TestContext.Current.CancellationToken);
+        await File.WriteAllTextAsync(bootPath, "original boot", TestContext.Current.CancellationToken);
+        using var cancelled = new CancellationTokenSource();
+        Exception interruption = cancellation ? new OperationCanceledException(cancelled.Token) : new TimeoutException("native fixture deadline");
+        interruption.Data["ProcessRootExitConfirmed"] = rootExited;
+        interruption.Data["ProcessTreeTerminationConfirmed"] = false;
+        interruption.Data["ProcessOutputDrainConfirmed"] = !rootExited;
+        var nativeCompleted = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        var runner = new FakeWinPeProcessRunner
+        {
+            Interruption = interruption,
+            InterruptCommand = command,
+            BeforeInterruption = () => { if (cancellation) { cancelled.Cancel(); } }
+        };
+        string catalog = CreateCatalogXml(Convert.ToHexString(SHA256.HashData("source fixture"u8)));
+        var service = new WinReBootImagePreparationService(runner, new HttpClient(new StaticCatalogHandler(catalog)));
+        try
+        {
+            Task<WinPeResult<WinReBootImagePreparationResult>> operation = service.ReplaceBootWimAsync(new WinReBootImagePreparationOptions
+            {
+                Artifact = new WinPeBuildArtifact { Architecture = WinPeArchitecture.X64, BootWimPath = bootPath, WorkingDirectoryPath = working },
+                Tools = new WinPeToolPaths { DismPath = "dism.exe" },
+                WinPeLanguage = "en-US",
+                CacheDirectoryPath = cache
+            }, cancelled.Token);
+            if (cancellation)
+            {
+                Assert.Same(interruption, await Assert.ThrowsAsync<OperationCanceledException>(() => operation));
+            }
+            else
+            {
+                Assert.Same(interruption, (await operation).Error?.Exception);
+            }
+            Assert.Equal(rootExited, interruption.Data["ProcessRootExitConfirmed"]);
+            Assert.Equal(false, interruption.Data["ProcessTreeTerminationConfirmed"]);
+            Assert.Throws<IOException>(() => File.WriteAllText(sourcePath, "replacement"));
+            Assert.Throws<IOException>(() => File.Delete(sourcePath));
+            Assert.True(File.Exists(Path.Combine(working, "native-owned.fixture")));
+            Assert.Equal("original boot", await File.ReadAllTextAsync(bootPath, TestContext.Current.CancellationToken));
+        }
+        finally
+        {
+            nativeCompleted.SetResult();
+            if (interruption.Data[NativeFileLease.RetainedLeaseIdsDataKey] is Guid[] ownershipIds)
+            {
+                foreach (Guid ownershipId in ownershipIds)
+                {
+                    await NativeFileLease.ReconcileRetainedAsync(ownershipId, _ => Task.FromResult(nativeCompleted.Task.IsCompleted), CancellationToken.None);
+                }
+            }
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Fact]
+    public async Task EnsureDownloadedAsync_InvalidReplacementPreservesCache_AndHttpIsScoped()
+    {
+        string root = Path.Combine(Path.GetTempPath(), $"foundry-winre-cache-{Guid.NewGuid():N}");
+        Directory.CreateDirectory(root);
+        string cached = Path.Combine(root, "source.esd");
+        await File.WriteAllTextAsync(cached, "previous cache", TestContext.Current.CancellationToken);
+        var handler = new StaticCatalogHandler("wrong replacement");
+        var service = new WinReBootImagePreparationService(new FakeWinPeProcessRunner(), new HttpClient(handler));
+        WinReCatalogItem source = WinReBootImagePreparationService.SelectCatalogCandidates(
+            CreateCatalogXml(new string('A', 64)), WinPeArchitecture.X64, "en-US").Value![0].Source with
+        {
+            Url = "http://dl.delivery.mp.microsoft.com/source.esd"
+        };
+        try
+        {
+            WinPeResult<string> failed = await service.EnsureDownloadedAsync(root, source, null, TestContext.Current.CancellationToken);
+            Assert.False(failed.IsSuccess);
+            Assert.Equal(WinPeErrorCodes.HashMismatch, failed.Error?.Code);
+            Assert.Equal("previous cache", await File.ReadAllTextAsync(cached, TestContext.Current.CancellationToken));
+            int requests = handler.RequestCount;
+            WinPeResult<string> disallowed = await service.EnsureDownloadedAsync(root, source with { Url = "http://example.test/source.esd" }, null, TestContext.Current.CancellationToken);
+            Assert.False(disallowed.IsSuccess);
+            Assert.Equal(requests, handler.RequestCount);
+        }
+        finally
+        {
+            Directory.Delete(root, true);
+        }
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData("abcd")]
+    [InlineData("GGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGGG")]
+    public async Task ValidateHashIfRequestedAsync_MissingOrMalformedDigest_FailsBeforeOpeningFile(string? hash)
+    {
+        WinPeResult result = await WinReBootImagePreparationService.ValidateHashIfRequestedAsync(
+            Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N"), "absent.esd"), hash, CancellationToken.None);
+        Assert.False(result.IsSuccess);
+    }
+
     [Fact]
     public void SelectCatalogCandidates_Filters24H2ArchitectureAndLanguage()
     {
@@ -153,8 +265,10 @@ public sealed class WinReBootImagePreparationServiceTests
         }
     }
 
-    [Fact]
-    public async Task ReplaceBootWimAsync_WhenCachedSourceIsValid_ReplacesBootWimAndStagesDependencies()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ReplaceBootWimAsync_RequiresCompleteImageMetadataBeforeExporting(bool metadataTruncated)
     {
         string root = Path.Combine(Path.GetTempPath(), $"foundry-winre-replace-{Guid.NewGuid():N}");
         string workingPath = Path.Combine(root, "workspace");
@@ -171,7 +285,7 @@ public sealed class WinReBootImagePreparationServiceTests
         string cachedSourceHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes("cached source")));
         string catalogXml = CreateCatalogXml(cachedSourceHash);
 
-        var runner = new FakeWinPeProcessRunner();
+        var runner = new FakeWinPeProcessRunner { MetadataTruncated = metadataTruncated };
         var service = new WinReBootImagePreparationService(
             runner,
             new HttpClient(new StaticCatalogHandler(catalogXml)));
@@ -195,6 +309,14 @@ public sealed class WinReBootImagePreparationServiceTests
                     CacheDirectoryPath = cachePath
                 },
                 CancellationToken.None);
+
+            if (metadataTruncated)
+            {
+                Assert.False(result.IsSuccess);
+                Assert.Equal("original", await File.ReadAllTextAsync(bootWimPath, TestContext.Current.CancellationToken));
+                Assert.DoesNotContain(runner.Executions, execution => execution.Arguments.Contains("/Export-Image", StringComparison.Ordinal));
+                return;
+            }
 
             Assert.True(result.IsSuccess, result.Error?.Details);
             Assert.Equal("winre", await File.ReadAllTextAsync(bootWimPath));
@@ -233,8 +355,11 @@ public sealed class WinReBootImagePreparationServiceTests
 
     private sealed class StaticCatalogHandler(string content) : HttpMessageHandler
     {
+        public int RequestCount { get; private set; }
+
         protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
+            RequestCount++;
             return Task.FromResult(new HttpResponseMessage(HttpStatusCode.OK)
             {
                 Content = new StringContent(content, Encoding.UTF8, "application/xml")
@@ -244,6 +369,10 @@ public sealed class WinReBootImagePreparationServiceTests
 
     private sealed class FakeWinPeProcessRunner : IWinPeProcessRunner
     {
+        public Exception? Interruption { get; init; }
+        public string? InterruptCommand { get; init; }
+        public Action? BeforeInterruption { get; init; }
+        public bool MetadataTruncated { get; init; }
         public List<WinPeProcessExecution> Executions { get; } = [];
 
         public Task<WinPeProcessExecution> RunAsync(
@@ -251,18 +380,38 @@ public sealed class WinReBootImagePreparationServiceTests
             string arguments,
             string workingDirectory,
             CancellationToken cancellationToken,
-            IReadOnlyDictionary<string, string>? environmentOverrides = null)
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
         {
+            throw new NotSupportedException("Executable calls must pass argument tokens.");
+        }
+
+        public Task<WinPeProcessExecution> RunAsync(
+            string fileName,
+            IReadOnlyList<string> argumentList,
+            string workingDirectory,
+            CancellationToken cancellationToken,
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
+        {
+            string arguments = string.Join(' ', argumentList);
+            if (Interruption is not null && InterruptCommand is not null && argumentList.Contains(InterruptCommand))
+            {
+                File.WriteAllText(Path.Combine(workingDirectory, "native-owned.fixture"), "native fixture input");
+                BeforeInterruption?.Invoke();
+                throw Interruption;
+            }
             var execution = new WinPeProcessExecution
             {
                 FileName = fileName,
                 Arguments = arguments,
                 WorkingDirectory = workingDirectory,
-                StandardOutput = CreateOutput(arguments)
+                StandardOutput = CreateOutput(arguments),
+                StandardOutputTruncated = MetadataTruncated && argumentList.Contains("/Get-ImageInfo")
             };
 
             Executions.Add(execution);
-            HandleSideEffects(arguments);
+            HandleSideEffects(argumentList);
             return Task.FromResult(execution);
         }
 
@@ -270,7 +419,8 @@ public sealed class WinReBootImagePreparationServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }
@@ -279,7 +429,8 @@ public sealed class WinReBootImagePreparationServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }
@@ -299,9 +450,9 @@ public sealed class WinReBootImagePreparationServiceTests
                    """;
         }
 
-        private static void HandleSideEffects(string arguments)
+        private static void HandleSideEffects(IReadOnlyList<string> arguments)
         {
-            if (arguments.Contains("/Export-Image", StringComparison.OrdinalIgnoreCase))
+            if (arguments.Contains("/Export-Image", StringComparer.OrdinalIgnoreCase))
             {
                 string destination = ExtractArgumentPath(arguments, "/DestinationImageFile:");
                 Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
@@ -309,7 +460,7 @@ public sealed class WinReBootImagePreparationServiceTests
                 return;
             }
 
-            if (arguments.Contains("/Mount-Image", StringComparison.OrdinalIgnoreCase))
+            if (arguments.Contains("/Mount-Image", StringComparer.OrdinalIgnoreCase))
             {
                 string mountDirectory = ExtractArgumentPath(arguments, "/MountDir:");
                 string recoveryPath = Path.Combine(mountDirectory, "Windows", "System32", "Recovery");
@@ -322,20 +473,7 @@ public sealed class WinReBootImagePreparationServiceTests
             }
         }
 
-        private static string ExtractArgumentPath(string arguments, string name)
-        {
-            int start = arguments.IndexOf(name, StringComparison.OrdinalIgnoreCase);
-            Assert.True(start >= 0, $"Argument '{name}' was not found in '{arguments}'.");
-            start += name.Length;
-
-            if (arguments[start] == '"')
-            {
-                int end = arguments.IndexOf('"', start + 1);
-                return arguments[(start + 1)..end];
-            }
-
-            int nextSpace = arguments.IndexOf(' ', start);
-            return nextSpace < 0 ? arguments[start..] : arguments[start..nextSpace];
-        }
+        private static string ExtractArgumentPath(IReadOnlyList<string> arguments, string name) =>
+            Assert.Single(arguments, argument => argument.StartsWith(name, StringComparison.OrdinalIgnoreCase))[name.Length..];
     }
 }

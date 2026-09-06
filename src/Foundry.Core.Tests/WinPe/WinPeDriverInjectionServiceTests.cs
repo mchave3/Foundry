@@ -12,9 +12,9 @@ public sealed class WinPeDriverInjectionServiceTests
     public async Task InjectAsync_AddsEachDriverPathWithRecurse()
     {
         string root = Path.Combine(Path.GetTempPath(), $"foundry-driver-injection-{Guid.NewGuid():N}");
-        string mountedImagePath = Path.Combine(root, "mount");
+        string mountedImagePath = Path.Combine(root, "mount é (x86)");
         string workingDirectory = Path.Combine(root, "work");
-        string driverDirectory = Path.Combine(root, "drivers");
+        string driverDirectory = Path.Combine(root, "drivers & packages");
         Directory.CreateDirectory(mountedImagePath);
         Directory.CreateDirectory(workingDirectory);
         Directory.CreateDirectory(driverDirectory);
@@ -38,8 +38,7 @@ public sealed class WinPeDriverInjectionServiceTests
             Assert.True(result.IsSuccess, result.Error?.Details);
             WinPeProcessExecution execution = Assert.Single(runner.Executions);
             Assert.Equal("dism.exe", execution.FileName);
-            Assert.Contains("/Add-Driver", execution.Arguments);
-            Assert.Contains("/Recurse", execution.Arguments);
+            Assert.Equal([$"/Image:{mountedImagePath}", "/Add-Driver", $"/Driver:{driverDirectory}", "/Recurse"], Assert.Single(runner.ArgumentLists));
         }
         finally
         {
@@ -108,6 +107,7 @@ public sealed class WinPeDriverInjectionServiceTests
 
     private sealed class FakeInjectionRunner(IReadOnlyList<string>? outputLines = null) : IWinPeProcessOutputRunner
     {
+        public List<IReadOnlyList<string>> ArgumentLists { get; } = [];
         public List<WinPeProcessExecution> Executions { get; } = [];
 
         public Task<WinPeProcessExecution> RunAsync(
@@ -115,8 +115,22 @@ public sealed class WinPeDriverInjectionServiceTests
             string arguments,
             string workingDirectory,
             CancellationToken cancellationToken,
-            IReadOnlyDictionary<string, string>? environmentOverrides = null)
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
         {
+            throw new NotSupportedException("Executable calls must pass argument tokens.");
+        }
+
+        public Task<WinPeProcessExecution> RunAsync(
+            string fileName,
+            IReadOnlyList<string> argumentList,
+            string workingDirectory,
+            CancellationToken cancellationToken,
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
+        {
+            string arguments = string.Join(' ', argumentList);
+            ArgumentLists.Add(argumentList.ToArray());
             var execution = new WinPeProcessExecution
             {
                 FileName = fileName,
@@ -135,21 +149,36 @@ public sealed class WinPeDriverInjectionServiceTests
             Action<string>? onOutputData,
             Action<string>? onErrorData,
             CancellationToken cancellationToken,
-            IReadOnlyDictionary<string, string>? environmentOverrides = null)
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
+        {
+            throw new NotSupportedException("Executable calls must pass argument tokens.");
+        }
+
+        public Task<WinPeProcessExecution> RunWithOutputAsync(
+            string fileName,
+            IReadOnlyList<string> argumentList,
+            string workingDirectory,
+            Action<string>? onOutputData,
+            Action<string>? onErrorData,
+            CancellationToken cancellationToken,
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
         {
             foreach (string line in outputLines ?? [])
             {
                 onOutputData?.Invoke(line);
             }
 
-            return RunAsync(fileName, arguments, workingDirectory, cancellationToken, environmentOverrides);
+            return RunAsync(fileName, argumentList, workingDirectory, cancellationToken, environmentOverrides, executionTimeout);
         }
 
         public Task<WinPeProcessExecution> RunCmdScriptAsync(
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }
@@ -158,7 +187,8 @@ public sealed class WinPeDriverInjectionServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }

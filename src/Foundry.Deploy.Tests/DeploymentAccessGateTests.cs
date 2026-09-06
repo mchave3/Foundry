@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Foundry.Deploy.Models.Configuration;
+using Foundry.Deploy.Services.ApplicationShell;
 using Foundry.Deploy.Services.Configuration;
 using Foundry.Deploy.Services.Security;
 
@@ -152,17 +153,74 @@ public sealed class DeploymentAccessGateTests
         Assert.False(authorized);
     }
 
+    [Fact]
+    public async Task AuthorizeAsync_WhenSchemaIsUnsupported_ShowsBlockingVersionDiagnostic()
+    {
+        const string configurationPath = @"X:\Foundry\Config\foundry.deploy.config.json";
+        var shell = new FakeApplicationShellService();
+        var gate = new DeploymentAccessGate(
+            new FakeConfigurationService(
+                document: null,
+                exists: true,
+                configurationPath: configurationPath,
+                isUnsupportedSchemaVersion: true,
+                failureMessage: "Foundry.Deploy configuration uses schema version 13, but this application supports up to schema version 12."),
+            new FakeUnlockService(),
+            new FakePasswordDialogService("unused"),
+            new ImmediateRetryDelay(),
+            shell);
+
+        bool authorized = await gate.AuthorizeAsync(TestContext.Current.CancellationToken);
+
+        Assert.False(authorized);
+        Assert.Equal(1, shell.BlockingErrorCount);
+        Assert.Contains("13", shell.BlockingErrorMessage, StringComparison.Ordinal);
+        Assert.Contains("12", shell.BlockingErrorMessage, StringComparison.Ordinal);
+        Assert.Contains(configurationPath, shell.BlockingErrorMessage, StringComparison.Ordinal);
+        Assert.Contains("Update Foundry", shell.BlockingErrorMessage, StringComparison.Ordinal);
+    }
+
     private sealed class FakeConfigurationService(
         FoundryDeployConfigurationDocument? document,
         bool exists = true,
-        string configurationPath = "") : IDeployConfigurationService
+        string configurationPath = "",
+        bool isUnsupportedSchemaVersion = false,
+        string? failureMessage = null) : IDeployConfigurationService
     {
         public DeployConfigurationLoadResult LoadOptional() => new()
         {
             ConfigurationPath = configurationPath,
             Exists = exists,
-            Document = document
+            Document = document,
+            IsUnsupportedSchemaVersion = isUnsupportedSchemaVersion,
+            FailureMessage = failureMessage
         };
+    }
+
+    private sealed class FakeApplicationShellService : IApplicationShellService
+    {
+        public int BlockingErrorCount { get; private set; }
+
+        public string BlockingErrorMessage { get; private set; } = string.Empty;
+
+        public void ShowAbout()
+        {
+        }
+
+        public bool ConfirmWarning(string title, string message)
+        {
+            return false;
+        }
+
+        public void ShowBlockingError(string title, string message)
+        {
+            BlockingErrorCount++;
+            BlockingErrorMessage = message;
+        }
+
+        public void Shutdown()
+        {
+        }
     }
 
     private static DeployProtectionSettings CreateWrappedProtection(bool isEnabled) => new()

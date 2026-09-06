@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 
 namespace Foundry.Deploy.Services.DriverPacks;
 
+/// <summary>Selects an OEM pack only when catalog compatibility matches the discovered machine.</summary>
 public sealed class DriverPackSelectionService : IDriverPackSelectionService
 {
     private readonly ILogger<DriverPackSelectionService> _logger;
@@ -16,15 +17,14 @@ public sealed class DriverPackSelectionService : IDriverPackSelectionService
         _logger = logger;
     }
 
+    /// <summary>Returns the newest exact compatible match without inferring model or release compatibility.</summary>
     public DriverPackSelectionResult SelectBest(
         IReadOnlyList<DriverPackCatalogItem> catalog,
         HardwareProfile hardware,
         OperatingSystemCatalogItem operatingSystem)
     {
-        _logger.LogInformation("Selecting best driver pack. CatalogCount={CatalogCount}, Manufacturer={Manufacturer}, Model={Model}, WindowsRelease={WindowsRelease}, ReleaseId={ReleaseId}, OsArchitecture={OsArchitecture}",
+        _logger.LogDebug("Selecting compatible OEM driver pack. CatalogCount={CatalogCount}, WindowsRelease={WindowsRelease}, ReleaseId={ReleaseId}, OsArchitecture={OsArchitecture}",
             catalog.Count,
-            hardware.Manufacturer,
-            hardware.Model,
             operatingSystem.WindowsRelease,
             operatingSystem.ReleaseId,
             operatingSystem.Architecture);
@@ -50,47 +50,25 @@ public sealed class DriverPackSelectionService : IDriverPackSelectionService
 
         string osArch = NormalizeArchitecture(operatingSystem.Architecture);
         string manufacturer = NormalizeManufacturer(hardware.Manufacturer);
-        string model = Normalize(hardware.Model);
-        string product = Normalize(hardware.Product);
-        string targetOsName = "Windows 11";
-        string targetReleaseId = Normalize(operatingSystem.ReleaseId);
+        if (string.IsNullOrEmpty(manufacturer) || string.IsNullOrEmpty(osArch) ||
+            NormalizeArchitecture(hardware.Architecture) != osArch)
+        {
+            return NoCompatiblePack();
+        }
 
-        IEnumerable<DriverPackCatalogItem> query = catalog
+        DriverPackCatalogItem? exactModel = catalog
+            .Where(item => NormalizeManufacturer(item.Manufacturer) == manufacturer)
             .Where(item => NormalizeArchitecture(item.OsArchitecture) == osArch)
-            .Where(item => item.OsName.Contains(targetOsName, StringComparison.OrdinalIgnoreCase));
-
-        if (!string.IsNullOrWhiteSpace(manufacturer) && !manufacturer.Equals("unknown", StringComparison.OrdinalIgnoreCase))
-        {
-            query = query.Where(item => NormalizeManufacturer(item.Manufacturer) == manufacturer);
-        }
-
-        DriverPackCatalogItem[] candidates = query.ToArray();
-        if (candidates.Length == 0)
-        {
-            return new DriverPackSelectionResult
-            {
-                DriverPack = null,
-                SelectionReason = $"No candidate for {manufacturer} / {targetOsName} / {osArch}."
-            };
-        }
-
-        DriverPackCatalogItem[] systemIdCandidates = manufacturer == "lenovo"
-            ? candidates.Where(item => IsSystemIdMatch(item, hardware)).ToArray()
-            : [];
-        DriverPackCatalogItem[] modelCandidates = systemIdCandidates.Length > 0
-            ? systemIdCandidates
-            : candidates
-            .Where(item => item.ModelNames.Any(modelName => ContainsIgnoreCase(modelName, model) || ContainsIgnoreCase(modelName, product)))
-            .ToArray();
-        DriverPackCatalogItem[] modelReleaseCandidates = SelectReleaseCandidates(modelCandidates, targetReleaseId);
-
-        DriverPackCatalogItem? exactModel = modelReleaseCandidates
+            .Where(item => Normalize(item.OsName) == "windows 11")
+            .Where(item => Normalize(item.OsReleaseId) == Normalize(operatingSystem.ReleaseId))
+            .Where(item => IsHardwareMatch(item, hardware, manufacturer))
             .OrderByDescending(item => item.ReleaseDate ?? DateTimeOffset.MinValue)
+            .ThenBy(item => item.Id, StringComparer.Ordinal)
             .FirstOrDefault();
 
         if (exactModel is not null)
         {
-            _logger.LogInformation("Driver pack selected by exact model match. DriverPackId={DriverPackId}, Name={DriverPackName}", exactModel.Id, exactModel.Name);
+            _logger.LogDebug("OEM driver pack selected by compatible hardware match.");
             return new DriverPackSelectionResult
             {
                 DriverPack = exactModel,
@@ -98,125 +76,82 @@ public sealed class DriverPackSelectionService : IDriverPackSelectionService
             };
         }
 
-        DriverPackCatalogItem[] releaseCandidates = SelectReleaseCandidates(candidates, targetReleaseId);
-        DriverPackCatalogItem latest = releaseCandidates
-            .OrderByDescending(item => item.ReleaseDate ?? DateTimeOffset.MinValue)
-            .First();
+        return NoCompatiblePack();
+    }
 
-        _logger.LogInformation("Driver pack selected by fallback newest candidate. DriverPackId={DriverPackId}, Name={DriverPackName}", latest.Id, latest.Name);
-
+    private DriverPackSelectionResult NoCompatiblePack()
+    {
+        _logger.LogDebug("No compatible OEM driver pack matched the discovered hardware and selected OS.");
         return new DriverPackSelectionResult
         {
-            DriverPack = latest,
-            SelectionReason = "No model exact match; selected newest compatible manufacturer candidate."
+            SelectionReason = "No compatible OEM system pack matches the detected model and exact OS release. Select a pack explicitly or use Microsoft Update Catalog."
         };
     }
 
-    private static bool ContainsIgnoreCase(string source, string value)
+    private static bool IsHardwareMatch(DriverPackCatalogItem item, HardwareProfile hardware, string manufacturer)
     {
-        if (string.IsNullOrWhiteSpace(source) || string.IsNullOrWhiteSpace(value))
+        if (item.PackageRole == DriverPackPackageRole.Accessory)
         {
             return false;
         }
 
-        return source.Contains(value, StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static bool IsSystemIdMatch(DriverPackCatalogItem item, HardwareProfile hardware)
-    {
-        return item.SystemIds.Any(systemId =>
-            StartsWithIgnoreCase(hardware.Model, systemId) ||
-            StartsWithIgnoreCase(hardware.Product, systemId));
-    }
-
-    private static bool StartsWithIgnoreCase(string value, string prefix)
-    {
-        return !string.IsNullOrWhiteSpace(value) &&
-               !string.IsNullOrWhiteSpace(prefix) &&
-               value.Trim().StartsWith(prefix.Trim(), StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static bool IsReleaseIdMatch(DriverPackCatalogItem item, string targetReleaseId)
-    {
-        if (string.IsNullOrWhiteSpace(targetReleaseId))
+        if (manufacturer == "lenovo")
         {
-            return false;
-        }
-
-        return Normalize(item.Name).Contains(targetReleaseId, StringComparison.OrdinalIgnoreCase) ||
-               Normalize(item.OsReleaseId).Contains(targetReleaseId, StringComparison.OrdinalIgnoreCase);
-    }
-
-    private static DriverPackCatalogItem[] SelectReleaseCandidates(
-        IReadOnlyList<DriverPackCatalogItem> candidates,
-        string targetReleaseId)
-    {
-        if (candidates.Count == 0 || string.IsNullOrWhiteSpace(targetReleaseId))
-        {
-            return candidates.ToArray();
-        }
-
-        DriverPackCatalogItem[] releaseFiltered = candidates
-            .Where(item => IsReleaseIdMatch(item, targetReleaseId))
-            .ToArray();
-        if (releaseFiltered.Length > 0)
-        {
-            return releaseFiltered;
-        }
-
-        int targetReleaseRank = WindowsReleaseId.GetSortRank(targetReleaseId);
-        if (targetReleaseRank <= 0)
-        {
-            return candidates.ToArray();
-        }
-
-        DriverPackCatalogItem[] compatibleReleaseCandidates = candidates
-            .Where(item =>
+            string[] machineTypes = new[] { hardware.Model, hardware.Product }
+                .Select(GetLenovoMachineType)
+                .Where(value => value.Length > 0)
+                .Distinct(StringComparer.Ordinal)
+                .ToArray();
+            if (machineTypes.Length > 1)
             {
-                int releaseRank = WindowsReleaseId.GetSortRank(item.OsReleaseId);
-                return releaseRank > 0 && releaseRank <= targetReleaseRank;
-            })
-            .ToArray();
-        if (compatibleReleaseCandidates.Length == 0)
-        {
-            return candidates.ToArray();
+                return false;
+            }
+
+            if (machineTypes.Length == 1 && item.SystemIds.Count > 0)
+            {
+                return item.SystemIds.Any(systemId => Normalize(systemId) == machineTypes[0]);
+            }
         }
 
-        int bestReleaseRank = compatibleReleaseCandidates.Max(item => WindowsReleaseId.GetSortRank(item.OsReleaseId));
-        return compatibleReleaseCandidates
-            .Where(item => WindowsReleaseId.GetSortRank(item.OsReleaseId) == bestReleaseRank)
-            .ToArray();
+        string model = Normalize(hardware.Model);
+        string product = Normalize(hardware.Product);
+        return item.PackageRole == DriverPackPackageRole.System && item.ModelNames.Any(modelName =>
+            IsKnownModelMatch(Normalize(modelName), model) || IsKnownModelMatch(Normalize(modelName), product));
+    }
+
+    private static bool IsKnownModelMatch(string catalogModel, string detectedModel)
+    {
+        return detectedModel.Length > 0 && detectedModel != "unknown" && catalogModel == detectedModel;
+    }
+
+    private static string GetLenovoMachineType(string value)
+    {
+        string normalized = Normalize(value);
+        // Lenovo defines the machine type as four characters, or the first four of a ten-character MTM.
+        if (normalized.Length is not (4 or 10) || !char.IsAsciiDigit(normalized[0]) ||
+            !normalized.All(char.IsAsciiLetterOrDigit))
+        {
+            return string.Empty;
+        }
+
+        return normalized[..4];
     }
 
     private static string Normalize(string value)
     {
-        return value.Trim().ToLowerInvariant();
+        return string.Join(' ', value.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)).ToLowerInvariant();
     }
 
     private static string NormalizeManufacturer(string value)
     {
-        string normalized = Normalize(value);
-        if (normalized.Contains("hewlett") || normalized == "hp")
+        return Normalize(value) switch
         {
-            return "hp";
-        }
-
-        if (normalized.Contains("dell"))
-        {
-            return "dell";
-        }
-
-        if (normalized.Contains("lenovo"))
-        {
-            return "lenovo";
-        }
-
-        if (normalized.Contains("microsoft"))
-        {
-            return "microsoft";
-        }
-
-        return normalized;
+            "hp" or "hp inc." or "hewlett-packard" or "hewlett packard" => "hp",
+            "dell" or "dell inc." or "dell inc" => "dell",
+            "lenovo" => "lenovo",
+            "microsoft" or "microsoft corporation" => "microsoft",
+            _ => string.Empty
+        };
     }
 
     private static string NormalizeArchitecture(string value)
@@ -228,7 +163,7 @@ public sealed class DriverPackSelectionService : IDriverPackSelectionService
             "x64" => "x64",
             "arm64" => "arm64",
             "aarch64" => "arm64",
-            _ => normalized
+            _ => string.Empty
         };
     }
 }

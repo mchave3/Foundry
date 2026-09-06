@@ -193,10 +193,10 @@ public sealed class WinPeRuntimePayloadProvisioningService : IWinPeRuntimePayloa
             File.Delete(archivePath);
         }
 
-        string publishArguments = string.Join(
-            " ",
+        string[] publishArguments =
+        [
             "publish",
-            WinPeProcessRunner.Quote(projectPath),
+            projectPath,
             "-c", "Release",
             "-r", runtimeIdentifier,
             "--self-contained", "true",
@@ -206,7 +206,8 @@ public sealed class WinPeRuntimePayloadProvisioningService : IWinPeRuntimePayloa
             "/p:IncludeAllContentForSelfExtract=true",
             "/p:DebugType=None",
             "/p:GenerateDocumentationFile=false",
-            "-o", WinPeProcessRunner.Quote(publishDirectory));
+            "-o", publishDirectory
+        ];
 
         WinPeProcessExecution publish = await _processRunner.RunAsync(
             "dotnet",

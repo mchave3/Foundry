@@ -10,6 +10,7 @@ using Foundry.Connect.Models.Configuration;
 using Foundry.Connect.Services.Configuration;
 using Foundry.Connect.Services.Logging;
 using Foundry.Connect.Services.Runtime;
+using Foundry.Core.Services.Configuration;
 using Foundry.Telemetry;
 using Foundry.Utilities.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
@@ -110,6 +111,24 @@ public static class Program
                 "Foundry.Connect configuration could not be loaded. Outcome={Outcome}, ExitCode={ExitCode}",
                 "ConfigurationFailure",
                 (int)FoundryConnectExitCode.ConfigurationFailure);
+            if (ex.InnerException is UnsupportedConfigurationVersionException)
+            {
+                try
+                {
+                    _ = MessageBox.Show(
+                        $"{ex.Message}{Environment.NewLine}{Environment.NewLine}" +
+                        "Update Foundry before using this configuration. The configuration file was not changed.",
+                        $"{FoundryConnectApplicationInfo.AppName} configuration update required",
+                        MessageBoxButton.OK,
+                        MessageBoxImage.Error,
+                        MessageBoxResult.OK);
+                }
+                catch (Exception dialogException)
+                {
+                    programLogger.Error(dialogException, "The unsupported configuration version dialog could not be displayed.");
+                }
+            }
+
             return (int)FoundryConnectExitCode.ConfigurationFailure;
         }
         catch (Exception ex)

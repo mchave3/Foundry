@@ -18,7 +18,8 @@ public sealed class DriverPackSelectionServiceTests
         {
             Manufacturer = "Dell Inc.",
             Model = "Latitude 5450",
-            Product = "Latitude 5450"
+            Product = "Latitude 5450",
+            Architecture = "x64"
         };
         OperatingSystemCatalogItem operatingSystem = new()
         {
@@ -50,14 +51,15 @@ public sealed class DriverPackSelectionServiceTests
     }
 
     [Fact]
-    public void SelectBest_WhenNoExactModelExists_FallsBackToNewestManufacturerCandidate()
+    public void SelectBest_WhenNoExactModelExists_DoesNotSelectAnotherHpModel()
     {
         var service = new DriverPackSelectionService(NullLogger<DriverPackSelectionService>.Instance);
         HardwareProfile hardware = new()
         {
             Manufacturer = "HP",
             Model = "EliteBook 845",
-            Product = "EliteBook 845"
+            Product = "EliteBook 845",
+            Architecture = "x64"
         };
         OperatingSystemCatalogItem operatingSystem = new()
         {
@@ -84,19 +86,20 @@ public sealed class DriverPackSelectionServiceTests
 
         DriverPackSelectionResult result = service.SelectBest([olderCandidate, newerCandidate], hardware, operatingSystem);
 
-        Assert.Equal("newer", result.DriverPack?.Id);
-        Assert.Equal("No model exact match; selected newest compatible manufacturer candidate.", result.SelectionReason);
+        Assert.Null(result.DriverPack);
+        Assert.Contains("No compatible", result.SelectionReason, StringComparison.OrdinalIgnoreCase);
     }
 
     [Fact]
-    public void SelectBest_WhenTargetReleaseIsUnavailable_PrefersNewestCompatibleExactModelRelease()
+    public void SelectBest_WhenTargetReleaseIsUnavailable_DoesNotAssumeOlderReleaseCompatibility()
     {
         var service = new DriverPackSelectionService(NullLogger<DriverPackSelectionService>.Instance);
         HardwareProfile hardware = new()
         {
             Manufacturer = "Lenovo",
             Model = "ThinkPad X13 Yoga Gen 3 Type 21AW 21AX",
-            Product = "21AW"
+            Product = "21AW",
+            Architecture = "x64"
         };
         OperatingSystemCatalogItem operatingSystem = new()
         {
@@ -130,19 +133,19 @@ public sealed class DriverPackSelectionServiceTests
 
         DriverPackSelectionResult result = service.SelectBest([win11_21H2, win11_22H2, win11_23H2], hardware, operatingSystem);
 
-        Assert.Equal("23h2", result.DriverPack?.Id);
-        Assert.Equal("Matched by hardware model/product and compatible OS release.", result.SelectionReason);
+        Assert.Null(result.DriverPack);
     }
 
     [Fact]
-    public void SelectBest_WhenNewerCompatibleReleaseExistsForDifferentModel_PrefersExactModel()
+    public void SelectBest_WhenOnlyAnotherModelHasTargetRelease_DoesNotSelectEitherPack()
     {
         var service = new DriverPackSelectionService(NullLogger<DriverPackSelectionService>.Instance);
         HardwareProfile hardware = new()
         {
             Manufacturer = "Lenovo",
             Model = "ThinkPad X13 Yoga Gen 3 Type 21AW 21AX",
-            Product = "21AW"
+            Product = "21AW",
+            Architecture = "x64"
         };
         OperatingSystemCatalogItem operatingSystem = new()
         {
@@ -159,17 +162,16 @@ public sealed class DriverPackSelectionServiceTests
             releaseDate: new DateTimeOffset(2024, 06, 13, 0, 0, 0, TimeSpan.Zero),
             modelNames: ["ThinkPad X13 Yoga Gen 3 Type 21AW 21AX"]);
         DriverPackCatalogItem otherModel = CreateCatalogItem(
-            id: "other-24h2",
+            id: "other-25h2",
             manufacturer: "Lenovo",
-            releaseId: "24H2",
+            releaseId: "25H2",
             architecture: "x64",
             releaseDate: new DateTimeOffset(2025, 01, 01, 0, 0, 0, TimeSpan.Zero),
             modelNames: ["ThinkPad T14 Gen 5"]);
 
         DriverPackSelectionResult result = service.SelectBest([exactModel, otherModel], hardware, operatingSystem);
 
-        Assert.Equal("exact-23h2", result.DriverPack?.Id);
-        Assert.Equal("Matched by hardware model/product and compatible OS release.", result.SelectionReason);
+        Assert.Null(result.DriverPack);
     }
 
     [Fact]
@@ -180,7 +182,8 @@ public sealed class DriverPackSelectionServiceTests
         {
             Manufacturer = "Lenovo",
             Model = "21Y6000JMX",
-            Product = "ThinkPad E14 Gen 8"
+            Product = "ThinkPad E14 Gen 8",
+            Architecture = "x64"
         };
         OperatingSystemCatalogItem operatingSystem = new()
         {
@@ -214,6 +217,166 @@ public sealed class DriverPackSelectionServiceTests
         Assert.Equal("21y6-21y7", result.DriverPack?.Id);
     }
 
+    [Theory]
+    [InlineData("Latitude 545", "Latitude 5450")]
+    [InlineData("Latitude 5450", "Latitude 5450 Rugged")]
+    [InlineData("Unknown", "Unknown")]
+    [InlineData("", "")]
+    public void SelectBest_WithoutExactKnownModel_DoesNotSelectPack(string detectedModel, string catalogModel)
+    {
+        DriverPackSelectionResult result = SelectSingle(
+            CreateHardware() with { Model = detectedModel, Product = detectedModel },
+            CreateCompatiblePack() with { ModelNames = [catalogModel] });
+
+        Assert.Null(result.DriverPack);
+    }
+
+    [Fact]
+    public void SelectBest_WithCaseAndWhitespaceDifferences_SelectsExactModel()
+    {
+        DriverPackSelectionResult result = SelectSingle(
+            CreateHardware() with { Model = "  LATITUDE\t5450  ", Product = "Unknown" },
+            CreateCompatiblePack());
+
+        Assert.Equal("compatible", result.DriverPack?.Id);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("Unknown")]
+    [InlineData("Not Dell")]
+    [InlineData("Other")]
+    public void SelectBest_WithUnknownOrDifferentManufacturer_DoesNotSearchOtherVendors(string manufacturer)
+    {
+        DriverPackSelectionResult result = SelectSingle(
+            CreateHardware() with { Manufacturer = manufacturer },
+            CreateCompatiblePack());
+
+        Assert.Null(result.DriverPack);
+    }
+
+    [Theory]
+    [InlineData("", "x64", "x64")]
+    [InlineData("arm64", "x64", "x64")]
+    [InlineData("x64", "", "")]
+    [InlineData("unknown", "unknown", "unknown")]
+    public void SelectBest_WithoutMatchingKnownArchitectures_DoesNotSelectPack(
+        string hardwareArchitecture, string osArchitecture, string packArchitecture)
+    {
+        DriverPackSelectionResult result = SelectSingle(
+            CreateHardware() with { Architecture = hardwareArchitecture },
+            CreateCompatiblePack() with { OsArchitecture = packArchitecture },
+            CreateOperatingSystem() with { Architecture = osArchitecture });
+
+        Assert.Null(result.DriverPack);
+    }
+
+    [Theory]
+    [InlineData("")]
+    [InlineData("*")]
+    [InlineData("23H2")]
+    [InlineData("25H2")]
+    [InlineData("124H2")]
+    public void SelectBest_WithoutExactReleaseMetadata_DoesNotTrustNameOrOtherRelease(string releaseId)
+    {
+        DriverPackSelectionResult result = SelectSingle(
+            CreateHardware(),
+            CreateCompatiblePack() with { OsReleaseId = releaseId, Name = "Latitude 5450 24H2" });
+
+        Assert.Null(result.DriverPack);
+    }
+
+    [Fact]
+    public void SelectBest_WhenLenovoTypeConflicts_RejectsExactMarketingName()
+    {
+        DriverPackSelectionResult result = SelectSingle(
+            CreateHardware() with { Manufacturer = "Lenovo", Model = "21Y6000JMX", Product = "ThinkPad E14 Gen 8" },
+            CreateCompatiblePack() with { Manufacturer = "Lenovo", ModelNames = ["ThinkPad E14 Gen 8"], SystemIds = ["21Y2", "21Y3"] });
+
+        Assert.Null(result.DriverPack);
+    }
+
+    [Theory]
+    [InlineData("21Y60", "21Y6")]
+    [InlineData("21Y6000JMX", "21Y")]
+    [InlineData("21Y6000JMX-extra", "21Y6")]
+    public void SelectBest_WhenLenovoIdentifierOnlySharesPrefix_DoesNotTreatItAsMachineType(string model, string systemId)
+    {
+        DriverPackSelectionResult result = SelectSingle(
+            CreateHardware() with { Manufacturer = "Lenovo", Model = model, Product = "Unknown" },
+            CreateCompatiblePack() with { Manufacturer = "Lenovo", ModelNames = ["ThinkPad E14 Gen 8"], SystemIds = [systemId] });
+
+        Assert.Null(result.DriverPack);
+    }
+
+    [Fact]
+    public void SelectBest_WhenSurfaceArm64CatalogContainsOnlyDock_DoesNotSelectAccessory()
+    {
+        DriverPackSelectionResult result = SelectSingle(
+            CreateHardware() with { Manufacturer = "Microsoft Corporation", Model = "Surface Pro", Product = "Surface Pro", Architecture = "arm64" },
+            CreateCompatiblePack() with
+            {
+                Manufacturer = "Microsoft",
+                Name = "SurfaceThunderbolt4DockDrivers_Win11_arm64_22000_23.033.35231.0.msi",
+                ModelNames = ["Surface Thunderbolt 4 Dock"],
+                OsReleaseId = "21H2",
+                OsArchitecture = "arm64"
+            },
+            CreateOperatingSystem() with { Architecture = "arm64" });
+
+        Assert.Null(result.DriverPack);
+    }
+
+    private static DriverPackSelectionResult SelectSingle(
+        HardwareProfile hardware,
+        DriverPackCatalogItem item,
+        OperatingSystemCatalogItem? operatingSystem = null)
+    {
+        var service = new DriverPackSelectionService(NullLogger<DriverPackSelectionService>.Instance);
+        return service.SelectBest([item], hardware, operatingSystem ?? CreateOperatingSystem());
+    }
+
+    [Theory]
+    [InlineData(DriverPackPackageRole.Unknown)]
+    [InlineData(DriverPackPackageRole.Accessory)]
+    public void SelectBest_WhenRoleDoesNotEstablishSystemPack_RejectsExactModel(DriverPackPackageRole role)
+    {
+        DriverPackSelectionResult result = SelectSingle(CreateHardware(), CreateCompatiblePack() with { PackageRole = role });
+
+        Assert.Null(result.DriverPack);
+    }
+
+    [Theory]
+    [InlineData(DriverPackPackageRole.Unknown, true)]
+    [InlineData(DriverPackPackageRole.Accessory, false)]
+    public void SelectBest_WhenLenovoTypeMatches_UsesDocumentedSystemMappingExceptForAccessory(
+        DriverPackPackageRole role, bool expectedMatch)
+    {
+        DriverPackSelectionResult result = SelectSingle(
+            CreateHardware() with { Manufacturer = "Lenovo", Model = "21Y6000JMX", Product = "Unknown" },
+            CreateCompatiblePack() with { Manufacturer = "Lenovo", PackageRole = role, ModelNames = [], SystemIds = ["21Y6"] });
+
+        Assert.Equal(expectedMatch, result.DriverPack is not null);
+    }
+
+    private static HardwareProfile CreateHardware() => new()
+    {
+        Manufacturer = "Dell Inc.",
+        Model = "Latitude 5450",
+        Product = "Latitude 5450",
+        Architecture = "x64"
+    };
+
+    private static OperatingSystemCatalogItem CreateOperatingSystem() => new()
+    {
+        WindowsRelease = "11",
+        ReleaseId = "24H2",
+        Architecture = "x64"
+    };
+
+    private static DriverPackCatalogItem CreateCompatiblePack() => CreateCatalogItem(
+        "compatible", "Dell", "24H2", "x64", new DateTimeOffset(2026, 3, 1, 0, 0, 0, TimeSpan.Zero), ["Latitude 5450"]);
+
     private static DriverPackCatalogItem CreateCatalogItem(
         string id,
         string manufacturer,
@@ -233,6 +396,7 @@ public sealed class DriverPackSelectionServiceTests
             OsName = "Windows 11",
             OsReleaseId = releaseId,
             OsArchitecture = architecture,
+            PackageRole = DriverPackPackageRole.System,
             ReleaseDate = releaseDate,
             ModelNames = modelNames,
             SystemIds = systemIds ?? []

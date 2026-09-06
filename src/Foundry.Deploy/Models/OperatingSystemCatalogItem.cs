@@ -6,6 +6,8 @@ namespace Foundry.Deploy.Models;
 
 public sealed record OperatingSystemCatalogItem
 {
+    /// <summary>Identifies the authenticated bounded catalog response that supplied this metadata.</summary>
+    public string CatalogRevision { get; init; } = string.Empty;
     public string SourceId { get; init; } = string.Empty;
     public string ClientType { get; init; } = string.Empty;
     public string WindowsRelease { get; init; } = string.Empty;

@@ -6,6 +6,8 @@ namespace Foundry.Deploy.Services.DriverPacks;
 
 public sealed record MicrosoftUpdateCatalogDownload
 {
+    /// <summary>Identifies the authenticated bounded catalog response that supplied this metadata.</summary>
+    public string CatalogRevision { get; init; } = string.Empty;
     public string DownloadUrl { get; init; } = string.Empty;
 
     public string FileName { get; init; } = string.Empty;

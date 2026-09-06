@@ -730,9 +730,20 @@ public sealed partial class StartMediaViewModel : ObservableObject, IDisposable
                 new UsbOutputOptions
                 {
                     TargetDiskNumber = selectedDisk.DiskNumber,
-                    ExpectedDiskFriendlyName = selectedDisk.FriendlyName,
-                    ExpectedDiskSerialNumber = selectedDisk.SerialNumber,
-                    ExpectedDiskUniqueId = selectedDisk.UniqueId,
+                    ExpectedDisk = new WinPeUsbDiskIdentity
+                    {
+                        Number = selectedDisk.DiskNumber,
+                        FriendlyName = selectedDisk.FriendlyName,
+                        SerialNumber = selectedDisk.SerialNumber,
+                        UniqueId = selectedDisk.UniqueId,
+                        BusType = selectedDisk.BusType,
+                        IsRemovable = selectedDisk.IsRemovable,
+                        IsSystem = selectedDisk.IsSystem,
+                        IsBoot = selectedDisk.IsBoot,
+                        IsOffline = selectedDisk.IsOffline,
+                        IsReadOnly = selectedDisk.IsReadOnly,
+                        Size = selectedDisk.SizeBytes
+                    },
                     PartitionStyle = options.UsbPartitionStyle,
                     FormatMode = options.UsbFormatMode,
                     RuntimePayloadProvisioning = workspace.RuntimePayloadProvisioning,
@@ -797,9 +808,20 @@ public sealed partial class StartMediaViewModel : ObservableObject, IDisposable
                 new UsbOutputOptions
                 {
                     TargetDiskNumber = selectedDisk.DiskNumber,
-                    ExpectedDiskFriendlyName = selectedDisk.FriendlyName,
-                    ExpectedDiskSerialNumber = selectedDisk.SerialNumber,
-                    ExpectedDiskUniqueId = selectedDisk.UniqueId,
+                    ExpectedDisk = new WinPeUsbDiskIdentity
+                    {
+                        Number = selectedDisk.DiskNumber,
+                        FriendlyName = selectedDisk.FriendlyName,
+                        SerialNumber = selectedDisk.SerialNumber,
+                        UniqueId = selectedDisk.UniqueId,
+                        BusType = selectedDisk.BusType,
+                        IsRemovable = selectedDisk.IsRemovable,
+                        IsSystem = selectedDisk.IsSystem,
+                        IsBoot = selectedDisk.IsBoot,
+                        IsOffline = selectedDisk.IsOffline,
+                        IsReadOnly = selectedDisk.IsReadOnly,
+                        Size = selectedDisk.SizeBytes
+                    },
                     FormatMode = options.UsbFormatMode,
                     RuntimePayloadProvisioning = workspace.RuntimePayloadProvisioning,
                     DownloadProgress = telemetryProgressTracker.CreateDownloadProgress(

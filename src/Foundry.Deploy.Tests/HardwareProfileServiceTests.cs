@@ -26,6 +26,7 @@ public sealed class HardwareProfileServiceTests
             "UEFI\\RES_{FIRMWARE}",
             [new PnpDeviceSnapshot("Device", "PCI\\VEN_1234", ["PCI\\VEN_1234"], "{CLASS}", "Vendor", "Net")])
         {
+            FirmwareType = WindowsFirmwareType.Uefi,
             AssetTag = "ASSET-42",
             SystemUuid = "550e8400-e29b-41d4-a716-446655440000"
         };
@@ -33,6 +34,7 @@ public sealed class HardwareProfileServiceTests
 
         HardwareProfile profile = await service.GetCurrentAsync(TestContext.Current.CancellationToken);
 
+        Assert.Equal(WindowsFirmwareType.Uefi, profile.FirmwareType);
         Assert.Equal("HP", profile.Manufacturer);
         Assert.Equal("Unknown", profile.Model);
         Assert.Equal("EliteBook", profile.Product);
@@ -59,6 +61,7 @@ public sealed class HardwareProfileServiceTests
 
         HardwareProfile profile = await service.GetCurrentAsync(TestContext.Current.CancellationToken);
 
+        Assert.Equal(WindowsFirmwareType.Unknown, profile.FirmwareType);
         Assert.Equal("Unknown", profile.Manufacturer);
         Assert.Equal("Unknown", profile.Model);
         Assert.Equal("Unknown", profile.Product);

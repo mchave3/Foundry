@@ -18,4 +18,7 @@ public sealed record DiskInfo(
     bool IsBoot,
     bool IsReadOnly,
     bool IsOffline,
-    bool IsRemovable);
+    bool IsRemovable)
+{
+    public string UniqueId { get; init; } = string.Empty;
+}

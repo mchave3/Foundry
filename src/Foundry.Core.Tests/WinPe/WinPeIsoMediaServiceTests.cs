@@ -9,6 +9,27 @@ namespace Foundry.Core.Tests.WinPe;
 public sealed class WinPeIsoMediaServiceTests
 {
     [Fact]
+    public async Task CreateAsync_RejectsUnsupportedBatchPathBeforeReplacingExistingOutput()
+    {
+        using TempPreparedWorkspace temp = TempPreparedWorkspace.Create(useBootEx: false);
+        string outputPath = Path.Combine(temp.RootPath, "unsafe&name.iso");
+        await File.WriteAllTextAsync(outputPath, "original", TestContext.Current.CancellationToken);
+        var runner = new FakeIsoRunner();
+
+        WinPeResult result = await new WinPeIsoMediaService(runner).CreateAsync(new WinPeIsoMediaOptions
+        {
+            PreparedWorkspace = temp.PreparedWorkspace,
+            OutputIsoPath = outputPath,
+            ForceOverwriteOutput = true,
+            IsoTempDirectoryPath = Path.Combine(temp.RootPath, "iso-temp")
+        }, TestContext.Current.CancellationToken);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal("original", await File.ReadAllTextAsync(outputPath, TestContext.Current.CancellationToken));
+        Assert.Empty(runner.Executions);
+    }
+
+    [Fact]
     public async Task CreateAsync_WhenBootExIsEnabled_PassesBootExToMakeWinPeMedia()
     {
         using TempPreparedWorkspace temp = TempPreparedWorkspace.Create(useBootEx: true);
@@ -164,6 +185,33 @@ public sealed class WinPeIsoMediaServiceTests
     }
 
     [Fact]
+    public async Task CreateAsync_WhenMakeWinPeMediaTimesOut_PreservesProcessTimeoutAndTerminationMetadata()
+    {
+        using TempPreparedWorkspace temp = TempPreparedWorkspace.Create(useBootEx: false);
+        var exception = new TimeoutException("The native operation exceeded its deadline.");
+        exception.Data["ProcessRootExitConfirmed"] = true;
+        exception.Data["ProcessTreeTerminationConfirmed"] = false;
+        var service = new WinPeIsoMediaService(new FakeIsoRunner(exception));
+
+        WinPeResult result = await service.CreateAsync(
+            new WinPeIsoMediaOptions
+            {
+                PreparedWorkspace = temp.PreparedWorkspace,
+                OutputIsoPath = Path.Combine(temp.RootPath, "out", "foundry.iso"),
+                IsoTempDirectoryPath = Path.Combine(temp.RootPath, "iso-temp")
+            },
+            TestContext.Current.CancellationToken);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(WinPeFailureKinds.Process, result.Error?.FailureKind);
+        Assert.Equal(WinPeFailureReasons.Timeout, result.Error?.FailureReason);
+        Assert.Equal("MakeWinPEMedia", result.Error?.ToolName);
+        Assert.Same(exception, result.Error?.Exception);
+        Assert.Equal(true, result.Error?.Exception?.Data["ProcessRootExitConfirmed"]);
+        Assert.Equal(false, result.Error?.Exception?.Data["ProcessTreeTerminationConfirmed"]);
+    }
+
+    [Fact]
     public async Task CreateAsync_WhenFinalCopyFails_ReportsFileSystemFinalizationFailure()
     {
         using TempPreparedWorkspace temp = TempPreparedWorkspace.Create(useBootEx: false);
@@ -268,7 +316,19 @@ public sealed class WinPeIsoMediaServiceTests
             string arguments,
             string workingDirectory,
             CancellationToken cancellationToken,
-            IReadOnlyDictionary<string, string>? environmentOverrides = null)
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
+        {
+            throw new NotSupportedException("Executable calls must pass argument tokens.");
+        }
+
+        public Task<WinPeProcessExecution> RunAsync(
+            string fileName,
+            IReadOnlyList<string> argumentList,
+            string workingDirectory,
+            CancellationToken cancellationToken,
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }
@@ -277,7 +337,8 @@ public sealed class WinPeIsoMediaServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             if (exception is not null)
             {
@@ -313,20 +374,17 @@ public sealed class WinPeIsoMediaServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }
 
         private static string ExtractLastIsoArgument(string arguments)
         {
-            int isoIndex = arguments.LastIndexOf(".iso", StringComparison.OrdinalIgnoreCase);
-            Assert.True(isoIndex >= 0, $"No ISO argument found in: {arguments}");
-
-            int end = isoIndex + ".iso".Length;
-            int start = arguments.LastIndexOf(' ', isoIndex);
-            start = start < 0 ? 0 : start + 1;
-            return arguments[start..end].Trim('"');
+            string[] quotedValues = arguments.Split('"');
+            Assert.True(quotedValues.Length >= 5, "Expected quoted workspace and ISO paths.");
+            return quotedValues[3];
         }
     }
 }
