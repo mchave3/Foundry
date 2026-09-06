@@ -38,7 +38,11 @@ public sealed class DriverPackInstallScriptTrustTests
                 try { $writer = [IO.File]::Open($env:FOUNDRY_TEST_PACKAGE, 'Open', 'Write', 'None'); $writer.Dispose(); $locks.Add($false) }
                 catch [IO.IOException] { $locks.Add($true) }
             }
-            function Start-Process { param($FilePath, $ArgumentList, [switch]$Wait, [switch]$PassThru, $WindowStyle); Test-PackageLock; $launches.Add($FilePath); [pscustomobject]@{ ExitCode = 0 } }
+            function Start-Process {
+                param($FilePath, $ArgumentList, [switch]$Wait, [switch]$PassThru, $WindowStyle)
+                if (-not $Wait -or -not $PassThru -or $WindowStyle -ne 'Hidden') { throw 'Native calls must wait and use a hidden window.' }
+                Test-PackageLock; $launches.Add($FilePath); [pscustomobject]@{ ExitCode = 0 }
+            }
             function New-Item { param($Path, $ItemType, [switch]$Force) }
             function Start-Transcript { param($Path, [switch]$Force) }
             function Stop-Transcript { }

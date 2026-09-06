@@ -226,7 +226,7 @@ public sealed class PreOobeScriptProvisioningServiceTests
     }
 
     [Fact]
-    public void Provision_StagesDriverPackScriptWithTranscriptAndWaitedProcesses()
+    public void Provision_StagesDriverPackScriptWithTranscriptAndProcessWrapper()
     {
         string windowsRoot = CreateWindowsRoot();
         var service = new PreOobeScriptProvisioningService(new SetupCompleteScriptService());
@@ -250,7 +250,6 @@ public sealed class PreOobeScriptProvisioningServiceTests
         Assert.Contains("Start-Transcript -Path $TranscriptPath -Force", stagedScript);
         Assert.Contains("Write-FoundryLog", stagedScript);
         Assert.Contains("$operationDuration = [DateTimeOffset]::Now - $operationStartedAt", stagedScript);
-        Assert.Contains("Start-Process -FilePath $FilePath -ArgumentList $ArgumentList -Wait -PassThru", stagedScript);
         Assert.Contains("-FilePath $ResolvedPackagePath", stagedScript);
         Assert.Contains("-FilePath 'reg.exe'", stagedScript);
         Assert.Contains("-FilePath 'pnpunattend.exe'", stagedScript);
