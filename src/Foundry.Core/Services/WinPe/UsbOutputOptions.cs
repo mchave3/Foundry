@@ -10,9 +10,8 @@ public sealed record UsbOutputOptions
 {
     public string StagingDirectoryPath { get; init; } = string.Empty;
     public int? TargetDiskNumber { get; init; }
-    public string ExpectedDiskFriendlyName { get; init; } = string.Empty;
-    public string ExpectedDiskSerialNumber { get; init; } = string.Empty;
-    public string ExpectedDiskUniqueId { get; init; } = string.Empty;
+    /// <summary>The immutable disk snapshot shown when the user confirmed the operation.</summary>
+    public WinPeUsbDiskIdentity? ExpectedDisk { get; init; }
     public UsbPartitionStyle PartitionStyle { get; init; } = UsbPartitionStyle.Gpt;
     public UsbFormatMode FormatMode { get; init; } = UsbFormatMode.Quick;
     public string? WorkingDirectoryPath { get; init; }

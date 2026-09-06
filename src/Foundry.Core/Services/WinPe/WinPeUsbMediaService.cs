@@ -2,6 +2,8 @@
 // Licensed under the MIT License.
 // See the LICENSE file in the project root for more information.
 
+using System.IO.Compression;
+using System.Text;
 using System.Text.Json;
 using Foundry.Utilities.Processes;
 using Foundry.Utilities.Serialization;
@@ -81,55 +83,16 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
 
         Directory.CreateDirectory(workingDirectoryPath);
 
-        const string script = """
+        string script = ReadUsbDiskOperations() + """
                               $foundryGptBootPartitionType = '{c12a7328-f81f-11d2-ba4b-00a0c93ec93b}'
-
-                              function Get-FoundryUsbDriveLetter($DriveLetter) {
-                                  if ($null -eq $DriveLetter) { return $null }
-                                  if ($DriveLetter -is [char] -and [int][char]$DriveLetter -eq 0) { return $null }
-
-                                  $text = ([string]$DriveLetter).Trim()
-                                  if ($text.Length -eq 2 -and $text[1] -eq ':') { $text = $text.Substring(0, 1) }
-                                  if ($text -match '^[A-Za-z]$') { return $text.ToUpperInvariant() }
-
-                                  return $null
-                              }
-
-                              function Get-FoundryUsbDriveLetterText($DriveLetter) {
-                                  $letter = Get-FoundryUsbDriveLetter $DriveLetter
-                                  if ($null -eq $letter) { return '' }
-                                  return "$($letter):"
-                              }
-
-                              function Get-FoundryUsbPartitionVolume($Partition) {
-                                  $driveLetter = Get-FoundryUsbDriveLetter $Partition.DriveLetter
-                                  if ($null -ne $driveLetter) {
-                                      $volume = Get-Volume -DriveLetter $driveLetter -ErrorAction SilentlyContinue
-                                  }
-                                  else {
-                                      $volume = Get-Volume -Partition $Partition -ErrorAction SilentlyContinue
-                                  }
-
-                                  if ($null -eq $volume) { return $null }
-
-                                  [pscustomobject]@{
-                                      PartitionNumber = [int]$Partition.PartitionNumber
-                                      DriveLetter = Get-FoundryUsbDriveLetterText $Partition.DriveLetter
-                                      FileSystemLabel = [string]$volume.FileSystemLabel
-                                      FileSystem = [string]$volume.FileSystem
-                                      GptType = [string]$Partition.GptType
-                                      MbrType = [string]$Partition.MbrType
-                                      IsActive = [bool]$Partition.IsActive
-                                  }
-                              }
 
                               $disks = Get-Disk | Where-Object { $_.BusType -eq 'USB' }
                               $result = @(
                               foreach ($disk in $disks) {
-                                  $partitions = @(Get-Partition -DiskNumber $disk.Number -ErrorAction SilentlyContinue)
-                                  $volumes = @($partitions | ForEach-Object { Get-FoundryUsbPartitionVolume $_ })
+                                  $partitions = @(Get-Partition -Disk $disk -ErrorAction SilentlyContinue)
+                                  $volumes = @($partitions | ForEach-Object { try { Get-FoundryUsbPartitionVolume $_ } catch { } })
                                   $letters = @(
-                                      $volumes | Where-Object { $_.DriveLetter -ne '' } | ForEach-Object { $_.DriveLetter }
+                                      $volumes | Where-Object { $_.DriveLetter -ne '' } | ForEach-Object { Get-FoundryUsbDriveLetterText $_.DriveLetter }
                                   )
                                   $hasBootVolume = @($volumes | Where-Object { $_.FileSystemLabel -eq 'BOOT' -and $_.FileSystem -eq 'FAT32' }).Count -gt 0
                                   $hasGptBootPartition = @($partitions | Where-Object { [string]$_.GptType -eq $foundryGptBootPartitionType }).Count -gt 0
@@ -146,6 +109,8 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
                                       IsRemovable = $disk.IsRemovable
                                       IsSystem = [bool]$disk.IsSystem
                                       IsBoot = [bool]$disk.IsBoot
+                                      IsOffline = [bool]$disk.IsOffline
+                                      IsReadOnly = [bool]$disk.IsReadOnly
                                       Size = [uint64]$disk.Size
                                       IsFoundryMedia = [bool](($hasBootVolume -or $hasGptBootPartition -or $hasMbrBootPartition) -and $hasCacheVolume)
                                   }
@@ -178,7 +143,9 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
                     candidate.BusType.Equals("USB", StringComparison.OrdinalIgnoreCase) &&
                     candidate.IsRemovable != false &&
                     !candidate.IsSystem &&
-                    !candidate.IsBoot)
+                    !candidate.IsBoot &&
+                    !candidate.IsOffline &&
+                    !candidate.IsReadOnly)
                 .OrderBy(candidate => candidate.DiskNumber)
                 .ToArray();
 
@@ -193,7 +160,42 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
         }
     }
 
-    public async Task<WinPeResult<WinPeUsbProvisionResult>> ProvisionAndPopulateAsync(
+    public Task<WinPeResult<WinPeUsbProvisionResult>> ProvisionAndPopulateAsync(
+        UsbOutputOptions options,
+        WinPeBuildArtifact artifact,
+        WinPeToolPaths tools,
+        bool useBootEx,
+        CancellationToken cancellationToken = default) =>
+        RunUsbFileOperationAsync(() => ProvisionAndPopulateCoreAsync(options, artifact, tools, useBootEx, cancellationToken));
+
+    public Task<WinPeResult<WinPeUsbProvisionResult>> UpdateBootPartitionAsync(
+        UsbOutputOptions options,
+        WinPeBuildArtifact artifact,
+        WinPeToolPaths tools,
+        bool useBootEx,
+        CancellationToken cancellationToken = default) =>
+        RunUsbFileOperationAsync(() => UpdateBootPartitionCoreAsync(options, artifact, tools, useBootEx, cancellationToken));
+
+    /// <summary>Translates device-backed filesystem failures before callers log the result.</summary>
+    private static async Task<WinPeResult<WinPeUsbProvisionResult>> RunUsbFileOperationAsync(
+        Func<Task<WinPeResult<WinPeUsbProvisionResult>>> operation)
+    {
+        try
+        {
+            return await operation().ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Security.SecurityException)
+        {
+            return WinPeResult<WinPeUsbProvisionResult>.Failure(new WinPeDiagnostic(
+                WinPeErrorCodes.UsbCopyFailed,
+                "Unable to access the confirmed USB media filesystem.",
+                "A BOOT or CACHE filesystem operation failed.",
+                failureKind: WinPeFailureKinds.FileSystem,
+                failureReason: ex is IOException ? WinPeFailureReasons.IoError : WinPeFailureReasons.AccessDenied));
+        }
+    }
+
+    private async Task<WinPeResult<WinPeUsbProvisionResult>> ProvisionAndPopulateCoreAsync(
         UsbOutputOptions options,
         WinPeBuildArtifact artifact,
         WinPeToolPaths tools,
@@ -216,8 +218,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
 
         int diskNumber = options.TargetDiskNumber.Value;
         ReportProgress(options.Progress, 0, "Validating USB target.");
-        WinPeResult<WinPeUsbDiskIdentity> diskResult = await GetDiskIdentityAsync(
-            diskNumber,
+        WinPeResult<IReadOnlyList<WinPeUsbDiskIdentity>> diskResult = await GetDiskIdentitiesAsync(
             tools,
             artifact.WorkingDirectoryPath,
             cancellationToken).ConfigureAwait(false);
@@ -227,7 +228,11 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
         }
 
         ReportProgress(options.Progress, 10, "Checking USB target safety.");
-        WinPeResult safetyValidation = ValidateDiskSafety(options, diskResult.Value!);
+        IReadOnlyList<WinPeUsbDiskIdentity> disks = diskResult.Value!;
+        WinPeUsbDiskIdentity? disk = disks.FirstOrDefault(candidate => candidate.Number == diskNumber);
+        WinPeResult safetyValidation = disk is null
+            ? WinPeResult.Failure(WinPeErrorCodes.UsbIdentityMismatch, "Confirmed USB disk is no longer present.")
+            : ValidateDiskSafety(options, disk, disks);
         if (!safetyValidation.IsSuccess)
         {
             return WinPeResult<WinPeUsbProvisionResult>.Failure(safetyValidation.Error!);
@@ -235,7 +240,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
 
         ReportProgress(options.Progress, 20, "Partitioning and formatting USB target.");
         WinPeResult<WinPeUsbProvisionResult> provisioningResult = await ProvisionDiskAsync(
-            diskNumber,
+            options.ExpectedDisk!,
             options.PartitionStyle,
             options.FormatMode,
             tools,
@@ -248,8 +253,14 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
         }
 
         WinPeUsbProvisionResult provisionedUsb = provisioningResult.Value!;
-        string bootRootPath = _resolveVolumeRoot($"{provisionedUsb.BootDriveLetter}\\");
-        string cacheRootPath = _resolveVolumeRoot($"{provisionedUsb.CacheDriveLetter}\\");
+        WinPeResult copyLayoutValidation = await ValidatePopulationLayoutAsync(options.ExpectedDisk!, provisionedUsb, tools, artifact.WorkingDirectoryPath, cancellationToken).ConfigureAwait(false);
+        if (!copyLayoutValidation.IsSuccess)
+        {
+            return WinPeResult<WinPeUsbProvisionResult>.Failure(copyLayoutValidation.Error!);
+        }
+
+        string bootRootPath = _resolveVolumeRoot(provisionedUsb.BootVolumePath);
+        string cacheRootPath = _resolveVolumeRoot(provisionedUsb.CacheVolumePath);
         ReportProgress(options.Progress, 55, "Copying WinPE media to USB.");
         WinPeResult copyResult = await CopyMediaAsync(
             artifact.MediaDirectoryPath,
@@ -264,6 +275,12 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
         if (useBootEx)
         {
             ReportProgress(options.Progress, 70, "Configuring USB boot files.");
+            WinPeResult bootFilesLayoutValidation = await ValidatePopulationLayoutAsync(options.ExpectedDisk!, provisionedUsb, tools, artifact.WorkingDirectoryPath, cancellationToken).ConfigureAwait(false);
+            if (!bootFilesLayoutValidation.IsSuccess)
+            {
+                return WinPeResult<WinPeUsbProvisionResult>.Failure(bootFilesLayoutValidation.Error!);
+            }
+
             WinPeResult bootConfigurationResult = ConfigureBootFiles(bootRootPath, artifact);
             if (!bootConfigurationResult.IsSuccess)
             {
@@ -285,11 +302,23 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
         }
 
         ReportProgress(options.Progress, 85, "Preparing USB cache partition.");
+        WinPeResult cacheLayoutValidation = await ValidatePopulationLayoutAsync(options.ExpectedDisk!, provisionedUsb, tools, artifact.WorkingDirectoryPath, cancellationToken).ConfigureAwait(false);
+        if (!cacheLayoutValidation.IsSuccess)
+        {
+            return WinPeResult<WinPeUsbProvisionResult>.Failure(cacheLayoutValidation.Error!);
+        }
+
         InitializeCachePartitionDirectories(cacheRootPath);
 
         if (options.RuntimePayloadProvisioning is not null)
         {
             ReportProgress(options.Progress, 92, "Provisioning USB runtime payloads.");
+            WinPeResult runtimeLayoutValidation = await ValidatePopulationLayoutAsync(options.ExpectedDisk!, provisionedUsb, tools, artifact.WorkingDirectoryPath, cancellationToken).ConfigureAwait(false);
+            if (!runtimeLayoutValidation.IsSuccess)
+            {
+                return WinPeResult<WinPeUsbProvisionResult>.Failure(runtimeLayoutValidation.Error!);
+            }
+
             WinPeResult runtimePayloadResult = await _runtimePayloadProvisioningService.ProvisionAsync(
                 CreateUsbRuntimePayloadOptions(options.RuntimePayloadProvisioning, artifact, cacheRootPath),
                 options.DownloadProgress,
@@ -297,7 +326,14 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
 
             if (!runtimePayloadResult.IsSuccess)
             {
-                return WinPeResult<WinPeUsbProvisionResult>.Failure(runtimePayloadResult.Error!);
+                return WinPeResult<WinPeUsbProvisionResult>.Failure(runtimePayloadResult.Error! with
+                {
+                    Message = "Failed to provision USB runtime payloads.",
+                    Details = "Unable to populate CACHE/Runtime.",
+                    Command = null,
+                    ErrorSummary = null,
+                    Exception = null
+                });
             }
         }
 
@@ -305,7 +341,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
         return WinPeResult<WinPeUsbProvisionResult>.Success(provisionedUsb);
     }
 
-    public async Task<WinPeResult<WinPeUsbProvisionResult>> UpdateBootPartitionAsync(
+    private async Task<WinPeResult<WinPeUsbProvisionResult>> UpdateBootPartitionCoreAsync(
         UsbOutputOptions options,
         WinPeBuildArtifact artifact,
         WinPeToolPaths tools,
@@ -328,8 +364,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
 
         int diskNumber = options.TargetDiskNumber.Value;
         ReportProgress(options.Progress, 0, "Validating USB target.");
-        WinPeResult<WinPeUsbDiskIdentity> diskResult = await GetDiskIdentityAsync(
-            diskNumber,
+        WinPeResult<IReadOnlyList<WinPeUsbDiskIdentity>> diskResult = await GetDiskIdentitiesAsync(
             tools,
             artifact.WorkingDirectoryPath,
             cancellationToken).ConfigureAwait(false);
@@ -339,7 +374,11 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
         }
 
         ReportProgress(options.Progress, 10, "Checking USB target safety.");
-        WinPeResult safetyValidation = ValidateDiskSafety(options, diskResult.Value!);
+        IReadOnlyList<WinPeUsbDiskIdentity> disks = diskResult.Value!;
+        WinPeUsbDiskIdentity? disk = disks.FirstOrDefault(candidate => candidate.Number == diskNumber);
+        WinPeResult safetyValidation = disk is null
+            ? WinPeResult.Failure(WinPeErrorCodes.UsbIdentityMismatch, "Confirmed USB disk is no longer present.")
+            : ValidateDiskSafety(options, disk, disks);
         if (!safetyValidation.IsSuccess)
         {
             return WinPeResult<WinPeUsbProvisionResult>.Failure(safetyValidation.Error!);
@@ -347,7 +386,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
 
         ReportProgress(options.Progress, 20, "Inspecting USB media layout.");
         WinPeResult<WinPeUsbProvisionResult> layoutResult = await GetFoundryUsbMediaLayoutAsync(
-            diskNumber,
+            options.ExpectedDisk!,
             tools,
             artifact.WorkingDirectoryPath,
             cancellationToken).ConfigureAwait(false);
@@ -358,9 +397,9 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
 
         WinPeUsbProvisionResult layout = layoutResult.Value!;
         ReportProgress(options.Progress, 35, "Formatting BOOT partition.");
-        WinPeResult formatResult = await FormatBootPartitionAsync(
-            diskNumber,
-            layout.BootDriveLetter,
+        WinPeResult<WinPeUsbProvisionResult> formatResult = await FormatBootPartitionAsync(
+            options.ExpectedDisk!,
+            layout,
             options.FormatMode,
             tools,
             artifact.WorkingDirectoryPath,
@@ -371,7 +410,14 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
             return WinPeResult<WinPeUsbProvisionResult>.Failure(formatResult.Error!);
         }
 
-        string bootRootPath = _resolveVolumeRoot($"{layout.BootDriveLetter}\\");
+        layout = formatResult.Value!;
+        WinPeResult copyLayoutValidation = await ValidatePopulationLayoutAsync(options.ExpectedDisk!, layout, tools, artifact.WorkingDirectoryPath, cancellationToken).ConfigureAwait(false);
+        if (!copyLayoutValidation.IsSuccess)
+        {
+            return WinPeResult<WinPeUsbProvisionResult>.Failure(copyLayoutValidation.Error!);
+        }
+
+        string bootRootPath = _resolveVolumeRoot(layout.BootVolumePath);
         ReportProgress(options.Progress, 55, "Copying WinPE media to USB.");
         WinPeResult copyResult = await CopyMediaAsync(
             artifact.MediaDirectoryPath,
@@ -386,6 +432,12 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
         if (useBootEx)
         {
             ReportProgress(options.Progress, 75, "Configuring USB boot files.");
+            WinPeResult bootFilesLayoutValidation = await ValidatePopulationLayoutAsync(options.ExpectedDisk!, layout, tools, artifact.WorkingDirectoryPath, cancellationToken).ConfigureAwait(false);
+            if (!bootFilesLayoutValidation.IsSuccess)
+            {
+                return WinPeResult<WinPeUsbProvisionResult>.Failure(bootFilesLayoutValidation.Error!);
+            }
+
             WinPeResult bootConfigurationResult = ConfigureBootFiles(bootRootPath, artifact);
             if (!bootConfigurationResult.IsSuccess)
             {
@@ -408,9 +460,21 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
 
         if (options.RuntimePayloadProvisioning is not null)
         {
-            string cacheRootPath = _resolveVolumeRoot($"{layout.CacheDriveLetter}\\");
+            string cacheRootPath = _resolveVolumeRoot(layout.CacheVolumePath);
             ReportProgress(options.Progress, 92, "Provisioning USB runtime payloads.");
+            WinPeResult cacheLayoutValidation = await ValidatePopulationLayoutAsync(options.ExpectedDisk!, layout, tools, artifact.WorkingDirectoryPath, cancellationToken).ConfigureAwait(false);
+            if (!cacheLayoutValidation.IsSuccess)
+            {
+                return WinPeResult<WinPeUsbProvisionResult>.Failure(cacheLayoutValidation.Error!);
+            }
+
             InitializeCachePartitionDirectories(cacheRootPath);
+            WinPeResult runtimeLayoutValidation = await ValidatePopulationLayoutAsync(options.ExpectedDisk!, layout, tools, artifact.WorkingDirectoryPath, cancellationToken).ConfigureAwait(false);
+            if (!runtimeLayoutValidation.IsSuccess)
+            {
+                return WinPeResult<WinPeUsbProvisionResult>.Failure(runtimeLayoutValidation.Error!);
+            }
+
             WinPeResult runtimePayloadResult = await _runtimePayloadProvisioningService.ProvisionAsync(
                 CreateUsbRuntimePayloadOptions(options.RuntimePayloadProvisioning, artifact, cacheRootPath),
                 options.DownloadProgress,
@@ -418,7 +482,14 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
 
             if (!runtimePayloadResult.IsSuccess)
             {
-                return WinPeResult<WinPeUsbProvisionResult>.Failure(runtimePayloadResult.Error!);
+                return WinPeResult<WinPeUsbProvisionResult>.Failure(runtimePayloadResult.Error! with
+                {
+                    Message = "Failed to provision USB runtime payloads.",
+                    Details = "Unable to populate CACHE/Runtime.",
+                    Command = null,
+                    ErrorSummary = null,
+                    Exception = null
+                });
             }
         }
 
@@ -426,79 +497,47 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
         return WinPeResult<WinPeUsbProvisionResult>.Success(layout);
     }
 
-    internal static WinPeResult ValidateDiskSafety(UsbOutputOptions options, WinPeUsbDiskIdentity disk)
+    /// <summary>Validates one confirmed snapshot against the same complete enumeration used for uniqueness.</summary>
+    internal static WinPeResult ValidateDiskSafety(
+        UsbOutputOptions options,
+        WinPeUsbDiskIdentity disk,
+        IReadOnlyList<WinPeUsbDiskIdentity> disks)
     {
-        if (!disk.BusType.Equals("USB", StringComparison.OrdinalIgnoreCase))
+        if (!IsSelectableDisk(disk))
         {
-            return WinPeResult.Failure(
-                WinPeErrorCodes.UsbUnsafeTarget,
-                "Target disk is not on USB bus.",
-                $"Disk {disk.Number} bus type is '{disk.BusType}'. Only USB disks are allowed.");
+            return WinPeResult.Failure(WinPeErrorCodes.UsbUnsafeTarget, "USB target is not selectable.");
         }
 
-        if (disk.IsRemovable == false)
+        WinPeUsbDiskIdentity? expected = options.ExpectedDisk;
+        if (expected is null || !IsSelectableDisk(expected) ||
+            options.TargetDiskNumber != expected.Number || disk.Number != expected.Number ||
+            disk.Size != expected.Size || CanonicalBus(disk.BusType) != CanonicalBus(expected.BusType) ||
+            disks.Count(candidate => candidate.Number == expected.Number) != 1 ||
+            !SameIdentifier(disk.UniqueId, expected.UniqueId) ||
+            !SameIdentifier(disk.SerialNumber, expected.SerialNumber))
         {
-            return WinPeResult.Failure(
-                WinPeErrorCodes.UsbUnsafeTarget,
-                "Target disk is not removable.",
-                $"Disk {disk.Number} reports IsRemovable=false.");
+            return WinPeResult.Failure(WinPeErrorCodes.UsbIdentityMismatch, "USB target no longer matches the confirmed disk.");
         }
 
-        if (disk.IsSystem || disk.IsBoot)
-        {
-            return WinPeResult.Failure(
-                WinPeErrorCodes.UsbUnsafeTarget,
-                "Refusing to modify a system or boot disk.",
-                $"Disk {disk.Number}: IsSystem={disk.IsSystem}, IsBoot={disk.IsBoot}.");
-        }
-
-        if (disk.Size < MinimumUsbDiskSizeBytes)
-        {
-            return WinPeResult.Failure(
-                WinPeErrorCodes.UsbUnsafeTarget,
-                "Target USB disk is below the minimum supported size.",
-                $"Disk {disk.Number} size is {disk.Size} bytes. Foundry OSD requires a USB disk of at least 16 GB.");
-        }
-
-        if (string.IsNullOrWhiteSpace(options.ExpectedDiskFriendlyName) &&
-            string.IsNullOrWhiteSpace(options.ExpectedDiskSerialNumber) &&
-            string.IsNullOrWhiteSpace(options.ExpectedDiskUniqueId))
-        {
-            return WinPeResult.Failure(
-                WinPeErrorCodes.ValidationFailed,
-                "Disk identity confirmation is required.",
-                "Set at least one expected disk identity value before formatting USB media.");
-        }
-
-        if (!string.IsNullOrWhiteSpace(options.ExpectedDiskFriendlyName) &&
-            !ContainsIgnoreCase(disk.FriendlyName, options.ExpectedDiskFriendlyName))
-        {
-            return WinPeResult.Failure(
-                WinPeErrorCodes.UsbIdentityMismatch,
-                "Target disk friendly name does not match confirmation.",
-                $"Expected contains '{options.ExpectedDiskFriendlyName}', actual '{disk.FriendlyName}'.");
-        }
-
-        if (!string.IsNullOrWhiteSpace(options.ExpectedDiskSerialNumber) &&
-            !ContainsIgnoreCase(disk.SerialNumber, options.ExpectedDiskSerialNumber))
-        {
-            return WinPeResult.Failure(
-                WinPeErrorCodes.UsbIdentityMismatch,
-                "Target disk serial number does not match confirmation.",
-                $"Expected contains '{options.ExpectedDiskSerialNumber}', actual '{disk.SerialNumber}'.");
-        }
-
-        if (!string.IsNullOrWhiteSpace(options.ExpectedDiskUniqueId) &&
-            !ContainsIgnoreCase(disk.UniqueId, options.ExpectedDiskUniqueId))
-        {
-            return WinPeResult.Failure(
-                WinPeErrorCodes.UsbIdentityMismatch,
-                "Target disk unique ID does not match confirmation.",
-                $"Expected contains '{options.ExpectedDiskUniqueId}', actual '{disk.UniqueId}'.");
-        }
-
-        return WinPeResult.Success();
+        string uniqueId = expected.UniqueId.Trim();
+        string serial = expected.SerialNumber.Trim();
+        int matches = uniqueId.Length > 0
+            ? disks.Count(candidate => SameIdentifier(candidate.UniqueId, uniqueId))
+            : serial.Length > 0 ? disks.Count(candidate => SameIdentifier(candidate.SerialNumber, serial)) : 0;
+        return matches == 1
+            ? WinPeResult.Success()
+            : WinPeResult.Failure(WinPeErrorCodes.UsbIdentityMismatch, "USB target identity is missing or ambiguous.");
     }
+
+    private static bool IsSelectableDisk(WinPeUsbDiskIdentity disk) =>
+        CanonicalBus(disk.BusType) == "USB" && disk.IsRemovable != false &&
+        !disk.IsSystem && !disk.IsBoot && !disk.IsOffline && !disk.IsReadOnly &&
+        disk.Size >= MinimumUsbDiskSizeBytes;
+
+    private static string CanonicalBus(string value) => value.Trim().ToUpperInvariant();
+
+    private static bool SameIdentifier(string first, string second) =>
+        string.Equals(first.Trim(), second.Trim(), StringComparison.Ordinal);
 
     internal static bool IsRobocopySuccessExitCode(int exitCode)
     {
@@ -506,72 +545,48 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
     }
 
     internal static string BuildPowerShellProvisioningScript(
-        int diskNumber,
+        WinPeUsbDiskIdentity expectedDisk,
         UsbPartitionStyle partitionStyle,
         UsbFormatMode formatMode)
     {
         string template = WinPeEmbeddedAssetService.ReadEmbeddedText(WinPeEmbeddedAssetService.UsbProvisioningScriptResourceName);
-        string partitionStyleText = partitionStyle == UsbPartitionStyle.Gpt ? "GPT" : "MBR";
-        string fullFormatValue = formatMode == UsbFormatMode.Complete ? "$true" : "$false";
-
-        return template
-            .Replace("{{DISK_NUMBER}}", diskNumber.ToString())
-            .Replace("{{PARTITION_STYLE}}", partitionStyleText)
-            .Replace("{{FULL_FORMAT}}", fullFormatValue)
+        return ReadUsbDiskOperations() + template
+            .Replace("{{EXPECTED_DISK}}", EncodeJson(expectedDisk))
+            .Replace("{{PARTITION_STYLE}}", partitionStyle == UsbPartitionStyle.Gpt ? "GPT" : "MBR")
+            .Replace("{{FULL_FORMAT}}", formatMode == UsbFormatMode.Complete ? "$true" : "$false")
             .ReplaceLineEndings(Environment.NewLine);
     }
 
     internal static string BuildPowerShellBootPartitionUpdateScript(
-        int diskNumber,
-        string bootDriveLetter,
+        WinPeUsbDiskIdentity expectedDisk,
+        WinPeUsbProvisionResult layout,
         UsbFormatMode formatMode)
     {
-        string normalizedBootDriveLetter = NormalizeDriveLetter(bootDriveLetter).TrimEnd(':');
-        string fullFormatValue = formatMode == UsbFormatMode.Complete ? "$true" : "$false";
-
-        return $$"""
-                 $ErrorActionPreference = 'Stop'
-
-                 Import-Module Storage
-
-                 function Write-FoundryUsbProgress([int]$Percent, [string]$Status) {
-                     Write-Output ("FOUNDRY_USB_PROGRESS|{0}|{1}" -f $Percent, $Status)
-                 }
-
-                 function Write-FoundryUsbVerbose([string]$Message) {
-                     Write-Output ("FOUNDRY_USB_VERBOSE|{0}" -f $Message)
-                 }
-
-                 $diskNumber = {{diskNumber}}
-                 $bootDriveLetter = '{{normalizedBootDriveLetter}}'
-                 $fullFormat = {{fullFormatValue}}
-
-                 Write-FoundryUsbProgress 35 'Formatting BOOT partition.'
-                 $bootPartition = Get-Partition -DiskNumber $diskNumber -ErrorAction Stop |
-                     Where-Object { $_.DriveLetter -eq $bootDriveLetter } |
-                     Select-Object -First 1
-                 if ($null -eq $bootPartition) {
-                     throw "BOOT partition $bootDriveLetter`: was not found on disk $diskNumber."
-                 }
-
-                 $bootVolume = Get-Volume -DriveLetter $bootDriveLetter -ErrorAction Stop
-                 if ($bootVolume.FileSystemLabel -ne 'BOOT' -or $bootVolume.FileSystem -ne 'FAT32') {
-                     throw "Volume $bootDriveLetter`: is not a Foundry BOOT volume. Label=$($bootVolume.FileSystemLabel), FileSystem=$($bootVolume.FileSystem)."
-                 }
-
-                 $bootFormatArguments = @{
-                     DriveLetter = $bootDriveLetter
-                     FileSystem = 'FAT32'
-                     NewFileSystemLabel = 'BOOT'
-                     Confirm = $false
-                     Force = $true
-                     ErrorAction = 'Stop'
-                 }
-                 if ($fullFormat) { $bootFormatArguments['Full'] = $true }
-                 Format-Volume @bootFormatArguments | Out-Null
-                 Write-FoundryUsbVerbose "BOOT partition formatted. DriveLetter=$bootDriveLetter, FileSystem=FAT32, Label=BOOT."
-                 """.ReplaceLineEndings(Environment.NewLine);
+        return ReadUsbDiskOperations() + $$"""
+            $ErrorActionPreference = 'Stop'
+            Import-Module Storage
+            $expected = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('{{EncodeJson(expectedDisk)}}')) | ConvertFrom-Json
+            $layout = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('{{EncodeJson(layout)}}')) | ConvertFrom-Json
+            $validatedLayout = Get-FoundryUsbLayout -Expected $expected -Layout $layout
+            $bootPartition = Get-FoundryUsbLayoutPartition -Expected $expected -Layout $layout -Role 'Boot'
+            $bootVolume = Get-FoundryUsbPartitionVolume $bootPartition
+            if ([string]$bootVolume.UniqueId -cne $layout.BootVolumeUniqueId -or [string]$bootVolume.Path -cne $layout.BootVolumePath) { throw 'BOOT volume identity changed.' }
+            Write-Output 'FOUNDRY_USB_PROGRESS|35|Formatting BOOT partition.'
+            Format-Volume -InputObject $bootVolume -FileSystem FAT32 -NewFileSystemLabel BOOT -Full:{{(formatMode == UsbFormatMode.Complete ? "$true" : "$false")}} -Force -Confirm:$false -ErrorAction Stop | Out-Null
+            $bootPartition = Get-FoundryUsbLayoutPartition -Expected $expected -Layout $layout -Role 'Boot'
+            $current = Get-FoundryUsbLayout -Expected $expected
+            foreach ($property in @('CachePartitionNumber', 'CachePartitionOffset', 'CachePartitionSize', 'CachePartitionGuid', 'CacheVolumeUniqueId', 'CacheVolumePath')) {
+                if ([string]$current.$property -cne [string]$layout.$property) { throw 'CACHE identity changed.' }
+            }
+            if ($current.BootPartitionNumber -ne $bootPartition.PartitionNumber -or $current.BootPartitionOffset -ne $bootPartition.Offset -or $current.BootPartitionSize -ne $bootPartition.Size -or $current.BootPartitionGuid -cne [string]$bootPartition.Guid) { throw 'BOOT partition changed after formatting.' }
+            $current | ConvertTo-Json -Depth 5 -Compress
+            """.ReplaceLineEndings(Environment.NewLine);
     }
+
+    private static string ReadUsbDiskOperations() =>
+        WinPeEmbeddedAssetService.ReadEmbeddedText(WinPeEmbeddedAssetService.UsbDiskOperationsResourceName) + Environment.NewLine;
+
+    private static string EncodeJson<T>(T value) => Convert.ToBase64String(Encoding.UTF8.GetBytes(JsonSerializer.Serialize(value)));
 
     internal static void InitializeCachePartitionDirectories(string cacheRootPath)
     {
@@ -607,7 +622,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
             return WinPeResult.Failure(
                 WinPeErrorCodes.BootExUnsupported,
                 "PCA2023 USB creation requires BootEx EFI binaries in the WinPE workspace.",
-                $"Expected '{bootManagerSourcePath}'.");
+                "Expected workspace/bootbins/bootmgfw_EX.efi.");
         }
 
         string efiBootPath = Path.Combine(bootRootPath, "EFI", "Boot", artifact.Architecture.ToBootEfiName());
@@ -623,7 +638,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
             return WinPeResult.Failure(
                 WinPeErrorCodes.UsbProvisioningFailed,
                 "USB boot configuration failed: EFI Microsoft boot manager path is invalid.",
-                $"Expected '{efiMicrosoftBootManagerPath}'.");
+                "Expected BOOT/EFI/Microsoft/Boot/bootmgfw.efi.");
         }
 
         Directory.CreateDirectory(efiMicrosoftBootDirectoryPath);
@@ -639,7 +654,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
             return WinPeResult.Failure(
                 WinPeErrorCodes.UsbVerificationFailed,
                 "USB verification failed: boot.wim not found.",
-                $"Expected '{bootWimPath}'.");
+                "Expected BOOT/sources/boot.wim.");
         }
 
         string bcdPath = Path.Combine(bootRootPath, "boot", "BCD");
@@ -648,7 +663,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
             return WinPeResult.Failure(
                 WinPeErrorCodes.UsbVerificationFailed,
                 "USB verification failed: BCD not found.",
-                $"Expected '{bcdPath}'.");
+                "Expected BOOT/boot/BCD.");
         }
 
         string efiBootPath = Path.Combine(bootRootPath, "EFI", "Boot", architecture.ToBootEfiName());
@@ -657,7 +672,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
             return WinPeResult.Failure(
                 WinPeErrorCodes.UsbVerificationFailed,
                 "USB verification failed: EFI boot file not found.",
-                $"Expected '{efiBootPath}'.");
+                $"Expected BOOT/EFI/Boot/{architecture.ToBootEfiName()}.");
         }
 
         return WinPeResult.Success();
@@ -671,14 +686,14 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
             return WinPeResult.Failure(
                 WinPeErrorCodes.UsbVerificationFailed,
                 "USB verification failed: BOOT partition contains Foundry runtime content.",
-                $"Unexpected path: '{foundryPath}'.");
+                "Unexpected BOOT/Foundry runtime content.");
         }
 
         return WinPeResult.Success();
     }
 
     private async Task<WinPeResult<WinPeUsbProvisionResult>> ProvisionDiskAsync(
-        int diskNumber,
+        WinPeUsbDiskIdentity expectedDisk,
         UsbPartitionStyle partitionStyle,
         UsbFormatMode formatMode,
         WinPeToolPaths tools,
@@ -687,7 +702,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
         CancellationToken cancellationToken)
     {
         string script = BuildPowerShellProvisioningScript(
-            diskNumber,
+            expectedDisk,
             partitionStyle,
             formatMode);
 
@@ -713,142 +728,66 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
             return ParseUsbProvisionResult(execution);
         }
 
-        string diagnostic = $"{execution.ToDiagnosticText()}{Environment.NewLine}" +
-                            $"PartitionStyle: {partitionStyle}{Environment.NewLine}" +
-                            "PowerShellProvisioningScript:" + Environment.NewLine +
-                            script;
-        return WinPeResult<WinPeUsbProvisionResult>.Failure(
+        return WinPeResult<WinPeUsbProvisionResult>.Failure(WithoutDeviceDetails(execution).ToFailureDiagnostic(
             WinPeErrorCodes.UsbProvisioningFailed,
-            "Failed to partition and format the USB disk.",
-            diagnostic);
+            "Failed to partition and format the confirmed USB disk.", toolName: "PowerShell"));
     }
 
     private async Task<WinPeResult<WinPeUsbProvisionResult>> GetFoundryUsbMediaLayoutAsync(
-        int diskNumber,
+        WinPeUsbDiskIdentity expectedDisk,
+        WinPeToolPaths tools,
+        string workingDirectoryPath,
+        CancellationToken cancellationToken,
+        WinPeUsbProvisionResult? retainedLayout = null)
+    {
+        string script = ReadUsbDiskOperations() + $$"""
+            $ErrorActionPreference = 'Stop'
+            Import-Module Storage
+            $expected = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('{{EncodeJson(expectedDisk)}}')) | ConvertFrom-Json
+            $layout = [Text.Encoding]::UTF8.GetString([Convert]::FromBase64String('{{EncodeJson(retainedLayout)}}')) | ConvertFrom-Json
+            Get-FoundryUsbLayout -Expected $expected -Layout $layout | ConvertTo-Json -Depth 5 -Compress
+            """;
+        WinPeResult<string> result = await RunPowerShellAsync(script, tools, workingDirectoryPath, cancellationToken).ConfigureAwait(false);
+        return result.IsSuccess
+            ? ParseUsbProvisionResult(new WinPeProcessExecution { ExitCode = 0, StandardOutput = result.Value! })
+            : WinPeResult<WinPeUsbProvisionResult>.Failure(WinPeErrorCodes.UsbVerificationFailed, "Confirmed USB media layout could not be verified.");
+    }
+
+    private async Task<WinPeResult> ValidatePopulationLayoutAsync(
+        WinPeUsbDiskIdentity expectedDisk,
+        WinPeUsbProvisionResult retainedLayout,
         WinPeToolPaths tools,
         string workingDirectoryPath,
         CancellationToken cancellationToken)
     {
-        string script = $$"""
-                          $diskNumber = {{diskNumber}}
-                          $foundryGptBootPartitionType = '{c12a7328-f81f-11d2-ba4b-00a0c93ec93b}'
-
-                          function Get-FoundryUsbDriveLetter($DriveLetter) {
-                              if ($null -eq $DriveLetter) { return $null }
-                              if ($DriveLetter -is [char] -and [int][char]$DriveLetter -eq 0) { return $null }
-
-                              $text = ([string]$DriveLetter).Trim()
-                              if ($text.Length -eq 2 -and $text[1] -eq ':') { $text = $text.Substring(0, 1) }
-                              if ($text -match '^[A-Za-z]$') { return $text.ToUpperInvariant() }
-
-                              return $null
-                          }
-
-                          function Test-FoundryUsbDriveLetter($DriveLetter) {
-                              return $null -ne (Get-FoundryUsbDriveLetter $DriveLetter)
-                          }
-
-                          function Get-FoundryUsbDriveLetterText($DriveLetter) {
-                              $letter = Get-FoundryUsbDriveLetter $DriveLetter
-                              if ($null -eq $letter) { return '' }
-                              return "$($letter):"
-                          }
-
-                          function Get-FoundryUsbPartitionVolume($Partition) {
-                              $driveLetter = Get-FoundryUsbDriveLetter $Partition.DriveLetter
-                              if ($null -ne $driveLetter) {
-                                  $volume = Get-Volume -DriveLetter $driveLetter -ErrorAction SilentlyContinue
-                              }
-                              else {
-                                  $volume = Get-Volume -Partition $Partition -ErrorAction SilentlyContinue
-                              }
-
-                              if ($null -eq $volume) { return $null }
-
-                              [pscustomobject]@{
-                                  PartitionNumber = [int]$Partition.PartitionNumber
-                                  DriveLetter = Get-FoundryUsbDriveLetterText $Partition.DriveLetter
-                                  FileSystemLabel = [string]$volume.FileSystemLabel
-                                  FileSystem = [string]$volume.FileSystem
-                                  GptType = [string]$Partition.GptType
-                                  MbrType = [string]$Partition.MbrType
-                                  IsActive = [bool]$Partition.IsActive
-                              }
-                          }
-
-                          $partitions = @(Get-Partition -DiskNumber $diskNumber -ErrorAction Stop)
-                          $volumes = @($partitions | ForEach-Object { Get-FoundryUsbPartitionVolume $_ })
-
-                          $bootVolume = @($volumes | Where-Object { $_.FileSystemLabel -eq 'BOOT' -and $_.FileSystem -eq 'FAT32' } | Select-Object -First 1)
-                          $cacheVolume = @($volumes | Where-Object { $_.FileSystemLabel -eq 'Foundry Cache' -and $_.FileSystem -eq 'NTFS' } | Select-Object -First 1)
-                          if ($cacheVolume.Count -eq 0) {
-                              throw "Disk $diskNumber is not a Foundry USB media. Expected Foundry Cache NTFS volume."
-                          }
-
-                          if ($bootVolume.Count -gt 0) {
-                              $bootPartition = @($partitions | Where-Object { $_.PartitionNumber -eq $bootVolume[0].PartitionNumber } | Select-Object -First 1)
-                          }
-                          else {
-                              $bootPartition = @($partitions | Where-Object { [string]$_.GptType -eq $foundryGptBootPartitionType } | Select-Object -First 1)
-                              if ($bootPartition.Count -eq 0) {
-                                  $bootPartition = @($partitions | Where-Object { [string]$_.MbrType -eq 'FAT32' -and [bool]$_.IsActive } | Select-Object -First 1)
-                              }
-
-                              if ($bootPartition.Count -eq 0) {
-                                  throw "Disk $diskNumber is not a Foundry USB media. Expected BOOT FAT32 partition."
-                              }
-                          }
-
-                          $hasFoundryBootPartitionType = ([string]$bootPartition[0].GptType -eq $foundryGptBootPartitionType) -or ([string]$bootPartition[0].MbrType -eq 'FAT32' -and [bool]$bootPartition[0].IsActive)
-                          if (-not $hasFoundryBootPartitionType) {
-                              throw "Disk $diskNumber is not a Foundry USB media. Expected BOOT FAT32 partition."
-                          }
-
-                          if (-not (Test-FoundryUsbDriveLetter $bootPartition[0].DriveLetter)) {
-                              Add-PartitionAccessPath -DiskNumber $diskNumber -PartitionNumber $bootPartition[0].PartitionNumber -AssignDriveLetter -ErrorAction Stop
-                              Update-HostStorageCache -ErrorAction SilentlyContinue
-                              Update-Disk -Number $diskNumber -ErrorAction SilentlyContinue
-
-                              $partitions = @(Get-Partition -DiskNumber $diskNumber -ErrorAction Stop)
-                              $bootPartition = @($partitions | Where-Object { $_.PartitionNumber -eq $bootPartition[0].PartitionNumber } | Select-Object -First 1)
-                          }
-
-                          $bootVolume = @(Get-FoundryUsbPartitionVolume $bootPartition[0])
-                          if ($bootVolume.Count -eq 0 -or $bootVolume[0].FileSystemLabel -ne 'BOOT' -or $bootVolume[0].FileSystem -ne 'FAT32') {
-                              throw "Disk $diskNumber is not a Foundry USB media. Expected BOOT FAT32 volume."
-                          }
-
-                          [pscustomobject]@{
-                              DiskNumber = $diskNumber
-                              BootDriveLetter = [string]$bootVolume[0].DriveLetter
-                              CacheDriveLetter = [string]$cacheVolume[0].DriveLetter
-                          } | ConvertTo-Json -Compress
-                          """;
-
-        WinPeResult<string> result = await RunPowerShellAsync(
-            script,
-            tools,
-            workingDirectoryPath,
-            cancellationToken).ConfigureAwait(false);
+        WinPeResult<WinPeUsbProvisionResult> result = await GetFoundryUsbMediaLayoutAsync(
+            expectedDisk, tools, workingDirectoryPath, cancellationToken, retainedLayout).ConfigureAwait(false);
         if (!result.IsSuccess)
         {
-            return WinPeResult<WinPeUsbProvisionResult>.Failure(
-                WinPeErrorCodes.UsbVerificationFailed,
-                "Selected USB media is not a Foundry USB media.",
-                result.Error?.Details ?? result.Error?.Message ?? string.Empty);
+            return WinPeResult.Failure(result.Error!);
         }
 
-        var execution = new WinPeProcessExecution
-        {
-            ExitCode = 0,
-            StandardOutput = result.Value!
-        };
-        return ParseUsbProvisionResult(execution);
+        WinPeUsbProvisionResult current = result.Value!;
+        return retainedLayout.ConfirmedDisk == expectedDisk && current.ConfirmedDisk == expectedDisk &&
+               retainedLayout.BootPartitionNumber == current.BootPartitionNumber &&
+               retainedLayout.CachePartitionNumber == current.CachePartitionNumber &&
+               retainedLayout.BootPartitionOffset == current.BootPartitionOffset &&
+               retainedLayout.CachePartitionOffset == current.CachePartitionOffset &&
+               retainedLayout.BootPartitionSize == current.BootPartitionSize &&
+               retainedLayout.CachePartitionSize == current.CachePartitionSize &&
+               retainedLayout.BootPartitionGuid == current.BootPartitionGuid &&
+               retainedLayout.CachePartitionGuid == current.CachePartitionGuid &&
+               retainedLayout.BootVolumeUniqueId == current.BootVolumeUniqueId &&
+               retainedLayout.CacheVolumeUniqueId == current.CacheVolumeUniqueId &&
+               retainedLayout.BootVolumePath == current.BootVolumePath &&
+               retainedLayout.CacheVolumePath == current.CacheVolumePath
+            ? WinPeResult.Success()
+            : WinPeResult.Failure(WinPeErrorCodes.UsbIdentityMismatch, "USB disk or volume identity changed before population.");
     }
 
-    private async Task<WinPeResult> FormatBootPartitionAsync(
-        int diskNumber,
-        string bootDriveLetter,
+    private async Task<WinPeResult<WinPeUsbProvisionResult>> FormatBootPartitionAsync(
+        WinPeUsbDiskIdentity expectedDisk,
+        WinPeUsbProvisionResult layout,
         UsbFormatMode formatMode,
         WinPeToolPaths tools,
         string workingDirectoryPath,
@@ -856,8 +795,8 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
         CancellationToken cancellationToken)
     {
         string script = BuildPowerShellBootPartitionUpdateScript(
-            diskNumber,
-            bootDriveLetter,
+            expectedDisk,
+            layout,
             formatMode);
 
         Directory.CreateDirectory(workingDirectoryPath);
@@ -877,19 +816,9 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
                 workingDirectoryPath,
                 cancellationToken).ConfigureAwait(false);
 
-        if (execution.IsSuccess)
-        {
-            return WinPeResult.Success();
-        }
-
-        string diagnostic = $"{execution.ToDiagnosticText()}{Environment.NewLine}" +
-                            "PowerShellBootPartitionUpdateScript:" + Environment.NewLine +
-                            script;
-        return WinPeResult.Failure(execution.ToFailureDiagnostic(
-            WinPeErrorCodes.UsbProvisioningFailed,
-            "Failed to format the USB BOOT partition.",
-            toolName: "PowerShell") with
-        { Details = diagnostic });
+        return execution.IsSuccess
+            ? ParseUsbProvisionResult(execution)
+            : WinPeResult<WinPeUsbProvisionResult>.Failure(WithoutDeviceDetails(execution).ToFailureDiagnostic(WinPeErrorCodes.UsbProvisioningFailed, "Failed to format the confirmed USB BOOT partition.", toolName: "PowerShell"));
     }
 
     private static WinPeResult<WinPeUsbProvisionResult> ParseUsbProvisionResult(WinPeProcessExecution execution)
@@ -917,7 +846,14 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
 
                 string bootDriveLetter = NormalizeDriveLetter(result.BootDriveLetter);
                 string cacheDriveLetter = NormalizeDriveLetter(result.CacheDriveLetter);
-                if (string.IsNullOrWhiteSpace(bootDriveLetter) || string.IsNullOrWhiteSpace(cacheDriveLetter))
+                if (result.ConfirmedDisk is null || result.BootPartitionNumber <= 0 || result.CachePartitionNumber <= 0 ||
+                    result.BootPartitionNumber == result.CachePartitionNumber ||
+                    result.BootPartitionOffset == 0 || result.CachePartitionOffset == 0 ||
+                    result.BootPartitionSize == 0 || result.CachePartitionSize == 0 ||
+                    string.IsNullOrWhiteSpace(result.BootVolumeUniqueId) || string.IsNullOrWhiteSpace(result.CacheVolumeUniqueId) ||
+                    result.BootVolumeUniqueId == result.CacheVolumeUniqueId ||
+                    !IsVolumeGuidPath(result.BootVolumePath) || !IsVolumeGuidPath(result.CacheVolumePath) ||
+                    result.BootVolumePath.Equals(result.CacheVolumePath, StringComparison.OrdinalIgnoreCase))
                 {
                     break;
                 }
@@ -939,8 +875,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
 
         return WinPeResult<WinPeUsbProvisionResult>.Failure(
             WinPeErrorCodes.UsbProvisioningFailed,
-            "USB provisioning did not return assigned drive letters.",
-            execution.ToDiagnosticText());
+            "USB provisioning did not return a complete disk and volume identity.");
     }
 
     private async Task<WinPeResult> CopyMediaAsync(
@@ -969,7 +904,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
             return WinPeResult.Success();
         }
 
-        return WinPeResult.Failure(execution.ToFailureDiagnostic(
+        return WinPeResult.Failure(WithoutDeviceDetails(execution).ToFailureDiagnostic(
             WinPeErrorCodes.UsbCopyFailed,
             "Failed to copy WinPE media files to USB BOOT partition.",
             toolName: "robocopy"));
@@ -1028,55 +963,46 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
         }
     }
 
-    private async Task<WinPeResult<WinPeUsbDiskIdentity>> GetDiskIdentityAsync(
-        int diskNumber,
+    private async Task<WinPeResult<IReadOnlyList<WinPeUsbDiskIdentity>>> GetDiskIdentitiesAsync(
         WinPeToolPaths tools,
         string workingDirectoryPath,
         CancellationToken cancellationToken)
     {
-        string script = $$"""
-                          $disk = Get-Disk -Number {{diskNumber}} -ErrorAction Stop
-                          [pscustomobject]@{
-                              Number = [int]$disk.Number
-                              FriendlyName = [string]$disk.FriendlyName
-                              SerialNumber = [string]$disk.SerialNumber
-                              UniqueId = [string]$disk.UniqueId
-                              BusType = [string]$disk.BusType
-                              IsRemovable = $disk.IsRemovable
-                              IsSystem = [bool]$disk.IsSystem
-                              IsBoot = [bool]$disk.IsBoot
-                              Size = [uint64]$disk.Size
-                          } | ConvertTo-Json -Compress
-                          """;
-
-        WinPeResult<string> result = await RunPowerShellAsync(
-            script,
-            tools,
-            workingDirectoryPath,
-            cancellationToken).ConfigureAwait(false);
+        const string script = """
+            $ErrorActionPreference = 'Stop'
+            $disks = @(Get-Disk -ErrorAction Stop | ForEach-Object {
+                [pscustomobject]@{
+                    Number = [int]$_.Number
+                    FriendlyName = [string]$_.FriendlyName
+                    SerialNumber = [string]$_.SerialNumber
+                    UniqueId = [string]$_.UniqueId
+                    BusType = [string]$_.BusType
+                    IsRemovable = $_.IsRemovable
+                    IsSystem = [bool]$_.IsSystem
+                    IsBoot = [bool]$_.IsBoot
+                    IsOffline = [bool]$_.IsOffline
+                    IsReadOnly = [bool]$_.IsReadOnly
+                    Size = [uint64]$_.Size
+                }
+            })
+            ConvertTo-Json -InputObject $disks -Compress
+            """;
+        WinPeResult<string> result = await RunPowerShellAsync(script, tools, workingDirectoryPath, cancellationToken).ConfigureAwait(false);
         if (!result.IsSuccess)
         {
-            return WinPeResult<WinPeUsbDiskIdentity>.Failure(result.Error!);
+            return WinPeResult<IReadOnlyList<WinPeUsbDiskIdentity>>.Failure(result.Error!);
         }
 
         try
         {
-            WinPeUsbDiskIdentity? disk = JsonSerializer.Deserialize<WinPeUsbDiskIdentity>(
-                result.Value!,
-                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            return disk is null
-                ? WinPeResult<WinPeUsbDiskIdentity>.Failure(
-                    WinPeErrorCodes.UsbQueryFailed,
-                    "Failed to read target USB disk details.",
-                    "PowerShell returned an empty payload for Get-Disk.")
-                : WinPeResult<WinPeUsbDiskIdentity>.Success(disk);
+            WinPeUsbDiskIdentity[] disks = JsonObjectSequence.Parse(result.Value!)
+                .Select(element => element.Deserialize<WinPeUsbDiskIdentity>(new JsonSerializerOptions { PropertyNameCaseInsensitive = true })!)
+                .ToArray();
+            return WinPeResult<IReadOnlyList<WinPeUsbDiskIdentity>>.Success(disks);
         }
-        catch (Exception ex)
+        catch (JsonException)
         {
-            return WinPeResult<WinPeUsbDiskIdentity>.Failure(
-                WinPeErrorCodes.UsbQueryFailed,
-                "Failed to parse target USB disk details.",
-                ex.Message);
+            return WinPeResult<IReadOnlyList<WinPeUsbDiskIdentity>>.Failure(WinPeErrorCodes.UsbQueryFailed, "Failed to parse USB disk enumeration.");
         }
     }
 
@@ -1094,7 +1020,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
 
         if (!execution.IsSuccess)
         {
-            return WinPeResult<string>.Failure(execution.ToFailureDiagnostic(
+            return WinPeResult<string>.Failure(WithoutDeviceDetails(execution).ToFailureDiagnostic(
                 WinPeErrorCodes.UsbQueryFailed,
                 "A required PowerShell USB query command failed.",
                 toolName: "PowerShell"));
@@ -1106,7 +1032,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
             return WinPeResult<string>.Failure(
                 WinPeErrorCodes.UsbQueryFailed,
                 "A required PowerShell USB query command returned no data.",
-                execution.ToDiagnosticText());
+                WithoutDeviceDetails(execution).ToDiagnosticText());
         }
 
         return WinPeResult<string>.Success(output);
@@ -1129,6 +1055,20 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
 
     private static string CreatePowerShellArguments(string script)
     {
+        using var compressed = new MemoryStream();
+        using (var gzip = new GZipStream(compressed, CompressionLevel.SmallestSize, leaveOpen: true))
+        {
+            gzip.Write(Encoding.UTF8.GetBytes(script));
+        }
+
+        string loader = $$"""
+            $bytes = [Convert]::FromBase64String('{{Convert.ToBase64String(compressed.ToArray())}}')
+            $stream = [IO.MemoryStream]::new($bytes, $false)
+            $gzip = [IO.Compression.GZipStream]::new($stream, [IO.Compression.CompressionMode]::Decompress)
+            $reader = [IO.StreamReader]::new($gzip, [Text.Encoding]::UTF8)
+            try { $source = $reader.ReadToEnd() } finally { $reader.Dispose() }
+            & ([scriptblock]::Create($source))
+            """;
         return string.Join(
             ' ',
             [
@@ -1136,7 +1076,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
                 "-NonInteractive",
                 "-ExecutionPolicy",
                 "Bypass",
-                .. PowerShellCommand.CreateEncodedArguments(script)
+                .. PowerShellCommand.CreateEncodedArguments(loader)
             ]);
     }
 
@@ -1158,6 +1098,8 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
             IsRemovable = GetNullableBool(element, "IsRemovable"),
             IsSystem = GetBool(element, "IsSystem"),
             IsBoot = GetBool(element, "IsBoot"),
+            IsOffline = GetBool(element, "IsOffline"),
+            IsReadOnly = GetBool(element, "IsReadOnly"),
             SizeBytes = GetUInt64(element, "Size"),
             IsFoundryMedia = GetBool(element, "IsFoundryMedia")
         };
@@ -1240,10 +1182,20 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
             : 0;
     }
 
-    private static bool ContainsIgnoreCase(string source, string expectedFragment)
-    {
-        return source.IndexOf(expectedFragment, StringComparison.OrdinalIgnoreCase) >= 0;
-    }
+    private static WinPeProcessExecution WithoutDeviceDetails(WinPeProcessExecution execution) =>
+        execution with
+        {
+            Arguments = string.Empty,
+            StandardOutput = string.Empty,
+            StandardError = execution.StandardError.Contains("USB partition style remained contradictory", StringComparison.Ordinal)
+                ? "USB partition style remained contradictory after Clear-Disk; provisioning stopped."
+                : string.Empty
+        };
+
+    private static bool IsVolumeGuidPath(string path) =>
+        path.StartsWith(@"\\?\Volume{", StringComparison.OrdinalIgnoreCase) &&
+        path.EndsWith(@"}\", StringComparison.Ordinal) && path.Length == 49 &&
+        Guid.TryParseExact(path.Substring(11, 36), "D", out _);
 
     private static string NormalizeDriveLetter(string value)
     {

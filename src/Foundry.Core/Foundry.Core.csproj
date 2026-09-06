@@ -17,6 +17,9 @@
     <EmbeddedResource Include="Assets\WinPe\FoundryBootstrap.ps1">
       <LogicalName>Foundry.Core.WinPe.FoundryBootstrap</LogicalName>
     </EmbeddedResource>
+    <EmbeddedResource Include="Assets\WinPe\UsbDiskOperations.ps1">
+      <LogicalName>Foundry.Core.WinPe.UsbDiskOperations</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Include="Assets\WinPe\ProvisionUsbDisk.ps1">
       <LogicalName>Foundry.Core.WinPe.ProvisionUsbDisk</LogicalName>
     </EmbeddedResource>
