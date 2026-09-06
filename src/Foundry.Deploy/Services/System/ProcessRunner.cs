@@ -78,6 +78,11 @@ public sealed class ProcessRunner : IProcessRunner
         string argumentsDisplay,
         CancellationToken cancellationToken)
     {
+        if (argumentsDisplay.Contains("-EncodedCommand", StringComparison.OrdinalIgnoreCase))
+        {
+            argumentsDisplay = "[encoded PowerShell command omitted]";
+        }
+
         _logger.LogDebug(
             "Starting process. FileName={FileName}, Arguments={Arguments}, WorkingDirectory={WorkingDirectory}",
             request.FileName,

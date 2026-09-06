@@ -120,6 +120,10 @@ public sealed record DeploymentRuntimeState
     /// </summary>
     public string? TargetSystemPartitionRoot { get; set; }
 
+    /// <summary>Retains live partition associations in memory without persisting device identifiers to diagnostic state.</summary>
+    [global::System.Text.Json.Serialization.JsonIgnore]
+    public DeploymentTargetLayout? TargetLayout { get; set; }
+
     /// <summary>
     /// Gets or sets the target Windows partition root.
     /// </summary>

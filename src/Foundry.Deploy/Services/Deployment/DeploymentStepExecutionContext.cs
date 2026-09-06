@@ -379,27 +379,16 @@ public sealed class DeploymentStepExecutionContext : IDisposable
         CancellationToken cancellationToken = default)
     {
         IReadOnlyList<TargetDiskInfo> disks = await _targetDiskService.GetDisksAsync(cancellationToken).ConfigureAwait(false);
-        TargetDiskInfo? selectedDisk = disks.FirstOrDefault(disk => disk.DiskNumber == Request.TargetDiskNumber);
-        if (selectedDisk is null)
+        TargetDiskInfo? selectedDisk = Request.ConfirmedTargetDisk?.Match(disks);
+        if (selectedDisk is null || Request.ConfirmedTargetDisk?.DiskNumber != Request.TargetDiskNumber)
         {
             return (null, DeploymentStepResult.Failed(
-                $"Target disk {Request.TargetDiskNumber} is no longer present.",
-                DeploymentFailure.Guard(
-                    DeploymentOperationNames.ValidateTargetDisk,
-                    DeploymentFailureReasons.MissingResource,
-                    "target_disk_not_found")));
-        }
-
-        if (!selectedDisk.IsSelectable)
-        {
-            return (null, DeploymentStepResult.Failed(
-                $"Target disk {Request.TargetDiskNumber} is blocked: {selectedDisk.SelectionWarning}",
+                "The confirmed target disk is unavailable, changed, or unsafe.",
                 DeploymentFailure.Guard(
                     DeploymentOperationNames.ValidateTargetDisk,
                     DeploymentFailureReasons.InvalidState,
-                    "target_disk_not_selectable")));
+                    "confirmed_target_disk_mismatch")));
         }
-
         await AppendLogAsync(DeploymentLogLevel.Info, $"Target disk revalidated: {selectedDisk.DisplayLabel}", cancellationToken).ConfigureAwait(false);
         return (selectedDisk, null);
     }

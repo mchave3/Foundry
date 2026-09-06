@@ -33,15 +33,86 @@ public sealed class PrepareTargetDiskLayoutStepTests
         Assert.False(Directory.Exists(Path.Combine(targetFoundryRoot, "Cache", "DriverPacks")));
     }
 
+    [Fact]
+    public async Task ExecuteAsync_WhenConfirmedDiskIsMissing_BlocksPartitionService()
+    {
+        using TempDeploymentWorkspace workspace = TempDeploymentWorkspace.Create();
+        var service = new FakeWindowsDeploymentService(workspace);
+        var step = new PrepareTargetDiskLayoutStep(service);
+        DeploymentStepExecutionContext context = CreateExecutionContext(workspace, DeploymentMode.Iso, confirmed: false);
+
+        DeploymentStepResult result = await step.ExecuteAsync(context, TestContext.Current.CancellationToken);
+
+        Assert.Equal(DeploymentStepState.Failed, result.State);
+        Assert.Equal(0, service.PrepareCalls);
+    }
+    private static TargetDiskInfo SafeDisk => new()
+    {
+        DiskNumber = 9, UniqueId = "A", SerialNumber = "SERIAL-A", SizeBytes = 128UL * 1024 * 1024 * 1024,
+        BusType = "NVMe", IsSelectable = true
+    };
+
+    [Theory]
+    [InlineData("replacement")]
+    [InlineData("missing")]
+    [InlineData("duplicate")]
+    [InlineData("capacity")]
+    [InlineData("bus")]
+    [InlineData("number")]
+    [InlineData("boot")]
+    [InlineData("system")]
+    [InlineData("readonly")]
+    [InlineData("offline")]
+    public async Task ExecuteAsync_WhenConfirmedDeviceChanges_DoesNotPartition(string change)
+    {
+        using TempDeploymentWorkspace workspace = TempDeploymentWorkspace.Create();
+        var service = new FakeWindowsDeploymentService(workspace);
+        TargetDiskInfo disk = change switch
+        {
+            "replacement" => SafeDisk with { UniqueId = "B", SerialNumber = "SERIAL-B" },
+            "missing" => SafeDisk with { UniqueId = "", SerialNumber = "" },
+            "capacity" => SafeDisk with { SizeBytes = 256UL * 1024 * 1024 * 1024 },
+            "bus" => SafeDisk with { BusType = "SATA" },
+            "number" => SafeDisk with { DiskNumber = 8 },
+            "boot" => SafeDisk with { IsBoot = true },
+            "system" => SafeDisk with { IsSystem = true },
+            "readonly" => SafeDisk with { IsReadOnly = true },
+            "offline" => SafeDisk with { IsOffline = true },
+            _ => SafeDisk
+        };
+        DeploymentStepExecutionContext context = CreateExecutionContext(workspace, DeploymentMode.Iso,
+            disks: change == "duplicate" ? [disk, disk with { DiskNumber = 10 }] : [disk]);
+
+        DeploymentStepResult result = await new PrepareTargetDiskLayoutStep(service).ExecuteAsync(context, TestContext.Current.CancellationToken);
+
+        Assert.Equal(DeploymentStepState.Failed, result.State);
+        Assert.Equal("confirmed_target_disk_mismatch", result.Failure?.Code);
+        Assert.Equal(0, service.PrepareCalls);
+    }
+
+    [Theory]
+    [InlineData(Foundry.Utilities.Hardware.WindowsFirmwareType.Unknown)]
+    [InlineData(Foundry.Utilities.Hardware.WindowsFirmwareType.Bios)]
+    public async Task ExecuteAsync_WhenFirmwareUnsupported_DoesNotPartition(Foundry.Utilities.Hardware.WindowsFirmwareType firmware)
+    {
+        using TempDeploymentWorkspace workspace = TempDeploymentWorkspace.Create();
+        var service = new FakeWindowsDeploymentService(workspace);
+        DeploymentStepResult result = await new PrepareTargetDiskLayoutStep(service).ExecuteAsync(
+            CreateExecutionContext(workspace, DeploymentMode.Iso, firmware: firmware), TestContext.Current.CancellationToken);
+        Assert.Equal("unsupported_boot_firmware", result.Failure?.Code);
+        Assert.Equal(0, service.PrepareCalls);
+    }
     private static DeploymentStepExecutionContext CreateExecutionContext(
         TempDeploymentWorkspace workspace,
-        DeploymentMode mode)
+        DeploymentMode mode, bool confirmed = true, IReadOnlyList<TargetDiskInfo>? disks = null,
+        Foundry.Utilities.Hardware.WindowsFirmwareType firmware = Foundry.Utilities.Hardware.WindowsFirmwareType.Uefi)
     {
         var request = new DeploymentContext
         {
             Mode = mode,
             CacheRootPath = workspace.CacheRuntimeRoot,
-            TargetDiskNumber = 1,
+            TargetDiskNumber = 9,
+            ConfirmedTargetDisk = confirmed ? new TargetDiskIdentity(9, "A", "SERIAL-A", 128UL * 1024 * 1024 * 1024, "NVMe") : null,
             TargetComputerName = "LAB01",
             OperatingSystem = new OperatingSystemCatalogItem(),
             DriverPackSelectionKind = DriverPackSelectionKind.None,
@@ -50,6 +121,7 @@ public sealed class PrepareTargetDiskLayoutStepTests
 
         var runtimeState = new DeploymentRuntimeState
         {
+            HardwareProfile = new HardwareProfile { FirmwareType = firmware },
             WorkspaceRoot = workspace.WorkspaceRoot,
             Mode = mode,
             ResolvedCache = new CacheResolution
@@ -65,13 +137,14 @@ public sealed class PrepareTargetDiskLayoutStepTests
             [],
             new FakeOperationProgressService(),
             new FakeDeploymentLogService(),
-            new FakeTargetDiskService(),
+            new FakeTargetDiskService(disks ?? [SafeDisk]),
             _ => { });
     }
 
     private sealed class FakeWindowsDeploymentService : IWindowsDeploymentService
     {
         private readonly TempDeploymentWorkspace _workspace;
+        public int PrepareCalls { get; private set; }
 
         public FakeWindowsDeploymentService(TempDeploymentWorkspace workspace)
         {
@@ -79,15 +152,16 @@ public sealed class PrepareTargetDiskLayoutStepTests
         }
 
         public Task<DeploymentTargetLayout> PrepareTargetDiskAsync(
-            int diskNumber,
+            TargetDiskIdentity expectedDisk,
             string workingDirectory,
             CancellationToken cancellationToken = default)
         {
+            PrepareCalls++;
             Directory.CreateDirectory(workingDirectory);
 
             return Task.FromResult(new DeploymentTargetLayout
             {
-                DiskNumber = diskNumber,
+                DiskNumber = expectedDisk.DiskNumber,
                 SystemPartitionRoot = _workspace.SystemRoot,
                 WindowsPartitionRoot = _workspace.WindowsRoot,
                 RecoveryPartitionRoot = _workspace.RecoveryRoot,
@@ -279,19 +353,11 @@ public sealed class PrepareTargetDiskLayoutStepTests
         public void ResetToIdle() => ProgressChanged?.Invoke(this, EventArgs.Empty);
     }
 
-    private sealed class FakeTargetDiskService : ITargetDiskService
+    private sealed class FakeTargetDiskService(IReadOnlyList<TargetDiskInfo> disks) : ITargetDiskService
     {
         public Task<IReadOnlyList<TargetDiskInfo>> GetDisksAsync(CancellationToken cancellationToken = default)
         {
-            return Task.FromResult<IReadOnlyList<TargetDiskInfo>>(
-            [
-                new TargetDiskInfo
-                {
-                    DiskNumber = 1,
-                    FriendlyName = "Disk 1",
-                    IsSelectable = true
-                }
-            ]);
+            return Task.FromResult(disks);
         }
 
         public Task<int?> GetDiskNumberForPathAsync(string path, CancellationToken cancellationToken = default)

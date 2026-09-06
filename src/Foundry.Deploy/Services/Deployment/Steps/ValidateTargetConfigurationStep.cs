@@ -67,6 +67,11 @@ public sealed class ValidateTargetConfigurationStep : DeploymentStepBase
             DeploymentOperationNames.DetectHardware);
         HardwareProfile hardware = await _hardwareProfileService.GetCurrentAsync(cancellationToken).ConfigureAwait(false);
         context.RuntimeState.HardwareProfile = hardware;
+        if (hardware.FirmwareType != Foundry.Utilities.Hardware.WindowsFirmwareType.Uefi)
+        {
+            return DeploymentStepResult.Failed("Deployment requires UEFI boot mode.",
+                DeploymentFailure.Guard(DeploymentOperationNames.ValidateTarget, DeploymentFailureReasons.InvalidState, "unsupported_boot_firmware"));
+        }
         await context.AppendLogAsync(DeploymentLogLevel.Info, $"Detected hardware: {hardware.DisplayLabel}", cancellationToken).ConfigureAwait(false);
 
         return DeploymentStepResult.Succeeded("Target configuration validated.");

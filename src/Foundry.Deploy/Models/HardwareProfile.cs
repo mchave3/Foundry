@@ -6,6 +6,7 @@ namespace Foundry.Deploy.Models;
 
 public sealed record HardwareProfile
 {
+    public Foundry.Utilities.Hardware.WindowsFirmwareType FirmwareType { get; init; }
     public string Manufacturer { get; init; } = "Unknown";
     public string Model { get; init; } = "Unknown";
     public string Product { get; init; } = "Unknown";

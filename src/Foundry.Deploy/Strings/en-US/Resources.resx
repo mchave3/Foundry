@@ -989,6 +989,9 @@ Continue with deployment?</value>
   <data name="StepResult.CacheStrategyResolvedSimulation" xml:space="preserve">
     <value>Cache strategy resolved (simulation).</value>
   </data>
+  <data name="StepResult.ConfirmedDiskMismatch" xml:space="preserve">
+    <value>The confirmed target disk is unavailable, changed, or unsafe.</value>
+  </data>
   <data name="StepResult.DeferredDriverPackStagingUnsupportedCommand" xml:space="preserve">
     <value>First-boot driver pack staging was requested without a supported command.</value>
   </data>
@@ -1177,6 +1180,9 @@ Continue with deployment?</value>
   </data>
   <data name="StepResult.TargetWindowsPartitionUnavailableForInteractiveAutopilotRegistration" xml:space="preserve">
     <value>Target Windows partition is unavailable for interactive Autopilot registration assistant staging.</value>
+  </data>
+  <data name="StepResult.UefiRequired" xml:space="preserve">
+    <value>Deployment requires UEFI boot mode.</value>
   </data>
   <data name="StepResult.UnsupportedDriverPackInstallMode" xml:space="preserve">
     <value>Unsupported driver pack install mode.</value>

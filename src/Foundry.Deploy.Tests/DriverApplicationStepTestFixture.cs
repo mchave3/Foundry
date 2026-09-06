@@ -110,7 +110,7 @@ internal sealed class RecordingDriverApplicationService : IWindowsDeploymentServ
         return Task.CompletedTask;
     }
 
-    public Task<DeploymentTargetLayout> PrepareTargetDiskAsync(int diskNumber, string workingDirectory, CancellationToken cancellationToken = default) => throw new NotSupportedException();
+    public Task<DeploymentTargetLayout> PrepareTargetDiskAsync(TargetDiskIdentity expectedDisk, string workingDirectory, CancellationToken cancellationToken = default) => throw new NotSupportedException();
 
     public Task<int> ResolveImageIndexAsync(string imagePath, string requestedEdition, string workingDirectory, CancellationToken cancellationToken = default) => throw new NotSupportedException();
 

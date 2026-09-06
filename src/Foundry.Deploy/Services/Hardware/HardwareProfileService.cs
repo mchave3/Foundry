@@ -33,6 +33,7 @@ public sealed class HardwareProfileService : IHardwareProfileService
 
             HardwareProfile profile = new()
             {
+                FirmwareType = snapshot.FirmwareType,
                 Manufacturer = NormalizeManufacturer(snapshot.Manufacturer),
                 Model = NormalizeValue(snapshot.Model),
                 Product = NormalizeValue(snapshot.Product),

@@ -72,7 +72,7 @@ public sealed class DeploymentLaunchPreparationService : IDeploymentLaunchPrepar
             return DeploymentLaunchPreparationResult.Failure(normalizedComputerName);
         }
 
-        if (!request.IsDryRun && !effectiveTargetDisk.IsSelectable)
+        if (!request.IsDryRun && (!effectiveTargetDisk.IsSelectable || effectiveTargetDisk.IsSimulationOnly))
         {
             return DeploymentLaunchPreparationResult.Failure(normalizedComputerName);
         }
@@ -100,6 +100,7 @@ public sealed class DeploymentLaunchPreparationService : IDeploymentLaunchPrepar
             Mode = request.Mode,
             CacheRootPath = request.CacheRootPath,
             TargetDiskNumber = effectiveTargetDisk.DiskNumber,
+            ConfirmedTargetDisk = request.IsDryRun ? null : TargetDiskIdentity.FromDisk(effectiveTargetDisk),
             Unattend = request.Unattend,
             TargetComputerName = request.UsesCustomUnattend ? string.Empty : normalizedComputerName,
             DefaultTimeZoneId = request.UsesCustomUnattend || string.IsNullOrWhiteSpace(request.DefaultTimeZoneId) ? null : request.DefaultTimeZoneId.Trim(),

@@ -119,8 +119,8 @@ public sealed class DeploymentStepExecutionContextTests
         Assert.NotNull(result?.Failure);
         Assert.Equal(DeploymentOperationNames.ValidateTargetDisk, result.Failure.OperationName);
         Assert.Equal(DeploymentFailureKinds.Validation, result.Failure.Kind);
-        Assert.Equal(DeploymentFailureReasons.MissingResource, result.Failure.Reason);
-        Assert.Equal("target_disk_not_found", result.Failure.Code);
+        Assert.Equal(DeploymentFailureReasons.InvalidState, result.Failure.Reason);
+        Assert.Equal("confirmed_target_disk_mismatch", result.Failure.Code);
     }
 
     [Fact]
@@ -144,7 +144,7 @@ public sealed class DeploymentStepExecutionContextTests
         Assert.Equal(DeploymentOperationNames.ValidateTargetDisk, result.Failure.OperationName);
         Assert.Equal(DeploymentFailureKinds.Validation, result.Failure.Kind);
         Assert.Equal(DeploymentFailureReasons.InvalidState, result.Failure.Reason);
-        Assert.Equal("target_disk_not_selectable", result.Failure.Code);
+        Assert.Equal("confirmed_target_disk_mismatch", result.Failure.Code);
     }
 
     [Fact]

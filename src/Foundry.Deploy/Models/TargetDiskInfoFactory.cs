@@ -10,6 +10,7 @@ public static class TargetDiskInfoFactory
     {
         return new TargetDiskInfo
         {
+            IsSimulationOnly = true,
             DiskNumber = 999,
             FriendlyName = Foundry.Deploy.Services.Localization.LocalizationText.GetString("Disk.DebugVirtualTarget"),
             SerialNumber = "DEBUG-ONLY",

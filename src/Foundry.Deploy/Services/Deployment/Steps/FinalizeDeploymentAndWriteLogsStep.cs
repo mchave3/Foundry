@@ -70,7 +70,7 @@ public sealed class FinalizeDeploymentAndWriteLogsStep : DeploymentStepBase
         return finalSummaryPath;
     }
 
-    private static async Task WriteDeploymentSummaryAsync(
+    internal static async Task WriteDeploymentSummaryAsync(
         string path,
         DeploymentRuntimeState runtimeState,
         CancellationToken cancellationToken)
@@ -122,7 +122,7 @@ public sealed class FinalizeDeploymentAndWriteLogsStep : DeploymentStepBase
             WriteIndented = true
         });
 
-        await File.WriteAllTextAsync(path, json, cancellationToken).ConfigureAwait(false);
+        await File.WriteAllTextAsync(path, VolumePathDiagnostics.Redact(json), cancellationToken).ConfigureAwait(false);
     }
 
     private static void CleanupTargetFoundryRoot(DeploymentRuntimeState runtimeState, DeploymentLogSession? logSession)

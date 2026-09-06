@@ -13,6 +13,26 @@ namespace Foundry.Deploy.Tests;
 public sealed class DeploymentLaunchPreparationServiceTests
 {
     [Fact]
+    public void Prepare_WhenDebugDiskUsedLive_BlocksBeforeConfirmation()
+    {
+        var shell = new FakeApplicationShellService { ConfirmationResult = true };
+        DeploymentLaunchPreparationResult result = new DeploymentLaunchPreparationService(shell)
+            .Prepare(CreateRequest(TargetDiskInfoFactory.CreateDebugVirtualDisk()));
+        Assert.False(result.IsReadyToStart);
+        Assert.Equal(0, shell.ConfirmationCallCount);
+    }
+
+    [Fact]
+    public void Prepare_RetainsExactlyTheConfirmedSnapshot()
+    {
+        var shell = new FakeApplicationShellService { ConfirmationResult = true };
+        var disk = CreateDisk() with { DiskNumber = 9, UniqueId = "A", SerialNumber = "serial" };
+        DeploymentLaunchPreparationResult result = new DeploymentLaunchPreparationService(shell).Prepare(CreateRequest(disk));
+        Assert.NotNull(result.Context);
+        Assert.Equal(new TargetDiskIdentity(9, "A", "serial", disk.SizeBytes, disk.BusType), result.Context.ConfirmedTargetDisk);
+        Assert.Same(disk, result.EffectiveTargetDisk);
+    }
+    [Fact]
     public void Prepare_WhenDryRunAndTargetDiskMissing_UsesDebugVirtualDisk()
     {
         var shell = new FakeApplicationShellService();
@@ -22,6 +42,7 @@ public sealed class DeploymentLaunchPreparationServiceTests
 
         Assert.True(result.IsReadyToStart);
         Assert.Equal(999, result.EffectiveTargetDisk?.DiskNumber);
+        Assert.Null(result.Context?.ConfirmedTargetDisk);
         Assert.Equal("LAB-01", result.NormalizedComputerName);
         Assert.Equal(0, shell.ConfirmationCallCount);
     }

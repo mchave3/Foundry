@@ -90,6 +90,8 @@ public static partial class DeploymentUiTextLocalizer
             "Detecting hardware profile..." => LocalizationText.GetString("StepMessage.DetectingHardwareProfile"),
             "Operating system URL is missing." => LocalizationText.GetString("StepResult.OperatingSystemUrlMissing"),
             "Target disk number is required." => LocalizationText.GetString("StepResult.TargetDiskNumberRequired"),
+            "Deployment requires UEFI boot mode." => LocalizationText.GetString("StepResult.UefiRequired"),
+            "The confirmed target disk is unavailable, changed, or unsafe." => LocalizationText.GetString("StepResult.ConfirmedDiskMismatch"),
             "Target configuration validated." => LocalizationText.GetString("StepResult.TargetConfigurationValidated"),
             "Target configuration validated (simulation)." => LocalizationText.GetString("StepResult.TargetConfigurationValidatedSimulation"),
             "Resolving cache strategy..." => LocalizationText.GetString("StepMessage.ResolvingCacheStrategy"),

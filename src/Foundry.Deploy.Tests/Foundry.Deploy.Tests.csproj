@@ -17,6 +17,15 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Foundry.Deploy\Foundry.Deploy.csproj" />
+    <ProjectReference Include="..\Foundry.Utilities.Tests\ProcessTestChild\ProcessTestChild.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>
+
+  <Target Name="CopyProcessTestChild" AfterTargets="Build">
+    <ItemGroup>
+      <_ProcessTestChildArtifacts Include="..\Foundry.Utilities.Tests\ProcessTestChild\bin\$(Platform)\$(Configuration)\$(TargetFramework)\ProcessTestChild.*" />
+    </ItemGroup>
+    <Error Condition="'@(_ProcessTestChildArtifacts)' == ''" Text="ProcessTestChild build output was not found." />
+    <Copy SourceFiles="@(_ProcessTestChildArtifacts)" DestinationFolder="$(OutDir)ProcessTestChild" SkipUnchangedFiles="true" />
+  </Target>
 
 </Project>

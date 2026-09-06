@@ -77,6 +77,7 @@ public sealed class DeploymentLogService : IDeploymentLogService
         {
             WriteIndented = true
         });
+        json = VolumePathDiagnostics.Redact(json);
 
         string temporaryStateFilePath = session.StateFilePath + ".tmp";
         try

@@ -97,7 +97,8 @@ public sealed class TargetDiskService : ITargetDiskService
         {
             DiskNumber = snapshot.Number,
             FriendlyName = NormalizeValue(snapshot.FriendlyName),
-            SerialNumber = NormalizeValue(snapshot.SerialNumber),
+            UniqueId = snapshot.UniqueId.Trim(),
+            SerialNumber = snapshot.SerialNumber.Trim(),
             BusType = NormalizeValue(snapshot.BusType),
             PartitionStyle = NormalizeValue(snapshot.PartitionStyle),
             SizeBytes = snapshot.SizeBytes,

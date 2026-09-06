@@ -19,7 +19,7 @@ public sealed class TargetDiskServiceTests
         [
             new(0, "System", "", "NVMe", "GPT", 1024, true, false, false, false, false),
             new(2, "USB media", "USB-2", "USB", "GPT", 2048, false, false, false, false, true),
-            new(1, "Target", "SERIAL-1", "SATA", "GPT", 4096, false, false, false, false, false),
+            new(1, "Target", "SERIAL-1", "SATA", "GPT", 4096, false, false, false, false, false) { UniqueId = "UNIQUE-1" },
             new(3, "Removable target", "SERIAL-3", "SD", "GPT", 8192, false, false, false, false, true)
         ];
         var service = CreateService(getDisks: _ => Task.FromResult<IReadOnlyList<DiskInfo>>(snapshots));
@@ -29,12 +29,14 @@ public sealed class TargetDiskServiceTests
         Assert.Equal([1, 3, 0], disks.Select(static disk => disk.DiskNumber));
         Assert.True(disks[0].IsSelectable);
         Assert.Equal("Target", disks[0].FriendlyName);
+        Assert.Equal("UNIQUE-1", disks[0].UniqueId);
+        Assert.DoesNotContain("UNIQUE-1", disks[0].DisplayLabel, StringComparison.Ordinal);
         Assert.Equal("SERIAL-1", disks[0].SerialNumber);
         Assert.True(disks[1].IsSelectable);
         Assert.True(disks[1].IsRemovable);
         Assert.False(disks[2].IsSelectable);
         Assert.Equal(LocalizationText.GetString("Disk.BlockedSystemDisk"), disks[2].SelectionWarning);
-        Assert.Equal(LocalizationText.GetString("Common.Unknown"), disks[2].SerialNumber);
+        Assert.Empty(disks[2].SerialNumber);
     }
 
     [Fact]

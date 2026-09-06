@@ -47,7 +47,7 @@ internal static class FoundryDeployLogging
 
         CurrentLogFilePath = normalizedLogFilePath;
         _startupLogDirectoryPath = Path.GetDirectoryName(normalizedLogFilePath);
-        return logger;
+        return VolumePathDiagnostics.WrapLogger(logger);
     }
 
     public static void RegisterPersistenceDirectory(string logsDirectoryPath)
