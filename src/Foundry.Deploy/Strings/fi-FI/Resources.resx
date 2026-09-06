@@ -254,6 +254,9 @@ Toimi: Tarkista levyn attribuutit ja yritä käyttöönottoa uudelleen.</value>
   <data name="Disk.WarningSuffixFormat" xml:space="preserve">
     <value>| {0}</value>
   </data>
+  <data name="DriverPack.ManualSelectionWarning" xml:space="preserve">
+    <value>Manual selection: verify that this pack supports the detected hardware and selected Windows release. Package integrity and publisher checks still apply.</value>
+  </data>
   <data name="DriverPack.MicrosoftUpdateCatalog" xml:space="preserve">
     <value>Microsoft Update Catalog</value>
   </data>
@@ -989,6 +992,9 @@ Jatketaanko käyttöönottoa?</value>
   <data name="StepResult.CacheStrategyResolvedSimulation" xml:space="preserve">
     <value>Välimuististrategia ratkaistu (simulointi).</value>
   </data>
+  <data name="StepResult.ConfirmedDiskMismatch" xml:space="preserve">
+    <value>The confirmed target disk is unavailable, changed, or unsafe.</value>
+  </data>
   <data name="StepResult.DeferredDriverPackStagingUnsupportedCommand" xml:space="preserve">
     <value>Ensimmäisen käynnistyksen ohjainpaketin vaiheistusta pyydettiin ilman tuettua komentoa.</value>
   </data>
@@ -1177,6 +1183,9 @@ Jatketaanko käyttöönottoa?</value>
   </data>
   <data name="StepResult.TargetWindowsPartitionUnavailableForInteractiveAutopilotRegistration" xml:space="preserve">
     <value>Windows-kohdeosio ei ole käytettävissä vuorovaikutteisen Autopilot-rekisteröintiavustajan valmisteluun.</value>
+  </data>
+  <data name="StepResult.UefiRequired" xml:space="preserve">
+    <value>Deployment requires UEFI boot mode.</value>
   </data>
   <data name="StepResult.UnsupportedDriverPackInstallMode" xml:space="preserve">
     <value>Ohjainpaketin asennustilaa ei tueta.</value>

@@ -46,6 +46,8 @@ Online catalog requests validate HTTPS certificates against Windows trust stores
 
 Cached payloads are rechecked before reuse. Downloads replace existing files only after validation, and downloaded driver installers require a valid signature from the expected publisher. A verified cached file can be reused from read-only media without reserving space for another download.
 
+Automatic OEM driver selection requires a matching manufacturer, model or documented machine type, architecture, exact Windows release, and an established system-pack role. Unmatched or ambiguous entries require an explicit model and version choice; verify their applicability before deployment. Manual selection retains package integrity and publisher checks.
+
 ## What you can configure
 
 - **Deployment content** — Windows release, language, edition, licensing channel, drivers, and optional firmware.

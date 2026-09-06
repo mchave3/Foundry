@@ -254,6 +254,9 @@ Action: Vérifiez les attributs du disque et réessayez le déploiement.</value>
   <data name="Disk.WarningSuffixFormat" xml:space="preserve">
     <value>| {0}</value>
   </data>
+  <data name="DriverPack.ManualSelectionWarning" xml:space="preserve">
+    <value>Manual selection: verify that this pack supports the detected hardware and selected Windows release. Package integrity and publisher checks still apply.</value>
+  </data>
   <data name="DriverPack.MicrosoftUpdateCatalog" xml:space="preserve">
     <value>Microsoft Update Catalog</value>
   </data>
@@ -989,6 +992,9 @@ Continuer le déploiement?</value>
   <data name="StepResult.CacheStrategyResolvedSimulation" xml:space="preserve">
     <value>Stratégie de cache résolue (simulation).</value>
   </data>
+  <data name="StepResult.ConfirmedDiskMismatch" xml:space="preserve">
+    <value>The confirmed target disk is unavailable, changed, or unsafe.</value>
+  </data>
   <data name="StepResult.DeferredDriverPackStagingUnsupportedCommand" xml:space="preserve">
     <value>La préparation du pack de pilotes au premier démarrage a été demandée sans commande prise en charge.</value>
   </data>
@@ -1177,6 +1183,9 @@ Continuer le déploiement?</value>
   </data>
   <data name="StepResult.TargetWindowsPartitionUnavailableForInteractiveAutopilotRegistration" xml:space="preserve">
     <value>La partition Windows cible n'est pas disponible pour préparer l'assistant d'enregistrement Autopilot interactif.</value>
+  </data>
+  <data name="StepResult.UefiRequired" xml:space="preserve">
+    <value>Deployment requires UEFI boot mode.</value>
   </data>
   <data name="StepResult.UnsupportedDriverPackInstallMode" xml:space="preserve">
     <value>Mode d'installation du pack de pilotes non pris en charge.</value>

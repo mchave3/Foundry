@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="Foundry.Deploy.Views.Wizard.DriverPackStepView" x:Name="ViewRoot"
+<UserControl x:Class="Foundry.Deploy.Views.Wizard.DriverPackStepView" x:Name="ViewRoot"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="clr-namespace:Foundry.Deploy.Controls">
@@ -76,6 +76,12 @@
                         IsEnabled="{Binding IsDriverPackVersionSelectionEnabled}"
                         ItemsSource="{Binding DriverPackVersionOptions}"
                         SelectedItem="{Binding SelectedDriverPackVersion}" />
+                    <TextBlock
+                        Margin="0,12,0,0"
+                        Style="{StaticResource BodyTextBlockStyle}"
+                        Text="{Binding DataContext.Strings[DriverPack.ManualSelectionWarning], ElementName=ViewRoot}"
+                        TextWrapping="Wrap"
+                        Visibility="{Binding IsManualDriverPackSelection, Converter={StaticResource BooleanToVisibilityConverter}}" />
                 </StackPanel>
             </StackPanel>
         </ScrollViewer>

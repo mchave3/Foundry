@@ -93,6 +93,7 @@ public sealed class DriverPackCatalogService : IDriverPackCatalogService
             SizeBytes = ParseLong(ReadAttribute(driverPack, "sizeBytes")),
             Format = ReadAttribute(driverPack, "format"),
             Type = ReadAttribute(driverPack, "type"),
+            PackageRole = ResolvePackageRole(driverPack, models),
             ReleaseDate = ParseDate(ReadAttribute(driverPack, "releaseDate")),
             OsName = ReadAttribute(osInfo, "name"),
             OsReleaseId = ReadAttribute(osInfo, "releaseId"),
@@ -105,6 +106,24 @@ public sealed class DriverPackCatalogService : IDriverPackCatalogService
             new FileIntegrity(string.IsNullOrEmpty(parsed.Sha256) ? null : new FileDigest(HashAlgorithmName.SHA256, parsed.Sha256),
                 parsed.SizeBytes == 0 ? null : parsed.SizeBytes));
         return parsed;
+    }
+
+    private static DriverPackPackageRole ResolvePackageRole(XElement driverPack, IReadOnlyList<string> models)
+    {
+        string manufacturer = ReadAttribute(driverPack, "manufacturer").ToLowerInvariant();
+        if (manufacturer == "microsoft" && models.Any(model =>
+            string.Join(' ', model.Split((char[]?)null, StringSplitOptions.RemoveEmptyEntries)).ToLowerInvariant()
+                is "surface dock 2" or "surface thunderbolt 4 dock"))
+        {
+            return DriverPackPackageRole.Accessory;
+        }
+
+        // The unified catalog defaults even Surface accessories to BaseDriverPack; only these OEM sources establish a system role.
+        return manufacturer is "dell" or "hp" or "lenovo" &&
+            ReadAttribute(driverPack, "type").Equals("Win", StringComparison.OrdinalIgnoreCase) &&
+            ReadAttribute(driverPack, "packageRole").Equals("BaseDriverPack", StringComparison.OrdinalIgnoreCase)
+                ? DriverPackPackageRole.System
+                : DriverPackPackageRole.Unknown;
     }
 
     private static string ReadAttribute(XElement? element, string attributeName)

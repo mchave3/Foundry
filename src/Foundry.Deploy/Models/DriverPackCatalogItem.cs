@@ -18,6 +18,8 @@ public sealed record DriverPackCatalogItem
     public long SizeBytes { get; init; }
     public string Format { get; init; } = string.Empty;
     public string Type { get; init; } = string.Empty;
+    /// <summary>Contains the role established from documented catalog metadata, never inferred from architecture.</summary>
+    public DriverPackPackageRole PackageRole { get; init; }
     public DateTimeOffset? ReleaseDate { get; init; }
     public string OsName { get; init; } = string.Empty;
     public string OsReleaseId { get; init; } = string.Empty;

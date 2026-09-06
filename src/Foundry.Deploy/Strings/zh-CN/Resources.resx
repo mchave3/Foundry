@@ -254,6 +254,9 @@
   <data name="Disk.WarningSuffixFormat" xml:space="preserve">
     <value>| {0}</value>
   </data>
+  <data name="DriverPack.ManualSelectionWarning" xml:space="preserve">
+    <value>Manual selection: verify that this pack supports the detected hardware and selected Windows release. Package integrity and publisher checks still apply.</value>
+  </data>
   <data name="DriverPack.MicrosoftUpdateCatalog" xml:space="preserve">
     <value>Microsoft Update Catalog</value>
   </data>
@@ -989,6 +992,9 @@
   <data name="StepResult.CacheStrategyResolvedSimulation" xml:space="preserve">
     <value>缓存策略已解决（模拟）。</value>
   </data>
+  <data name="StepResult.ConfirmedDiskMismatch" xml:space="preserve">
+    <value>The confirmed target disk is unavailable, changed, or unsafe.</value>
+  </data>
   <data name="StepResult.DeferredDriverPackStagingUnsupportedCommand" xml:space="preserve">
     <value>在没有支持的命令的情况下请求了首次启动驱动程序包暂存。</value>
   </data>
@@ -1177,6 +1183,9 @@
   </data>
   <data name="StepResult.TargetWindowsPartitionUnavailableForInteractiveAutopilotRegistration" xml:space="preserve">
     <value>目标 Windows 分区不可用于暂存交互式 Autopilot 注册助手。</value>
+  </data>
+  <data name="StepResult.UefiRequired" xml:space="preserve">
+    <value>Deployment requires UEFI boot mode.</value>
   </data>
   <data name="StepResult.UnsupportedDriverPackInstallMode" xml:space="preserve">
     <value>不支持的驱动程序包安装模式。</value>

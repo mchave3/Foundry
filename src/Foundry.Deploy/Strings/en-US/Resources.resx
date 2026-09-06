@@ -254,6 +254,9 @@ Action: Verify disk attributes and retry deployment.</value>
   <data name="Disk.WarningSuffixFormat" xml:space="preserve">
     <value> | {0}</value>
   </data>
+  <data name="DriverPack.ManualSelectionWarning" xml:space="preserve">
+    <value>Manual selection: verify that this pack supports the detected hardware and selected Windows release. Package integrity and publisher checks still apply.</value>
+  </data>
   <data name="DriverPack.MicrosoftUpdateCatalog" xml:space="preserve">
     <value>Microsoft Update Catalog</value>
   </data>
