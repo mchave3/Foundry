@@ -19,6 +19,7 @@ internal static class ProcessTestChild
             return args.FirstOrDefault() switch
             {
                 "argv" => EchoArguments(args[1..]),
+                "large-output" when args.Length == 2 => await WriteLargeOutputAsync(args[1] == "lines").ConfigureAwait(false),
                 "pipe-root" when args.Length == 2 => await RunPipeRootAsync(args[1]).ConfigureAwait(false),
                 "pipe-child" when args.Length == 2 => await RunPipeChildAsync(args[1]).ConfigureAwait(false),
                 _ => 2
@@ -34,6 +35,25 @@ internal static class ProcessTestChild
     private static int EchoArguments(string[] arguments)
     {
         Console.WriteLine(JsonSerializer.Serialize(arguments));
+        return 0;
+    }
+
+    private static async Task<int> WriteLargeOutputAsync(bool useLines)
+    {
+        string chunk = new('x', 4096);
+        for (int index = 0; index < 512; index++)
+        {
+            await Console.Out.WriteAsync(chunk).ConfigureAwait(false);
+            await Console.Error.WriteAsync(chunk).ConfigureAwait(false);
+            if (useLines)
+            {
+                await Console.Out.WriteLineAsync().ConfigureAwait(false);
+                await Console.Error.WriteLineAsync().ConfigureAwait(false);
+            }
+        }
+
+        await Console.Out.WriteLineAsync("stdout-tail").ConfigureAwait(false);
+        await Console.Error.WriteLineAsync("stderr-tail").ConfigureAwait(false);
         return 0;
     }
 

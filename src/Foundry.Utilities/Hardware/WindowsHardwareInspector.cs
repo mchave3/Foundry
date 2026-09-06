@@ -100,9 +100,13 @@ public sealed class WindowsHardwareInspector : IHardwareInspector
                 "Bypass",
                 .. PowerShellCommand.CreateEncodedArguments(InspectionScript)
             ],
-            Path.GetTempPath());
+            Path.GetTempPath())
+        {
+            ExecutionTimeout = TimeSpan.FromMinutes(1)
+        };
 
         ProcessExecutionResult execution = await _executeProcess(request, cancellationToken).ConfigureAwait(false);
+        execution.EnsureCompleteOutput();
         if (!execution.IsSuccess || string.IsNullOrWhiteSpace(execution.StandardOutput))
         {
             throw new InvalidDataException(

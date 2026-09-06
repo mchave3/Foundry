@@ -150,9 +150,14 @@ if ($null -eq $partition) {{
                 "Bypass",
                 .. PowerShellCommand.CreateEncodedArguments(script)
             ],
-            Path.GetTempPath());
+            Path.GetTempPath())
+        {
+            ExecutionTimeout = TimeSpan.FromMinutes(1)
+        };
 
-        return await _executeProcess(request, cancellationToken).ConfigureAwait(false);
+        ProcessExecutionResult execution = await _executeProcess(request, cancellationToken).ConfigureAwait(false);
+        execution.EnsureCompleteOutput();
+        return execution;
     }
 
     private static DiskInfo ParseDisk(JsonElement element)

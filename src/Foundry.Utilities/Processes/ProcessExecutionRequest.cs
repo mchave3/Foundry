@@ -60,14 +60,23 @@ public sealed record ProcessExecutionRequest
     public IReadOnlyDictionary<string, string?>? EnvironmentOverrides { get; init; }
 
     /// <summary>
-    /// Gets a callback invoked for each standard-output line.
+    /// Gets a nonblocking callback for output lines, segmented at 16,384 characters when necessary.
     /// </summary>
     public Action<string>? OnOutputData { get; init; }
 
     /// <summary>
-    /// Gets a callback invoked for each standard-error line.
+    /// Gets a nonblocking callback for error lines, segmented at 16,384 characters when necessary.
     /// </summary>
     public Action<string>? OnErrorData { get; init; }
+
+    /// <summary>Gets the optional deadline for process execution, including redirected output.</summary>
+    public TimeSpan? ExecutionTimeout { get; init; }
+
+    /// <summary>Gets the independent bound for exit cleanup and output draining after the root exits.</summary>
+    public TimeSpan TerminationGracePeriod { get; init; } = TimeSpan.FromSeconds(10);
+
+    /// <summary>Gets the maximum retained tail length for each redirected stream.</summary>
+    public int MaxCapturedOutputCharacters { get; init; } = 1_048_576;
 
     internal bool UsesRawArguments => RawArguments is not null;
 

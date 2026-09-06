@@ -17,6 +17,74 @@ public sealed class ProcessRunnerTests
     private static readonly TimeSpan HangGuardTimeout = TimeSpan.FromSeconds(10);
     private static readonly TimeSpan CleanupTimeout = TimeSpan.FromSeconds(10);
 
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task WaitForOutputAsync_WhenOneReaderFails_ReportsFailureBeforeTheOtherReaderCloses(bool standardOutputFails)
+    {
+        var blocked = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
+        Task failed = Task.FromException(new IOException("reader failed"));
+        Task completion = standardOutputFails
+            ? ProcessRunner.WaitForOutputAsync(failed, blocked.Task)
+            : ProcessRunner.WaitForOutputAsync(blocked.Task, failed);
+        try
+        {
+            IOException error = await Assert.ThrowsAsync<IOException>(() => completion.WaitAsync(
+                TimeSpan.FromSeconds(1), TestContext.Current.CancellationToken));
+            Assert.Equal("reader failed", error.Message);
+            Assert.False(blocked.Task.IsCompleted);
+        }
+        finally
+        {
+            blocked.TrySetResult(true);
+            _ = await Record.ExceptionAsync(() => completion);
+        }
+    }
+
+    [Fact]
+    public void ToDiagnosticText_WhenTruncatedTailsContainOnlyWhitespace_StillShowsTruncation()
+    {
+        var result = new ProcessExecutionResult
+        {
+            StandardOutput = " \r\n ",
+            StandardError = "\t\n",
+            StandardOutputTruncated = true,
+            StandardErrorTruncated = true
+        };
+
+        string diagnostic = result.ToDiagnosticText();
+
+        Assert.Contains("StdOut (truncated tail):", diagnostic, StringComparison.Ordinal);
+        Assert.Contains("StdErr (truncated tail):", diagnostic, StringComparison.Ordinal);
+    }
+
+    [Theory]
+    [InlineData("lines")]
+    [InlineData("single-line")]
+    public async Task RunAsync_WhenOutputExceedsLimit_RetainsBoundedTailsAndCallbacks(string outputMode)
+    {
+        using var workspace = new TemporaryDirectory();
+        int maximumCallbackLength = 0;
+        var request = new ProcessExecutionRequest(
+            GetProcessTestChildPath(), ["large-output", outputMode], workspace.Path)
+        {
+            MaxCapturedOutputCharacters = 256,
+            OnOutputData = line => maximumCallbackLength = Math.Max(maximumCallbackLength, line.Length)
+        };
+
+        ProcessExecutionResult result = await new ProcessRunner().RunAsync(request, TestContext.Current.CancellationToken);
+
+        Assert.True(result.IsSuccess);
+        Assert.Equal(256, result.StandardOutput.Length);
+        Assert.Equal(256, result.StandardError.Length);
+        Assert.EndsWith("stdout-tail" + Environment.NewLine, result.StandardOutput);
+        Assert.EndsWith("stderr-tail" + Environment.NewLine, result.StandardError);
+        Assert.True(result.StandardOutputTruncated);
+        Assert.True(result.StandardErrorTruncated);
+        Assert.InRange(maximumCallbackLength, 1, 16_384);
+        Assert.Throws<InvalidDataException>(result.EnsureCompleteOutput);
+    }
+
     [Fact]
     public async Task RunAsync_WithArgumentList_PassesArgumentsVerbatim()
     {
@@ -172,8 +240,12 @@ public sealed class ProcessRunnerTests
         Assert.False(Directory.Exists(workingDirectory));
     }
 
-    [Fact]
-    public async Task RunAsync_WhenCanceledAfterRootExit_DoesNotWaitForInheritedOutputPipe()
+    [Theory]
+    [InlineData(true, true)]
+    [InlineData(true, false)]
+    [InlineData(false, true)]
+    [InlineData(false, false)]
+    public async Task RunAsync_WhenInterrupted_ReapsRootAndBoundsInheritedOutput(bool rootExits, bool cancel)
     {
         var workspace = new TemporaryDirectory();
         var rootReady = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
@@ -182,6 +254,8 @@ public sealed class ProcessRunnerTests
             ["pipe-root", workspace.Path],
             workspace.Path) with
         {
+            TerminationGracePeriod = TimeSpan.FromSeconds(1),
+            ExecutionTimeout = rootExits || cancel ? null : TimeSpan.FromSeconds(5),
             OnOutputData = line =>
             {
                 if (line.Equals("root-ready", StringComparison.Ordinal))
@@ -203,18 +277,43 @@ public sealed class ProcessRunnerTests
             ProcessIdentity childIdentity = ReadIdentity(Path.Combine(workspace.Path, "child.json"));
             using Process root = OpenOwnedProcess(rootIdentity);
             using Process child = OpenOwnedProcess(childIdentity);
-            File.WriteAllText(Path.Combine(workspace.Path, "allow-root-exit"), string.Empty);
-            await root.WaitForExitAsync(TestContext.Current.CancellationToken).WaitAsync(
-                HangGuardTimeout,
-                TestContext.Current.CancellationToken);
-            Assert.True(root.HasExited);
+            if (rootExits)
+            {
+                File.WriteAllText(Path.Combine(workspace.Path, "allow-root-exit"), string.Empty);
+                await root.WaitForExitAsync(TestContext.Current.CancellationToken).WaitAsync(
+                    HangGuardTimeout,
+                    TestContext.Current.CancellationToken);
+                Assert.True(root.HasExited);
+            }
+            else
+            {
+                Assert.False(root.HasExited);
+            }
+
             Assert.False(child.HasExited);
 
-            cancellation.Cancel();
+            Exception interruption;
+            if (cancel)
+            {
+                cancellation.Cancel();
+                interruption = await Assert.ThrowsAnyAsync<OperationCanceledException>(() => executionTask.WaitAsync(
+                    HangGuardTimeout, TestContext.Current.CancellationToken));
+            }
+            else
+            {
+                interruption = await Assert.ThrowsAsync<TimeoutException>(() => executionTask.WaitAsync(
+                    HangGuardTimeout, TestContext.Current.CancellationToken));
+            }
 
-            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => executionTask.WaitAsync(
-                HangGuardTimeout,
-                TestContext.Current.CancellationToken));
+            Assert.Equal(true, interruption.Data["ProcessRootExitConfirmed"]);
+            Assert.Equal(false, interruption.Data["ProcessTreeTerminationConfirmed"]);
+            Assert.Equal(!rootExits, interruption.Data["ProcessOutputDrainConfirmed"]);
+            Assert.True(root.HasExited);
+            if (!rootExits)
+            {
+                await child.WaitForExitAsync(TestContext.Current.CancellationToken).WaitAsync(
+                    HangGuardTimeout, TestContext.Current.CancellationToken);
+            }
             testBodyCompleted = true;
         }
         finally
@@ -286,6 +385,27 @@ public sealed class ProcessRunnerTests
         Assert.Equal(request.FileName, exception.FileName);
         Assert.NotNull(exception.InnerException);
         Assert.NotNull(exception.NativeErrorCode);
+    }
+
+    [Theory]
+    [InlineData(0, 1000, 1000)]
+    [InlineData(256, 0, 1000)]
+    [InlineData(256, 1000, 0)]
+    public async Task RunAsync_WithInvalidLimits_DoesNotCreateWorkingDirectory(int capture, int cleanup, int timeout)
+    {
+        using var workspace = new TemporaryDirectory();
+        string workingDirectory = Path.Combine(workspace.Path, "must-not-exist");
+        var request = new ProcessExecutionRequest(GetProcessTestChildPath(), ["argv"], workingDirectory)
+        {
+            MaxCapturedOutputCharacters = capture,
+            TerminationGracePeriod = TimeSpan.FromMilliseconds(cleanup),
+            ExecutionTimeout = TimeSpan.FromMilliseconds(timeout)
+        };
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() =>
+            new ProcessRunner().RunAsync(request, TestContext.Current.CancellationToken));
+
+        Assert.False(Directory.Exists(workingDirectory));
     }
 
     [Theory]
@@ -389,6 +509,9 @@ public sealed class ProcessRunnerTests
             await executionTask.WaitAsync(CleanupTimeout);
         }
         catch (OperationCanceledException) when (cancellation.IsCancellationRequested)
+        {
+        }
+        catch (TimeoutException) when (executionTask.IsFaulted)
         {
         }
     }
