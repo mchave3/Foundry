@@ -108,7 +108,9 @@ public sealed class HttpRetryTests
         int attempts = 0;
         HttpRetryOptions limits = Options with
         {
-            MaximumAttempts = 2, RequestTimeout = TimeSpan.FromMilliseconds(30), InitialRetryDelay = TimeSpan.Zero
+            MaximumAttempts = 2,
+            RequestTimeout = TimeSpan.FromMilliseconds(30),
+            InitialRetryDelay = TimeSpan.Zero
         };
         await Assert.ThrowsAnyAsync<TimeoutException>(() => HttpRetry.ExecuteAsync<int>(async token =>
         {

@@ -29,7 +29,8 @@ public sealed class ProcessRunner : IProcessRunner
         ProcessExecutionRequest request = ProcessExecutionRequest.FromRawArguments(
             fileName,
             arguments,
-            workingDirectory) with { ExecutionTimeout = executionTimeout ?? DefaultExecutionTimeout };
+            workingDirectory) with
+        { ExecutionTimeout = executionTimeout ?? DefaultExecutionTimeout };
 
         return await RunAsync(request, arguments, cancellationToken).ConfigureAwait(false);
     }

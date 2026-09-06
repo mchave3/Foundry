@@ -22,8 +22,12 @@ public sealed class UsbDiskScriptTests
     {
         var expected = new WinPeUsbDiskIdentity
         {
-            Number = 9, UniqueId = "USB-123", SerialNumber = "SERIAL",
-            BusType = "USB", IsRemovable = true, Size = 64000000000
+            Number = 9,
+            UniqueId = "USB-123",
+            SerialNumber = "SERIAL",
+            BusType = "USB",
+            IsRemovable = true,
+            Size = 64000000000
         };
         Assert.Equal(accepted, RunGuard(expected, [expected with { UniqueId = actualId }]));
     }
@@ -44,8 +48,12 @@ public sealed class UsbDiskScriptTests
     {
         var expected = new WinPeUsbDiskIdentity
         {
-            Number = 9, UniqueId = "USB-123", SerialNumber = "SERIAL",
-            BusType = "USB", IsRemovable = true, Size = 64000000000
+            Number = 9,
+            UniqueId = "USB-123",
+            SerialNumber = "SERIAL",
+            BusType = "USB",
+            IsRemovable = true,
+            Size = 64000000000
         };
         WinPeUsbDiskIdentity actual = change switch
         {

@@ -22,8 +22,14 @@ public sealed class ArtifactDownloadServiceTests
         byte[] bytes = [1, 2, 3];
         ArtifactIdentity artifact = ArtifactIntegrityPolicy.FromDriverPack(new DriverPackCatalogItem
         {
-            CatalogRevision = "authenticated-revision", Id = "dell-package", PackageId = "package-1", Version = "A06",
-            Manufacturer = "Dell", FileName = "driver.exe", DownloadUrl = "https://downloads.dell.com/driver.exe", SizeBytes = bytes.Length
+            CatalogRevision = "authenticated-revision",
+            Id = "dell-package",
+            PackageId = "package-1",
+            Version = "A06",
+            Manufacturer = "Dell",
+            FileName = "driver.exe",
+            DownloadUrl = "https://downloads.dell.com/driver.exe",
+            SizeBytes = bytes.Length
         });
         string path = Path.Combine(temp.Path, artifact.FileName);
         await File.WriteAllBytesAsync(path, [4, 5, 6], TestContext.Current.CancellationToken);
@@ -53,7 +59,10 @@ public sealed class ArtifactDownloadServiceTests
         using TempDirectory temp = new();
         ArtifactIdentity artifact = ArtifactIntegrityPolicy.FromDriverPack(new DriverPackCatalogItem
         {
-            CatalogRevision = "authenticated-revision", Id = "dell-package", Manufacturer = "Dell", FileName = "driver.exe",
+            CatalogRevision = "authenticated-revision",
+            Id = "dell-package",
+            Manufacturer = "Dell",
+            FileName = "driver.exe",
             DownloadUrl = "https://downloads.dell.com/driver.exe"
         });
         var handler = new StaticHttpMessageHandler([1]);
@@ -99,10 +108,14 @@ public sealed class ArtifactDownloadServiceTests
         File.SetLastWriteTimeUtc(path, lastWriteTime.UtcDateTime);
         await File.WriteAllTextAsync($"{path}.manifest.json", JsonSerializer.Serialize(new ArtifactCacheManifest
         {
-            ArtifactKind = artifact.Kind, SourceUrl = artifact.SourceUri.AbsoluteUri,
-            HashAlgorithm = "SHA256", ExpectedHash = artifact.Integrity.Digest!.Hex,
-            ExpectedSizeBytes = valid.Length, FileSizeBytes = valid.Length,
-            FileLastWriteTimeUtc = lastWriteTime, ValidatedAtUtc = lastWriteTime
+            ArtifactKind = artifact.Kind,
+            SourceUrl = artifact.SourceUri.AbsoluteUri,
+            HashAlgorithm = "SHA256",
+            ExpectedHash = artifact.Integrity.Digest!.Hex,
+            ExpectedSizeBytes = valid.Length,
+            FileSizeBytes = valid.Length,
+            FileLastWriteTimeUtc = lastWriteTime,
+            ValidatedAtUtc = lastWriteTime
         }), TestContext.Current.CancellationToken);
         var handler = new StaticHttpMessageHandler(valid);
 

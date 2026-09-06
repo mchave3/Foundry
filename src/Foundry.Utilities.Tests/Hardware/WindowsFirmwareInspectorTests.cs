@@ -28,7 +28,8 @@ public sealed class WindowsFirmwareInspectorTests
     {
         var inspector = new WindowsHardwareInspector((_, _) => Task.FromResult(new ProcessExecutionResult
         {
-            ExitCode = 0, StandardOutput = "{}"
+            ExitCode = 0,
+            StandardOutput = "{}"
         }), () => firmware);
         HardwareSnapshot snapshot = await inspector.GetCurrentAsync(TestContext.Current.CancellationToken);
         Assert.Equal(firmware, snapshot.FirmwareType);

@@ -17,8 +17,13 @@ public sealed class WinPeUsbMediaServiceTests
     private const string CacheVolumePath = @"\\?\Volume{22222222-2222-2222-2222-222222222222}\";
     private static WinPeUsbDiskIdentity ConfirmedDisk => new()
     {
-        Number = 9, FriendlyName = "Safe USB", SerialNumber = "SERIAL", UniqueId = "UNIQUE",
-        BusType = "USB", IsRemovable = true, Size = 64000000000
+        Number = 9,
+        FriendlyName = "Safe USB",
+        SerialNumber = "SERIAL",
+        UniqueId = "UNIQUE",
+        BusType = "USB",
+        IsRemovable = true,
+        Size = 64000000000
     };
 
     [Theory]
@@ -98,7 +103,8 @@ public sealed class WinPeUsbMediaServiceTests
         var service = new WinPeUsbMediaService(runner, ResolveTestRoot);
         var options = new UsbOutputOptions
         {
-            TargetDiskNumber = 9, ExpectedDisk = ConfirmedDisk,
+            TargetDiskNumber = 9,
+            ExpectedDisk = ConfirmedDisk,
             RuntimePayloadProvisioning = new WinPeRuntimePayloadProvisioningOptions()
         };
         var artifact = new WinPeBuildArtifact { WorkingDirectoryPath = temporary.Path, MediaDirectoryPath = mediaRoot, Architecture = WinPeArchitecture.X64 };
@@ -120,8 +126,12 @@ public sealed class WinPeUsbMediaServiceTests
     {
         var actual = new WinPeUsbDiskIdentity
         {
-            Number = 9, UniqueId = actualId, SerialNumber = "SERIAL",
-            BusType = "USB", IsRemovable = true, Size = 64000000000
+            Number = 9,
+            UniqueId = actualId,
+            SerialNumber = "SERIAL",
+            BusType = "USB",
+            IsRemovable = true,
+            Size = 64000000000
         };
         WinPeResult result = WinPeUsbMediaService.ValidateDiskSafety(
             new UsbOutputOptions { TargetDiskNumber = 9, ExpectedDisk = actual with { UniqueId = expectedId } }, actual, [actual]);
@@ -168,7 +178,8 @@ public sealed class WinPeUsbMediaServiceTests
         var service = new WinPeUsbMediaService(runner, runtime, ResolveTestRoot);
         var options = new UsbOutputOptions
         {
-            TargetDiskNumber = 9, ExpectedDisk = ConfirmedDisk,
+            TargetDiskNumber = 9,
+            ExpectedDisk = ConfirmedDisk,
             RuntimePayloadProvisioning = new WinPeRuntimePayloadProvisioningOptions()
         };
         var artifact = new WinPeBuildArtifact { WorkingDirectoryPath = temporary.Path, MediaDirectoryPath = mediaRoot, Architecture = WinPeArchitecture.X64 };
@@ -213,12 +224,19 @@ public sealed class WinPeUsbMediaServiceTests
 
     private static WinPeUsbProvisionResult TestLayout => new()
     {
-        ConfirmedDisk = ConfirmedDisk, BootPartitionNumber = 1, CachePartitionNumber = 2,
-        BootPartitionOffset = 1048576, CachePartitionOffset = 2148532224,
-        BootPartitionSize = 2147483648, CachePartitionSize = 60000000000,
-        BootVolumeUniqueId = "boot-id", CacheVolumeUniqueId = "cache-id",
-        BootVolumePath = BootVolumePath, CacheVolumePath = CacheVolumePath,
-        BootDriveLetter = "Y:", CacheDriveLetter = "Z:"
+        ConfirmedDisk = ConfirmedDisk,
+        BootPartitionNumber = 1,
+        CachePartitionNumber = 2,
+        BootPartitionOffset = 1048576,
+        CachePartitionOffset = 2148532224,
+        BootPartitionSize = 2147483648,
+        CachePartitionSize = 60000000000,
+        BootVolumeUniqueId = "boot-id",
+        CacheVolumeUniqueId = "cache-id",
+        BootVolumePath = BootVolumePath,
+        CacheVolumePath = CacheVolumePath,
+        BootDriveLetter = "Y:",
+        CacheDriveLetter = "Z:"
     };
 
     [Fact]

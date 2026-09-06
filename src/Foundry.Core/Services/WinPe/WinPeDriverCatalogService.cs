@@ -28,7 +28,8 @@ public sealed class WinPeDriverCatalogService : IWinPeDriverCatalogService
                 {
                     throw new InvalidDataException("Driver catalog requests require HTTPS.");
                 }
-            })) { Timeout = TimeSpan.FromSeconds(30) })
+            }))
+        { Timeout = TimeSpan.FromSeconds(30) })
     {
     }
 

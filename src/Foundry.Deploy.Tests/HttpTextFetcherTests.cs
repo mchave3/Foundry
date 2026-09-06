@@ -13,7 +13,8 @@ public sealed class HttpTextFetcherTests
 {
     private static readonly HttpRetryOptions FastOptions = HttpOperationOptions.Metadata with
     {
-        MaximumAttempts = 1, RequestTimeout = TimeSpan.FromMilliseconds(50)
+        MaximumAttempts = 1,
+        RequestTimeout = TimeSpan.FromMilliseconds(50)
     };
 
     [Fact]

@@ -509,7 +509,8 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
 
     private static HttpClient CreateHttpClient(bool allowWindowsUpdateHttp) => new(new ValidatedRedirectHandler(
         new HttpClientHandler { AllowAutoRedirect = false, UseCookies = false },
-        uri => ValidateSourceUri(uri, allowWindowsUpdateHttp))) { Timeout = TimeSpan.FromSeconds(30) };
+        uri => ValidateSourceUri(uri, allowWindowsUpdateHttp)))
+    { Timeout = TimeSpan.FromSeconds(30) };
 
     private static void ValidateSourceUri(Uri source, bool allowWindowsUpdateHttp)
     {

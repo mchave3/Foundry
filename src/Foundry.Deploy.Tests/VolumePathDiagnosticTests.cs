@@ -86,10 +86,13 @@ public sealed class VolumePathDiagnosticTests
         {
             var state = new DeploymentRuntimeState
             {
-                TargetWindowsPartitionRoot = WindowsRoot, TargetSystemPartitionRoot = SystemRoot,
-                TargetRecoveryPartitionRoot = RecoveryRoot, TargetFoundryRoot = WindowsRoot + "Foundry",
+                TargetWindowsPartitionRoot = WindowsRoot,
+                TargetSystemPartitionRoot = SystemRoot,
+                TargetRecoveryPartitionRoot = RecoveryRoot,
+                TargetFoundryRoot = WindowsRoot + "Foundry",
                 DownloadedOperatingSystemPath = WindowsRoot + "Foundry\\install.wim",
-                PreOobeScriptPaths = [WindowsRoot + "script.ps1"], TargetComputerName = "UNCHANGED-OB03"
+                PreOobeScriptPaths = [WindowsRoot + "script.ps1"],
+                TargetComputerName = "UNCHANGED-OB03"
             };
             var service = new DeploymentLogService();
             DeploymentLogSession session = service.Initialize(directory);

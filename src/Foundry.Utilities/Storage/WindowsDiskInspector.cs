@@ -173,7 +173,8 @@ if ($null -eq $partition) {{
             ReadRequiredBool(element, "IsBoot"),
             ReadRequiredBool(element, "IsReadOnly"),
             ReadRequiredBool(element, "IsOffline"),
-            ReadBool(element, "IsRemovable")) { UniqueId = ReadString(element, "UniqueId") };
+            ReadBool(element, "IsRemovable"))
+        { UniqueId = ReadString(element, "UniqueId") };
     }
 
     private static string ReadString(JsonElement root, string propertyName)

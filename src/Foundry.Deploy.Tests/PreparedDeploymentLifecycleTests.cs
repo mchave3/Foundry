@@ -115,9 +115,12 @@ public sealed class PreparedDeploymentLifecycleTests
                 Events.Add("bcdboot"); BootArguments = tokens; BootExecutable = fileName;
                 return Task.FromResult(new ProcessExecutionResult
                 {
-                    ExitCode = failBoot ? 13 : 0, FileName = fileName, Arguments = string.Join(' ', tokens),
+                    ExitCode = failBoot ? 13 : 0,
+                    FileName = fileName,
+                    Arguments = string.Join(' ', tokens),
                     WorkingDirectory = VolumePathDiagnosticTests.WindowsRoot + "Foundry",
-                    StandardOutput = VolumePathDiagnosticTests.SystemRoot, StandardError = VolumePathDiagnosticTests.RecoveryRoot
+                    StandardOutput = VolumePathDiagnosticTests.SystemRoot,
+                    StandardError = VolumePathDiagnosticTests.RecoveryRoot
                 });
             }
             int call = ++_storageCalls;
@@ -129,8 +132,12 @@ public sealed class PreparedDeploymentLifecycleTests
             if (call > 1)
             {
                 using JsonDocument partitionData = ReadEncodedData(dataLines[1]);
-                Assert.Equal(call switch { 3 => VolumePathDiagnosticTests.WindowsRoot, 4 => VolumePathDiagnosticTests.SystemRoot,
-                    _ => VolumePathDiagnosticTests.RecoveryRoot }, partitionData.RootElement.GetProperty("VolumeRoot").GetString());
+                Assert.Equal(call switch
+                {
+                    3 => VolumePathDiagnosticTests.WindowsRoot,
+                    4 => VolumePathDiagnosticTests.SystemRoot,
+                    _ => VolumePathDiagnosticTests.RecoveryRoot
+                }, partitionData.RootElement.GetProperty("VolumeRoot").GetString());
             }
             string json = JsonSerializer.Serialize(new
             {

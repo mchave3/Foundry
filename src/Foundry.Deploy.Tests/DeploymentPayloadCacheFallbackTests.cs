@@ -25,7 +25,10 @@ public sealed class DeploymentPayloadCacheFallbackTests
             selectionKind: DriverPackSelectionKind.MicrosoftUpdateCatalog, logService: logs);
         var downloadedDriver = new MicrosoftUpdateCatalogDownloadedDriver
         {
-            UpdateId = "update-1", Title = "Network driver", Version = "1.0", Size = "1 MB",
+            UpdateId = "update-1",
+            Title = "Network driver",
+            Version = "1.0",
+            Size = "1 MB",
             DownloadUrl = "https://download.windowsupdate.com/driver.cab?token=PRIVATE_QUERY_SENTINEL"
         };
         var step = new DownloadDriverPackStep(new FakeMicrosoftUpdateCatalogDriverService(downloadedDriver), new CapturingArtifactDownloadService());

@@ -48,8 +48,12 @@ public sealed class PrepareTargetDiskLayoutStepTests
     }
     private static TargetDiskInfo SafeDisk => new()
     {
-        DiskNumber = 9, UniqueId = "A", SerialNumber = "SERIAL-A", SizeBytes = 128UL * 1024 * 1024 * 1024,
-        BusType = "NVMe", IsSelectable = true
+        DiskNumber = 9,
+        UniqueId = "A",
+        SerialNumber = "SERIAL-A",
+        SizeBytes = 128UL * 1024 * 1024 * 1024,
+        BusType = "NVMe",
+        IsSelectable = true
     };
 
     [Theory]

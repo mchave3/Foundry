@@ -23,7 +23,8 @@ internal sealed class ConnectProcessExecutor(ILogger logger)
         ProcessExecutionRequest request = ProcessExecutionRequest.FromRawArguments(
             fileName,
             arguments,
-            Environment.CurrentDirectory) with { ExecutionTimeout = executionTimeout ?? TimeSpan.FromMinutes(2) };
+            Environment.CurrentDirectory) with
+        { ExecutionTimeout = executionTimeout ?? TimeSpan.FromMinutes(2) };
 
         return ExecuteAsync(request, cancellationToken);
     }
