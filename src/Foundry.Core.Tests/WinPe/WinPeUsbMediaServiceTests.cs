@@ -22,6 +22,33 @@ public sealed class WinPeUsbMediaServiceTests
     };
 
     [Theory]
+    [InlineData(false, UsbFormatMode.Quick)]
+    [InlineData(true, UsbFormatMode.Complete)]
+    public async Task ProvisionAndPopulateAsync_RejectsTruncatedLayoutBeforeResolvingDestinations(bool truncateError, UsbFormatMode formatMode)
+    {
+        using var workspace = new TemporaryDirectory();
+        var runner = new FakeSequenceRunner(JsonSerializer.Serialize(ConfirmedDisk), JsonSerializer.Serialize(TestLayout))
+        {
+            TruncateAtExecution = 1,
+            TruncateError = truncateError
+        };
+        var service = new WinPeUsbMediaService(runner, _ => throw new InvalidOperationException("Must not resolve an incomplete layout."));
+
+        WinPeResult<WinPeUsbProvisionResult> result = await service.ProvisionAndPopulateAsync(
+            new UsbOutputOptions { TargetDiskNumber = 9, ExpectedDisk = ConfirmedDisk, FormatMode = formatMode },
+            new WinPeBuildArtifact { WorkingDirectoryPath = workspace.Path },
+            new WinPeToolPaths { PowerShellPath = "must-not-run.exe" }, false, TestContext.Current.CancellationToken);
+
+        Assert.False(result.IsSuccess);
+        Assert.Equal(WinPeErrorCodes.UsbProvisioningFailed, result.Error?.Code);
+        Assert.Equal(2, runner.Executions.Count);
+        Assert.Equal(TimeSpan.FromMinutes(2), runner.ExecutionTimeouts[0]);
+        Assert.Equal(TimeSpan.FromHours(formatMode == UsbFormatMode.Complete ? 24 : 4), runner.ExecutionTimeouts[1]);
+        Assert.DoesNotContain("UNIQUE", result.Error?.ToString(), StringComparison.Ordinal);
+        Assert.DoesNotContain("Volume{", result.Error?.ToString(), StringComparison.Ordinal);
+    }
+
+    [Theory]
     [InlineData("sources/boot.wim")]
     [InlineData("boot/BCD")]
     [InlineData("EFI/Boot/bootx64.efi")]
@@ -961,12 +988,25 @@ public sealed class WinPeUsbMediaServiceTests
             string arguments,
             string workingDirectory,
             CancellationToken cancellationToken,
-            IReadOnlyDictionary<string, string>? environmentOverrides = null)
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
         {
+            throw new NotSupportedException("Executable calls must pass argument tokens.");
+        }
+
+        public Task<WinPeProcessExecution> RunAsync(
+            string fileName,
+            IReadOnlyList<string> argumentList,
+            string workingDirectory,
+            CancellationToken cancellationToken,
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
+        {
+            string arguments = string.Join(' ', argumentList);
             bool isRobocopy = fileName.EndsWith("robocopy.exe", StringComparison.OrdinalIgnoreCase);
             if (isRobocopy && copyMedia && robocopyExitCode < 8)
             {
-                CopyRobocopyMedia(arguments);
+                CopyRobocopyMedia(argumentList);
             }
 
             var execution = new WinPeProcessExecution
@@ -985,7 +1025,8 @@ public sealed class WinPeUsbMediaServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }
@@ -994,7 +1035,8 @@ public sealed class WinPeUsbMediaServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }
@@ -1002,6 +1044,9 @@ public sealed class WinPeUsbMediaServiceTests
 
     private sealed class FakeSequenceRunner : IWinPeProcessRunner
     {
+        public int? TruncateAtExecution { get; init; }
+        public bool TruncateError { get; init; }
+        public List<TimeSpan?> ExecutionTimeouts { get; } = [];
         private readonly bool _copyMedia;
         private readonly int _robocopyExitCode;
         private readonly Queue<string> _outputs;
@@ -1025,12 +1070,25 @@ public sealed class WinPeUsbMediaServiceTests
             string arguments,
             string workingDirectory,
             CancellationToken cancellationToken,
-            IReadOnlyDictionary<string, string>? environmentOverrides = null)
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
         {
+            throw new NotSupportedException("Executable calls must pass argument tokens.");
+        }
+
+        public Task<WinPeProcessExecution> RunAsync(
+            string fileName,
+            IReadOnlyList<string> argumentList,
+            string workingDirectory,
+            CancellationToken cancellationToken,
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
+        {
+            string arguments = string.Join(' ', argumentList);
             bool isRobocopy = fileName.EndsWith("robocopy.exe", StringComparison.OrdinalIgnoreCase);
             if (isRobocopy && _copyMedia && _robocopyExitCode < 8)
             {
-                CopyRobocopyMedia(arguments);
+                CopyRobocopyMedia(argumentList);
             }
 
             var execution = new WinPeProcessExecution
@@ -1039,8 +1097,11 @@ public sealed class WinPeUsbMediaServiceTests
                 Arguments = arguments,
                 WorkingDirectory = workingDirectory,
                 ExitCode = isRobocopy ? _robocopyExitCode : 0,
-                StandardOutput = _outputs.Count > 0 ? _outputs.Dequeue() : string.Empty
+                StandardOutput = _outputs.Count > 0 ? _outputs.Dequeue() : string.Empty,
+                StandardOutputTruncated = TruncateAtExecution == Executions.Count && !TruncateError,
+                StandardErrorTruncated = TruncateAtExecution == Executions.Count && TruncateError
             };
+            ExecutionTimeouts.Add(executionTimeout);
             Executions.Add(execution);
             return Task.FromResult(execution);
         }
@@ -1049,7 +1110,8 @@ public sealed class WinPeUsbMediaServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }
@@ -1058,7 +1120,8 @@ public sealed class WinPeUsbMediaServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }
@@ -1074,8 +1137,23 @@ public sealed class WinPeUsbMediaServiceTests
             Action<string>? onOutputData,
             Action<string>? onErrorData,
             CancellationToken cancellationToken,
-            IReadOnlyDictionary<string, string>? environmentOverrides = null)
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
         {
+            throw new NotSupportedException("Executable calls must pass argument tokens.");
+        }
+
+        public Task<WinPeProcessExecution> RunWithOutputAsync(
+            string fileName,
+            IReadOnlyList<string> argumentList,
+            string workingDirectory,
+            Action<string>? onOutputData,
+            Action<string>? onErrorData,
+            CancellationToken cancellationToken,
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
+        {
+            string arguments = string.Join(' ', argumentList);
             onOutputData?.Invoke("FOUNDRY_USB_PROGRESS|26|Clearing USB partition table.");
             onOutputData?.Invoke("FOUNDRY_USB_PROGRESS|44|Formatting BOOT partition.");
             onOutputData?.Invoke("FOUNDRY_USB_VERBOSE|BOOT partition formatted. DriveLetter=S, FileSystem=FAT32, Label=BOOT.");
@@ -1158,17 +1236,10 @@ public sealed class WinPeUsbMediaServiceTests
         File.WriteAllText(Path.Combine(bootRootPath, "EFI", "Boot", architecture.ToBootEfiName()), "efi");
     }
 
-    private static void CopyRobocopyMedia(string arguments)
+    private static void CopyRobocopyMedia(IReadOnlyList<string> arguments)
     {
-        const string pathArgumentsPattern = """^(?:"(?<source>[^"]+)"|(?<source>\S+))\s+(?:"(?<destination>[^"]+)"|(?<destination>\S+))""";
-        Match match = Regex.Match(arguments, pathArgumentsPattern, RegexOptions.CultureInvariant);
-        if (!match.Success)
-        {
-            throw new InvalidOperationException("Could not parse fake robocopy paths.");
-        }
-
-        string sourcePath = match.Groups["source"].Value;
-        string destinationPath = match.Groups["destination"].Value;
+        string sourcePath = arguments[0];
+        string destinationPath = arguments[1];
         Directory.CreateDirectory(destinationPath);
         foreach (string directoryPath in Directory.EnumerateDirectories(sourcePath, "*", SearchOption.AllDirectories))
         {

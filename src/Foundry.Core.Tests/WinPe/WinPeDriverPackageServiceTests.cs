@@ -191,8 +191,21 @@ public sealed class WinPeDriverPackageServiceTests
             string arguments,
             string workingDirectory,
             CancellationToken cancellationToken,
-            IReadOnlyDictionary<string, string>? environmentOverrides = null)
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
         {
+            throw new NotSupportedException("Executable calls must pass argument tokens.");
+        }
+
+        public Task<WinPeProcessExecution> RunAsync(
+            string fileName,
+            IReadOnlyList<string> argumentList,
+            string workingDirectory,
+            CancellationToken cancellationToken,
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
+        {
+            string arguments = string.Join(' ', argumentList);
             Executions.Add(new WinPeProcessExecution
             {
                 FileName = fileName,
@@ -218,7 +231,8 @@ public sealed class WinPeDriverPackageServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }
@@ -227,7 +241,8 @@ public sealed class WinPeDriverPackageServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }

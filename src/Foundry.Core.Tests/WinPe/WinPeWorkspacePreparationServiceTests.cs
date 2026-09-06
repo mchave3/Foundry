@@ -169,7 +169,19 @@ public sealed class WinPeWorkspacePreparationServiceTests
             string arguments,
             string workingDirectory,
             CancellationToken cancellationToken,
-            IReadOnlyDictionary<string, string>? environmentOverrides = null)
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
+        {
+            throw new NotSupportedException("Executable calls must pass argument tokens.");
+        }
+
+        public Task<WinPeProcessExecution> RunAsync(
+            string fileName,
+            IReadOnlyList<string> argumentList,
+            string workingDirectory,
+            CancellationToken cancellationToken,
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }
@@ -178,7 +190,8 @@ public sealed class WinPeWorkspacePreparationServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }
@@ -187,7 +200,8 @@ public sealed class WinPeWorkspacePreparationServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             return Task.FromResult(new WinPeProcessExecution
             {

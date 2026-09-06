@@ -15,8 +15,13 @@ public sealed record WinPeProcessExecution
     public string WorkingDirectory { get; init; } = string.Empty;
     public string StandardOutput { get; init; } = string.Empty;
     public string StandardError { get; init; } = string.Empty;
+    public bool StandardOutputTruncated { get; init; }
+    public bool StandardErrorTruncated { get; init; }
 
     public bool IsSuccess => ExitCode == 0;
+
+    /// <summary>Rejects partial output before interpreting command metadata.</summary>
+    public void EnsureCompleteOutput() => ToProcessExecutionResult().EnsureCompleteOutput();
 
     public string ToDiagnosticText()
     {
@@ -51,7 +56,9 @@ public sealed record WinPeProcessExecution
             Arguments = result.Arguments,
             WorkingDirectory = result.WorkingDirectory,
             StandardOutput = result.StandardOutput,
-            StandardError = result.StandardError
+            StandardError = result.StandardError,
+            StandardOutputTruncated = result.StandardOutputTruncated,
+            StandardErrorTruncated = result.StandardErrorTruncated
         };
     }
 
@@ -64,7 +71,9 @@ public sealed record WinPeProcessExecution
             Arguments = Arguments,
             WorkingDirectory = WorkingDirectory,
             StandardOutput = StandardOutput,
-            StandardError = StandardError
+            StandardError = StandardError,
+            StandardOutputTruncated = StandardOutputTruncated,
+            StandardErrorTruncated = StandardErrorTruncated
         };
     }
 }

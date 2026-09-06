@@ -707,7 +707,9 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
             formatMode);
 
         Directory.CreateDirectory(workingDirectoryPath);
-        string arguments = CreatePowerShellArguments(script);
+        IReadOnlyList<string> arguments = CreatePowerShellArguments(script);
+        // A full surface format on a large removable drive can exceed the ordinary native-work deadline.
+        TimeSpan executionTimeout = formatMode == UsbFormatMode.Complete ? TimeSpan.FromHours(24) : TimeSpan.FromHours(4);
         var provisioningOutput = new UsbProvisioningOutputForwarder(progress);
         WinPeProcessExecution execution = _processRunner is IWinPeProcessOutputRunner outputRunner
             ? await outputRunner.RunWithOutputAsync(
@@ -716,12 +718,14 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
                 workingDirectoryPath,
                 provisioningOutput.Report,
                 null,
-                cancellationToken).ConfigureAwait(false)
+                cancellationToken,
+                executionTimeout: executionTimeout).ConfigureAwait(false)
             : await _processRunner.RunAsync(
                 tools.PowerShellPath,
                 arguments,
                 workingDirectoryPath,
-                cancellationToken).ConfigureAwait(false);
+                cancellationToken,
+                executionTimeout: executionTimeout).ConfigureAwait(false);
 
         if (execution.IsSuccess)
         {
@@ -800,7 +804,9 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
             formatMode);
 
         Directory.CreateDirectory(workingDirectoryPath);
-        string arguments = CreatePowerShellArguments(script);
+        IReadOnlyList<string> arguments = CreatePowerShellArguments(script);
+        // A full surface format on a large removable drive can exceed the ordinary native-work deadline.
+        TimeSpan executionTimeout = formatMode == UsbFormatMode.Complete ? TimeSpan.FromHours(24) : TimeSpan.FromHours(4);
         var provisioningOutput = new UsbProvisioningOutputForwarder(progress);
         WinPeProcessExecution execution = _processRunner is IWinPeProcessOutputRunner outputRunner
             ? await outputRunner.RunWithOutputAsync(
@@ -809,12 +815,14 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
                 workingDirectoryPath,
                 provisioningOutput.Report,
                 null,
-                cancellationToken).ConfigureAwait(false)
+                cancellationToken,
+                executionTimeout: executionTimeout).ConfigureAwait(false)
             : await _processRunner.RunAsync(
                 tools.PowerShellPath,
                 arguments,
                 workingDirectoryPath,
-                cancellationToken).ConfigureAwait(false);
+                cancellationToken,
+                executionTimeout: executionTimeout).ConfigureAwait(false);
 
         return execution.IsSuccess
             ? ParseUsbProvisionResult(execution)
@@ -823,6 +831,15 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
 
     private static WinPeResult<WinPeUsbProvisionResult> ParseUsbProvisionResult(WinPeProcessExecution execution)
     {
+        try
+        {
+            execution.EnsureCompleteOutput();
+        }
+        catch (InvalidDataException ex)
+        {
+            return WinPeResult<WinPeUsbProvisionResult>.Failure(WinPeErrorCodes.UsbProvisioningFailed, "USB provisioning returned incomplete output.", ex.Message);
+        }
+
         string[] lines = execution.StandardOutput.Split(
             [Environment.NewLine, "\n"],
             StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
@@ -895,7 +912,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
 
         WinPeProcessExecution execution = await _processRunner.RunAsync(
             robocopyPath,
-            $"{WinPeProcessRunner.Quote(sourceMediaDirectoryPath)} {WinPeProcessRunner.Quote(destinationBootRootPath)} /E /R:1 /W:1 /NFL /NDL /NJH /NJS /NP",
+            [sourceMediaDirectoryPath, destinationBootRootPath, "/E", "/R:1", "/W:1", "/NFL", "/NDL", "/NJH", "/NJS", "/NP"],
             workingDirectoryPath,
             cancellationToken).ConfigureAwait(false);
 
@@ -1016,7 +1033,8 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
             tools.PowerShellPath,
             CreatePowerShellArguments(script),
             workingDirectoryPath,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken,
+            executionTimeout: TimeSpan.FromMinutes(2)).ConfigureAwait(false);
 
         if (!execution.IsSuccess)
         {
@@ -1024,6 +1042,15 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
                 WinPeErrorCodes.UsbQueryFailed,
                 "A required PowerShell USB query command failed.",
                 toolName: "PowerShell"));
+        }
+
+        try
+        {
+            execution.EnsureCompleteOutput();
+        }
+        catch (InvalidDataException ex)
+        {
+            return WinPeResult<string>.Failure(WinPeErrorCodes.UsbQueryFailed, "A required PowerShell USB query returned incomplete output.", ex.Message);
         }
 
         string output = execution.StandardOutput.Trim();
@@ -1053,7 +1080,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
         return candidates;
     }
 
-    private static string CreatePowerShellArguments(string script)
+    private static IReadOnlyList<string> CreatePowerShellArguments(string script)
     {
         using var compressed = new MemoryStream();
         using (var gzip = new GZipStream(compressed, CompressionLevel.SmallestSize, leaveOpen: true))
@@ -1069,15 +1096,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
             try { $source = $reader.ReadToEnd() } finally { $reader.Dispose() }
             & ([scriptblock]::Create($source))
             """;
-        return string.Join(
-            ' ',
-            [
-                "-NoProfile",
-                "-NonInteractive",
-                "-ExecutionPolicy",
-                "Bypass",
-                .. PowerShellCommand.CreateEncodedArguments(loader)
-            ]);
+        return ["-NoProfile", "-NonInteractive", "-ExecutionPolicy", "Bypass", .. PowerShellCommand.CreateEncodedArguments(loader)];
     }
 
     private static WinPeUsbDiskCandidate? ParseUsbCandidate(JsonElement element)

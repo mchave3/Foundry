@@ -153,8 +153,10 @@ public sealed class WinReBootImagePreparationServiceTests
         }
     }
 
-    [Fact]
-    public async Task ReplaceBootWimAsync_WhenCachedSourceIsValid_ReplacesBootWimAndStagesDependencies()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public async Task ReplaceBootWimAsync_RequiresCompleteImageMetadataBeforeExporting(bool metadataTruncated)
     {
         string root = Path.Combine(Path.GetTempPath(), $"foundry-winre-replace-{Guid.NewGuid():N}");
         string workingPath = Path.Combine(root, "workspace");
@@ -171,7 +173,7 @@ public sealed class WinReBootImagePreparationServiceTests
         string cachedSourceHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes("cached source")));
         string catalogXml = CreateCatalogXml(cachedSourceHash);
 
-        var runner = new FakeWinPeProcessRunner();
+        var runner = new FakeWinPeProcessRunner { MetadataTruncated = metadataTruncated };
         var service = new WinReBootImagePreparationService(
             runner,
             new HttpClient(new StaticCatalogHandler(catalogXml)));
@@ -195,6 +197,14 @@ public sealed class WinReBootImagePreparationServiceTests
                     CacheDirectoryPath = cachePath
                 },
                 CancellationToken.None);
+
+            if (metadataTruncated)
+            {
+                Assert.False(result.IsSuccess);
+                Assert.Equal("original", await File.ReadAllTextAsync(bootWimPath, TestContext.Current.CancellationToken));
+                Assert.DoesNotContain(runner.Executions, execution => execution.Arguments.Contains("/Export-Image", StringComparison.Ordinal));
+                return;
+            }
 
             Assert.True(result.IsSuccess, result.Error?.Details);
             Assert.Equal("winre", await File.ReadAllTextAsync(bootWimPath));
@@ -244,6 +254,7 @@ public sealed class WinReBootImagePreparationServiceTests
 
     private sealed class FakeWinPeProcessRunner : IWinPeProcessRunner
     {
+        public bool MetadataTruncated { get; init; }
         public List<WinPeProcessExecution> Executions { get; } = [];
 
         public Task<WinPeProcessExecution> RunAsync(
@@ -251,18 +262,32 @@ public sealed class WinReBootImagePreparationServiceTests
             string arguments,
             string workingDirectory,
             CancellationToken cancellationToken,
-            IReadOnlyDictionary<string, string>? environmentOverrides = null)
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
         {
+            throw new NotSupportedException("Executable calls must pass argument tokens.");
+        }
+
+        public Task<WinPeProcessExecution> RunAsync(
+            string fileName,
+            IReadOnlyList<string> argumentList,
+            string workingDirectory,
+            CancellationToken cancellationToken,
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
+        {
+            string arguments = string.Join(' ', argumentList);
             var execution = new WinPeProcessExecution
             {
                 FileName = fileName,
                 Arguments = arguments,
                 WorkingDirectory = workingDirectory,
-                StandardOutput = CreateOutput(arguments)
+                StandardOutput = CreateOutput(arguments),
+                StandardOutputTruncated = MetadataTruncated && argumentList.Contains("/Get-ImageInfo")
             };
 
             Executions.Add(execution);
-            HandleSideEffects(arguments);
+            HandleSideEffects(argumentList);
             return Task.FromResult(execution);
         }
 
@@ -270,7 +295,8 @@ public sealed class WinReBootImagePreparationServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }
@@ -279,7 +305,8 @@ public sealed class WinReBootImagePreparationServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }
@@ -299,9 +326,9 @@ public sealed class WinReBootImagePreparationServiceTests
                    """;
         }
 
-        private static void HandleSideEffects(string arguments)
+        private static void HandleSideEffects(IReadOnlyList<string> arguments)
         {
-            if (arguments.Contains("/Export-Image", StringComparison.OrdinalIgnoreCase))
+            if (arguments.Contains("/Export-Image", StringComparer.OrdinalIgnoreCase))
             {
                 string destination = ExtractArgumentPath(arguments, "/DestinationImageFile:");
                 Directory.CreateDirectory(Path.GetDirectoryName(destination)!);
@@ -309,7 +336,7 @@ public sealed class WinReBootImagePreparationServiceTests
                 return;
             }
 
-            if (arguments.Contains("/Mount-Image", StringComparison.OrdinalIgnoreCase))
+            if (arguments.Contains("/Mount-Image", StringComparer.OrdinalIgnoreCase))
             {
                 string mountDirectory = ExtractArgumentPath(arguments, "/MountDir:");
                 string recoveryPath = Path.Combine(mountDirectory, "Windows", "System32", "Recovery");
@@ -322,20 +349,7 @@ public sealed class WinReBootImagePreparationServiceTests
             }
         }
 
-        private static string ExtractArgumentPath(string arguments, string name)
-        {
-            int start = arguments.IndexOf(name, StringComparison.OrdinalIgnoreCase);
-            Assert.True(start >= 0, $"Argument '{name}' was not found in '{arguments}'.");
-            start += name.Length;
-
-            if (arguments[start] == '"')
-            {
-                int end = arguments.IndexOf('"', start + 1);
-                return arguments[(start + 1)..end];
-            }
-
-            int nextSpace = arguments.IndexOf(' ', start);
-            return nextSpace < 0 ? arguments[start..] : arguments[start..nextSpace];
-        }
+        private static string ExtractArgumentPath(IReadOnlyList<string> arguments, string name) =>
+            Assert.Single(arguments, argument => argument.StartsWith(name, StringComparison.OrdinalIgnoreCase))[name.Length..];
     }
 }

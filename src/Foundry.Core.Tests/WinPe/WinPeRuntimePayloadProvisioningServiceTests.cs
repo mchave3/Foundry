@@ -273,9 +273,22 @@ public sealed class WinPeRuntimePayloadProvisioningServiceTests
             string arguments,
             string workingDirectory,
             CancellationToken cancellationToken,
-            IReadOnlyDictionary<string, string>? environmentOverrides = null)
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
         {
-            string outputDirectory = ExtractOutputDirectory(arguments);
+            throw new NotSupportedException("Executable calls must pass argument tokens.");
+        }
+
+        public Task<WinPeProcessExecution> RunAsync(
+            string fileName,
+            IReadOnlyList<string> argumentList,
+            string workingDirectory,
+            CancellationToken cancellationToken,
+            IReadOnlyDictionary<string, string>? environmentOverrides = null,
+            TimeSpan? executionTimeout = null)
+        {
+            string arguments = string.Join(' ', argumentList);
+            string outputDirectory = argumentList[argumentList.ToList().IndexOf("-o") + 1];
             Directory.CreateDirectory(outputDirectory);
             string executableName = arguments.Contains("Foundry.Connect.csproj", StringComparison.OrdinalIgnoreCase)
                 ? "Foundry.Connect.exe"
@@ -297,7 +310,8 @@ public sealed class WinPeRuntimePayloadProvisioningServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }
@@ -306,26 +320,12 @@ public sealed class WinPeRuntimePayloadProvisioningServiceTests
             string scriptPath,
             string scriptArguments,
             string workingDirectory,
-            CancellationToken cancellationToken)
+            CancellationToken cancellationToken,
+            TimeSpan? executionTimeout = null)
         {
             throw new NotSupportedException();
         }
 
-        private static string ExtractOutputDirectory(string arguments)
-        {
-            int marker = arguments.IndexOf("-o ", StringComparison.Ordinal);
-            Assert.True(marker >= 0, arguments);
-            string remaining = arguments[(marker + 3)..].Trim();
-            if (remaining.StartsWith('"'))
-            {
-                int endQuote = remaining.IndexOf('"', 1);
-                Assert.True(endQuote > 1, remaining);
-                return remaining[1..endQuote];
-            }
-
-            int nextSpace = remaining.IndexOf(' ', StringComparison.Ordinal);
-            return nextSpace < 0 ? remaining : remaining[..nextSpace];
-        }
     }
 
     private sealed class TempRuntimeWorkspace : IDisposable

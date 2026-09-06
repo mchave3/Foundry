@@ -50,6 +50,9 @@ public sealed class WinPeBuildService : IWinPeBuildService
 
         try
         {
+            string arguments = $"{options.Architecture.ToCopypeArchitecture()} {WinPeProcessRunner.Quote(workingDirectory)}";
+            WinPeProcessRunner.ValidateCmdScript(tools.CopypePath, arguments);
+
             if (Directory.Exists(workingDirectory) && options.CleanExistingWorkingDirectory)
             {
                 // The workspace is owned by this build stage, so stale ADK output is removed before Copype runs.
@@ -60,7 +63,7 @@ public sealed class WinPeBuildService : IWinPeBuildService
 
             WinPeProcessExecution copyPeResult = await _processRunner.RunCmdScriptAsync(
                 tools.CopypePath,
-                $"{options.Architecture.ToCopypeArchitecture()} {WinPeProcessRunner.Quote(workingDirectory)}",
+                arguments,
                 options.OutputDirectoryPath,
                 cancellationToken).ConfigureAwait(false);
 
@@ -114,9 +117,13 @@ public sealed class WinPeBuildService : IWinPeBuildService
                 "Unexpected failure while creating the WinPE workspace.",
                 ex.ToString(),
                 stage: "Build WinPE workspace",
-                failureReason: ex is UnauthorizedAccessException
-                    ? WinPeFailureReasons.AccessDenied
-                    : WinPeFailureReasons.ProcessStartFailed,
+                failureKind: ex is TimeoutException ? WinPeFailureKinds.Process : null,
+                failureReason: ex switch
+                {
+                    TimeoutException => WinPeFailureReasons.Timeout,
+                    UnauthorizedAccessException => WinPeFailureReasons.AccessDenied,
+                    _ => WinPeFailureReasons.ProcessStartFailed
+                },
                 toolName: "copype",
                 errorSummary: ex.Message,
                 exception: ex);

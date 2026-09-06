@@ -327,7 +327,7 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
             WinPeProcessExecution exportResult = await WinPeDismProcessRunner.RunAsync(
                 _processRunner,
                 options.Tools.DismPath,
-                $"/Export-Image /SourceImageFile:{WinPeProcessRunner.Quote(sourcePathResult.Value!)} /SourceIndex:{indexResult.Value} /DestinationImageFile:{WinPeProcessRunner.Quote(installWimPath)} /Compress:max /CheckIntegrity",
+                ["/Export-Image", $"/SourceImageFile:{sourcePathResult.Value!}", $"/SourceIndex:{indexResult.Value}", $"/DestinationImageFile:{installWimPath}", "/Compress:max", "/CheckIntegrity"],
                 options.Artifact.WorkingDirectoryPath,
                 "Exporting Windows image with DISM.",
                 CreateDismProgress(options.Progress, 19, "Exporting Windows image for WinRE extraction."),
@@ -569,11 +569,12 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
         WinPeProcessExecution imageInfoResult = await WinPeDismProcessRunner.RunAsync(
             _processRunner,
             dismPath,
-            $"/English /Get-ImageInfo /ImageFile:{WinPeProcessRunner.Quote(sourceImagePath)}",
+            ["/English", "/Get-ImageInfo", $"/ImageFile:{sourceImagePath}"],
             workingDirectory,
             "Resolving WinRE image index with DISM.",
             dismProgress,
-            cancellationToken).ConfigureAwait(false);
+            cancellationToken,
+            executionTimeout: TimeSpan.FromMinutes(2)).ConfigureAwait(false);
 
         if (!imageInfoResult.IsSuccess)
         {
@@ -583,6 +584,7 @@ public sealed partial class WinReBootImagePreparationService : IWinReBootImagePr
                 imageInfoResult.ToDiagnosticText());
         }
 
+        imageInfoResult.EnsureCompleteOutput();
         return ResolveImageIndexFromOutput(imageInfoResult.StandardOutput, requestedEdition);
     }
 

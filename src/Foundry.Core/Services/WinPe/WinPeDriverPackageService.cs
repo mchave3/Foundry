@@ -342,7 +342,7 @@ public sealed class WinPeDriverPackageService : IWinPeDriverPackageService
 
         WinPeProcessExecution extractionResult = await _processRunner.RunAsync(
             sevenZipExecutablePathResult.Value!,
-            $"x -y -o{WinPeProcessRunner.Quote(destinationPath)} {WinPeProcessRunner.Quote(packagePath)}",
+            ["x", "-y", $"-o{destinationPath}", packagePath],
             destinationPath,
             cancellationToken).ConfigureAwait(false);
 
