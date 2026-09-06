@@ -12,5 +12,6 @@ public sealed record DeployConfigurationLoadResult
     public bool Exists { get; init; }
     public FoundryDeployConfigurationDocument? Document { get; init; }
     public bool IsBootMediaUpdateRecommended { get; init; }
+    public bool IsUnsupportedSchemaVersion { get; init; }
     public string? FailureMessage { get; init; }
 }

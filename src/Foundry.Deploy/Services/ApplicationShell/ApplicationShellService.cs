@@ -57,6 +57,16 @@ public sealed class ApplicationShellService : IApplicationShellService
         return result == MessageBoxResult.Yes;
     }
 
+    public void ShowBlockingError(string title, string message)
+    {
+        _ = MessageBox.Show(
+            message,
+            title,
+            MessageBoxButton.OK,
+            MessageBoxImage.Error,
+            MessageBoxResult.OK);
+    }
+
     public void Shutdown()
     {
         Application.Current?.Shutdown();

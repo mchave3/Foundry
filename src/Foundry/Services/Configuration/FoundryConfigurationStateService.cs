@@ -6,6 +6,7 @@ using Foundry.Core.Models.Configuration;
 using Foundry.Core.Models.Configuration.Deploy;
 using Foundry.Core.Services.Configuration;
 using Foundry.Core.Services.WinPe;
+using Foundry.Utilities.IO;
 using Foundry.Services.Autopilot;
 using Foundry.Telemetry;
 using Foundry.Utilities.Security;
@@ -34,6 +35,7 @@ internal sealed class FoundryConfigurationStateService : IFoundryConfigurationSt
     private readonly IAutopilotHardwareHashSessionState autopilotHardwareHashSessionState;
     private readonly AppSettingsService appSettingsService;
     private readonly ILogger logger;
+    private readonly object stateLock = new();
     private UnattendSettings? validatedUnattendSettings;
     private IReadOnlyList<UnattendSourceValidation> unattendSourceValidations = [];
     private readonly List<(UnattendSettings Settings, Task<IReadOnlyList<UnattendSourceValidation>> Read)> unattendSourceReads = [];
@@ -59,8 +61,9 @@ internal sealed class FoundryConfigurationStateService : IFoundryConfigurationSt
         this.autopilotHardwareHashSessionState = autopilotHardwareHashSessionState;
         this.appSettingsService = appSettingsService;
         this.logger = logger.ForContext<FoundryConfigurationStateService>();
-        Current = SanitizeForPersistence(Load());
-        Save();
+        FoundryConfigurationDocument initial = SanitizeForPersistence(Load());
+        Save(initial);
+        Current = initial;
     }
 
     /// <inheritdoc />
@@ -291,74 +294,63 @@ internal sealed class FoundryConfigurationStateService : IFoundryConfigurationSt
     public void UpdateGeneral(GeneralSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
-        Current = Current with { General = SanitizeGeneralForPersistence(settings) };
-        Save();
-        StateChanged?.Invoke(this, EventArgs.Empty);
+        UpdateAndPersist(current => current with { General = SanitizeGeneralForPersistence(settings) });
     }
 
     /// <inheritdoc />
     public void UpdateLocalization(LocalizationSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
-        Current = Current with { Localization = settings };
-        Save();
-        StateChanged?.Invoke(this, EventArgs.Empty);
+        UpdateAndPersist(current => current with { Localization = settings });
     }
 
     /// <inheritdoc />
     public void UpdateOperatingSystemSelection(OperatingSystemSelectionSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
-        Current = Current with { OperatingSystemSelection = OperatingSystemSelectionSettingsNormalizer.Normalize(settings) };
-        Save();
-        StateChanged?.Invoke(this, EventArgs.Empty);
+        UpdateAndPersist(current => current with
+        {
+            OperatingSystemSelection = OperatingSystemSelectionSettingsNormalizer.Normalize(settings)
+        });
     }
 
     /// <inheritdoc />
     public void UpdateNetwork(NetworkSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
-        networkSecretStateService.Update(settings);
-        Current = Current with { Network = NetworkConfigurationValidator.SanitizeForPersistence(settings) };
-        Save();
-        StateChanged?.Invoke(this, EventArgs.Empty);
+        UpdateAndPersist(
+            current => current with { Network = NetworkConfigurationValidator.SanitizeForPersistence(settings) },
+            () => networkSecretStateService.Update(settings));
     }
 
     /// <inheritdoc />
     public void UpdateCustomization(CustomizationSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
-        oobeAccountSecretStateService.Update(settings.Oobe);
-        Current = Current with { Customization = SanitizeCustomizationForPersistence(settings) };
-        Save();
-        StateChanged?.Invoke(this, EventArgs.Empty);
+        UpdateAndPersist(
+            current => current with { Customization = SanitizeCustomizationForPersistence(settings) },
+            () => oobeAccountSecretStateService.Update(settings.Oobe));
     }
 
     /// <inheritdoc />
     public void UpdateAutopilot(AutopilotSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
-        Current = Current with { Autopilot = SanitizeAutopilotForPersistence(settings) };
-        Save();
-        StateChanged?.Invoke(this, EventArgs.Empty);
+        UpdateAndPersist(current => current with { Autopilot = SanitizeAutopilotForPersistence(settings) });
     }
 
     /// <inheritdoc />
     public void UpdateUnattend(UnattendSettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
-        Current = Current with { Unattend = settings };
-        Save();
-        StateChanged?.Invoke(this, EventArgs.Empty);
+        UpdateAndPersist(current => current with { Unattend = settings });
     }
 
     /// <inheritdoc />
     public void UpdateTelemetry(TelemetrySettings settings)
     {
         ArgumentNullException.ThrowIfNull(settings);
-        Current = Current with { Telemetry = settings };
-        Save();
-        StateChanged?.Invoke(this, EventArgs.Empty);
+        UpdateAndPersist(current => current with { Telemetry = settings });
     }
 
     /// <inheritdoc />
@@ -411,7 +403,7 @@ internal sealed class FoundryConfigurationStateService : IFoundryConfigurationSt
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or System.Text.Json.JsonException or ArgumentException)
         {
-            string backupPath = Constants.FoundryConfigurationStatePath + ".invalid";
+            string backupPath = CreateInvalidBackupPath(Constants.FoundryConfigurationStatePath);
             TryMoveInvalidState(backupPath, ex);
             return CreateDefaultDocument();
         }
@@ -514,14 +506,28 @@ internal sealed class FoundryConfigurationStateService : IFoundryConfigurationSt
         };
     }
 
-    private void Save()
+    private void UpdateAndPersist(
+        Func<FoundryConfigurationDocument, FoundryConfigurationDocument> update,
+        Action? afterPersistence = null)
+    {
+        lock (stateLock)
+        {
+            FoundryConfigurationDocument next = SanitizeForPersistence(update(Current));
+            Save(next);
+            Current = next;
+            afterPersistence?.Invoke();
+        }
+
+        StateChanged?.Invoke(this, EventArgs.Empty);
+    }
+
+    private void Save(FoundryConfigurationDocument document)
     {
         try
         {
             Directory.CreateDirectory(Constants.ConfigurationWorkspaceDirectoryPath);
-            FoundryConfigurationDocument document = SanitizeForPersistence(Current);
             string json = foundryConfigurationService.Serialize(document);
-            File.WriteAllText(Constants.FoundryConfigurationStatePath, json);
+            AtomicFile.WriteAllText(Constants.FoundryConfigurationStatePath, json);
         }
         catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
         {
@@ -532,13 +538,14 @@ internal sealed class FoundryConfigurationStateService : IFoundryConfigurationSt
 
     private static FoundryConfigurationDocument SanitizeForPersistence(FoundryConfigurationDocument document)
     {
-        return document with
+        FoundryConfigurationDocument normalized = FoundryConfigurationNormalizer.Normalize(document);
+        return normalized with
         {
-            General = SanitizeGeneralForPersistence(document.General),
-            Network = NetworkConfigurationValidator.SanitizeForPersistence(document.Network),
-            OperatingSystemSelection = OperatingSystemSelectionSettingsNormalizer.Normalize(document.OperatingSystemSelection),
-            Customization = SanitizeCustomizationForPersistence(document.Customization),
-            Autopilot = SanitizeAutopilotForPersistence(document.Autopilot)
+            General = SanitizeGeneralForPersistence(normalized.General),
+            Network = NetworkConfigurationValidator.SanitizeForPersistence(normalized.Network),
+            OperatingSystemSelection = OperatingSystemSelectionSettingsNormalizer.Normalize(normalized.OperatingSystemSelection),
+            Customization = SanitizeCustomizationForPersistence(normalized.Customization),
+            Autopilot = SanitizeAutopilotForPersistence(normalized.Autopilot)
         };
     }
 
@@ -756,11 +763,6 @@ internal sealed class FoundryConfigurationStateService : IFoundryConfigurationSt
     {
         try
         {
-            if (File.Exists(backupPath))
-            {
-                File.Delete(backupPath);
-            }
-
             File.Move(Constants.FoundryConfigurationStatePath, backupPath);
             logger.Warning(
                 originalException,
@@ -778,5 +780,13 @@ internal sealed class FoundryConfigurationStateService : IFoundryConfigurationSt
                 originalException.Message);
             throw;
         }
+    }
+
+    private static string CreateInvalidBackupPath(string sourcePath)
+    {
+        string firstBackupPath = sourcePath + ".invalid";
+        return !File.Exists(firstBackupPath)
+            ? firstBackupPath
+            : $"{firstBackupPath}.{DateTime.UtcNow:yyyyMMddHHmmssfff}.{Guid.NewGuid():N}";
     }
 }

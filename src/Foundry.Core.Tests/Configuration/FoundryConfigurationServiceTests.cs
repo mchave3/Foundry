@@ -419,6 +419,59 @@ public sealed class FoundryConfigurationServiceTests
     }
 
     [Fact]
+    public void Deserialize_WhenSchemaIsNewerThanSupported_RejectsUnknownSemantics()
+    {
+        var service = new FoundryConfigurationService();
+
+        UnsupportedConfigurationVersionException exception = Assert.Throws<UnsupportedConfigurationVersionException>(() => service.Deserialize("""
+            {
+              "schemaVersion": 15,
+              "autopilot": {
+                "provisioningMode": {
+                  "futureMode": true
+                }
+              },
+              "futurePolicy": {
+                "requiresSecretMaterial": true
+              }
+            }
+            """));
+
+        Assert.Contains("Foundry", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("15", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("14", exception.Message, StringComparison.Ordinal);
+    }
+
+    [Fact]
+    public void Deserialize_WhenNestedObjectsAreExplicitlyNull_ReturnsSafeDefaults()
+    {
+        var service = new FoundryConfigurationService();
+
+        FoundryConfigurationDocument document = service.Deserialize("""
+            {
+              "schemaVersion": 14,
+              "general": null,
+              "network": null,
+              "operatingSystemSelection": null,
+              "localization": null,
+              "customization": null,
+              "unattend": null,
+              "autopilot": null,
+              "telemetry": null
+            }
+            """);
+
+        Assert.NotNull(document.General);
+        Assert.NotNull(document.Network);
+        Assert.NotNull(document.OperatingSystemSelection);
+        Assert.NotNull(document.Localization);
+        Assert.NotNull(document.Customization);
+        Assert.NotNull(document.Unattend);
+        Assert.NotNull(document.Autopilot);
+        Assert.NotNull(document.Telemetry);
+    }
+
+    [Fact]
     public void Deserialize_WhenAutopilotProvisioningModeIsMissing_DefaultsToJsonProfile()
     {
         var service = new FoundryConfigurationService();

@@ -121,6 +121,40 @@ public sealed class ConnectConfigurationServiceTests
     }
 
     [Fact]
+    public void Load_WhenSchemaIsNewerThanSupported_FailsBeforeReadingSecrets()
+    {
+        using var environmentScope = new EnvironmentVariableScope("FOUNDRY_CONNECT_CONFIG", null);
+        using var tempDirectory = new TemporaryDirectory();
+        const string futureJson = """
+            {
+              "schemaVersion": 5,
+              "wifi": {
+                "enterpriseAuthenticationMode": {
+                  "futureMode": true
+                },
+                "passphraseSecret": {
+                  "kind": "future-secret-format"
+                }
+              }
+            }
+            """;
+        string configurationPath = CreateJsonFile(tempDirectory.Path, "future.json", futureJson);
+        byte[] originalBytes = File.ReadAllBytes(configurationPath);
+        var service = new ConnectConfigurationService(["--config", configurationPath], NullLogger<ConnectConfigurationService>.Instance);
+
+        FoundryConnectConfigurationException exception = Assert.Throws<FoundryConnectConfigurationException>(service.Load);
+
+        UnsupportedConfigurationVersionException unsupported = Assert.IsType<UnsupportedConfigurationVersionException>(exception.InnerException);
+        Assert.Contains("Foundry.Connect", exception.Message, StringComparison.Ordinal);
+        Assert.Contains("Foundry.Connect", unsupported.Message, StringComparison.Ordinal);
+        Assert.Contains("5", unsupported.Message, StringComparison.Ordinal);
+        Assert.Contains("4", unsupported.Message, StringComparison.Ordinal);
+        Assert.Contains(configurationPath, exception.Message, StringComparison.Ordinal);
+        Assert.False(service.IsLoadedFromDisk);
+        Assert.Equal(originalBytes, File.ReadAllBytes(configurationPath));
+    }
+
+    [Fact]
     public void Load_WhenConfigurationContainsTelemetry_PreservesTelemetrySettings()
     {
         using var environmentScope = new EnvironmentVariableScope("FOUNDRY_CONNECT_CONFIG", null);
@@ -175,7 +209,7 @@ public sealed class ConnectConfigurationServiceTests
     public void Load_WhenEnvironmentVariableIsSet_TakesPrecedenceOverCommandLineArgument()
     {
         using var tempDirectory = new TemporaryDirectory();
-        string environmentConfigurationPath = CreateJsonFile(tempDirectory.Path, "environment.json", """{ "schemaVersion": 5 }""");
+        string environmentConfigurationPath = CreateJsonFile(tempDirectory.Path, "environment.json", """{ "schemaVersion": 4 }""");
         string commandLineConfigurationPath = CreateJsonFile(tempDirectory.Path, "argument.json", """{ "schemaVersion": 2 }""");
         using var environmentScope = new EnvironmentVariableScope("FOUNDRY_CONNECT_CONFIG", environmentConfigurationPath);
 
@@ -185,7 +219,7 @@ public sealed class ConnectConfigurationServiceTests
 
         Assert.True(service.IsLoadedFromDisk);
         Assert.Equal(System.IO.Path.GetFullPath(environmentConfigurationPath), service.ConfigurationPath);
-        Assert.Equal(5, configuration.SchemaVersion);
+        Assert.Equal(4, configuration.SchemaVersion);
     }
 
     [Fact]

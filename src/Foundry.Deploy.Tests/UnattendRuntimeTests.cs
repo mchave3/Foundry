@@ -387,6 +387,7 @@ public sealed class UnattendRuntimeTests
     {
         public int Confirmations { get; private set; }
         public void ShowAbout() { }
+        public void ShowBlockingError(string title, string message) { }
         public void Shutdown() { }
         public bool ConfirmWarning(string title, string message) { Confirmations++; return true; }
     }

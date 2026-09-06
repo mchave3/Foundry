@@ -97,6 +97,40 @@ public sealed class DeployConfigurationServiceTests
     }
 
     [Fact]
+    public void LoadOptional_WhenSchemaIsNewerThanSupported_ReturnsBlockingFailureBeforeValidation()
+    {
+        using var tempDirectory = new TemporaryDirectory();
+        const string futureJson = """
+            {
+              "schemaVersion": 13,
+              "unattend": null,
+              "autopilot": {
+                "provisioningMode": {
+                  "futureMode": true
+                }
+              },
+              "futurePolicy": {
+                "requiresUnknownDeploymentStep": true
+              }
+            }
+            """;
+        string configurationPath = CreateJsonFile(tempDirectory.Path, "foundry.deploy.config.json", futureJson);
+        byte[] originalBytes = File.ReadAllBytes(configurationPath);
+        var service = new DeployConfigurationService(
+            NullLogger<DeployConfigurationService>.Instance,
+            configurationPath);
+
+        DeployConfigurationLoadResult result = service.LoadOptional();
+
+        Assert.Null(result.Document);
+        Assert.Contains("Foundry.Deploy", result.FailureMessage, StringComparison.Ordinal);
+        Assert.Contains("13", result.FailureMessage, StringComparison.Ordinal);
+        Assert.Contains("12", result.FailureMessage, StringComparison.Ordinal);
+        Assert.True(result.IsUnsupportedSchemaVersion);
+        Assert.Equal(originalBytes, File.ReadAllBytes(configurationPath));
+    }
+
+    [Fact]
     public void LoadOptional_WhenCompletionSettingsAreMissing_UsesAutomaticTenSecondReboot()
     {
         using var tempDirectory = new TemporaryDirectory();

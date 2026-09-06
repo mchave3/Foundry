@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using Foundry.Deploy.Models.Configuration;
+using Foundry.Deploy.Services.ApplicationShell;
 using Foundry.Deploy.Services.Configuration;
 
 namespace Foundry.Deploy.Services.Security;
@@ -11,13 +12,26 @@ public sealed class DeploymentAccessGate(
     IDeployConfigurationService configurationService,
     IDeploymentProtectionUnlockService unlockService,
     IDeploymentPasswordDialogService passwordDialogService,
-    IDeploymentAccessRetryDelay retryDelay) : IDeploymentAccessGate
+    IDeploymentAccessRetryDelay retryDelay,
+    IApplicationShellService? applicationShellService = null) : IDeploymentAccessGate
 {
     public async Task<bool> AuthorizeAsync(CancellationToken cancellationToken = default)
     {
         DeployConfigurationLoadResult loadResult = configurationService.LoadOptional();
         if (loadResult.Exists && loadResult.Document is null)
         {
+            if (loadResult.IsUnsupportedSchemaVersion)
+            {
+                string failureMessage = string.IsNullOrWhiteSpace(loadResult.FailureMessage)
+                    ? "The deployment configuration requires a newer version of Foundry."
+                    : loadResult.FailureMessage;
+                applicationShellService?.ShowBlockingError(
+                    "Foundry Deploy configuration update required",
+                    $"{failureMessage}{Environment.NewLine}{Environment.NewLine}" +
+                    $"Update Foundry before using this configuration. The configuration file was not changed:{Environment.NewLine}" +
+                    loadResult.ConfigurationPath);
+            }
+
             return false;
         }
 

@@ -18,10 +18,24 @@ public sealed class FoundryConfigurationService : IFoundryConfigurationService
     public FoundryConfigurationDocument Deserialize(string json)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(json);
+        ConfigurationVersionGuard.ThrowIfUnsupported(
+            json,
+            "Foundry",
+            ConfigurationSchemaVersions.FoundryCurrent,
+            ConfigurationJsonDefaults.SerializerOptions);
         FoundryConfigurationDocument document = JsonSerializer.Deserialize<FoundryConfigurationDocument>(
                 json,
                 ConfigurationJsonDefaults.SerializerOptions)
             ?? new FoundryConfigurationDocument();
-        return FoundryConfigurationMigration.ApplySchemaMigrations(document);
+        if (document.SchemaVersion > ConfigurationSchemaVersions.FoundryCurrent)
+        {
+            throw new UnsupportedConfigurationVersionException(
+                "Foundry",
+                document.SchemaVersion,
+                ConfigurationSchemaVersions.FoundryCurrent);
+        }
+
+        FoundryConfigurationDocument normalized = FoundryConfigurationNormalizer.Normalize(document);
+        return FoundryConfigurationMigration.ApplySchemaMigrations(normalized);
     }
 }

@@ -10,5 +10,7 @@ public interface IApplicationShellService
 
     bool ConfirmWarning(string title, string message);
 
+    void ShowBlockingError(string title, string message);
+
     void Shutdown();
 }

@@ -375,6 +375,10 @@ public sealed class DeploymentLaunchPreparationServiceTests
             return ConfirmationResult;
         }
 
+        public void ShowBlockingError(string title, string message)
+        {
+        }
+
         public void Shutdown()
         {
         }
