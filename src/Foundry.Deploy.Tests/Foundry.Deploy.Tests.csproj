@@ -8,6 +8,8 @@
     <ApplicationIcon></ApplicationIcon>
     <PackageIcon></PackageIcon>
     <RuntimeIdentifiers></RuntimeIdentifiers>
+    <!-- Keep the referenced test child's configuration when it is not listed in the solution. -->
+    <ShouldUnsetParentConfigurationAndPlatform>false</ShouldUnsetParentConfigurationAndPlatform>
     <GenerateDocumentationFile>false</GenerateDocumentationFile>
   </PropertyGroup>
 
