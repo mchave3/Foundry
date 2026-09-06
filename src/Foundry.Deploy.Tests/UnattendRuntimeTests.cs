@@ -2,6 +2,7 @@
 // Licensed under the MIT License.
 // See the LICENSE file in the project root for more information.
 
+using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
@@ -39,6 +40,62 @@ public sealed class UnattendRuntimeTests
         Assert.Equal(fixture.Content, File.ReadAllBytes(Path.Combine(fixture.Target, "Windows", "Panther", "unattend.xml")));
         snapshot.Dispose();
         await Assert.ThrowsAsync<InvalidOperationException>(() => snapshot.StageAsync(fixture.Target, TestContext.Current.CancellationToken));
+    }
+
+    [Fact]
+    public async Task Snapshot_WhenAnswerFileExists_ReplacesItWithExactValidatedBytes()
+    {
+        using var fixture = new Fixture();
+        using UnattendSnapshot snapshot = fixture.Service.Read(fixture.Selection, "x64", false, AutopilotProvisioningMode.JsonProfile);
+        string directory = Path.Combine(fixture.Target, "Windows", "Panther");
+        Directory.CreateDirectory(directory);
+        string path = Path.Combine(directory, "unattend.xml");
+        File.WriteAllText(path, "<existing-answer-file />");
+
+        await snapshot.StageAsync(fixture.Target, TestContext.Current.CancellationToken);
+
+        Assert.Equal(fixture.Content, File.ReadAllBytes(path));
+        Assert.Empty(Directory.EnumerateFiles(directory, ".foundry-unattend-*.tmp"));
+    }
+
+    [Fact]
+    public async Task Snapshot_WhenCancelled_PreservesExistingAnswerFileWithoutTemporaryPlaintext()
+    {
+        using var fixture = new Fixture();
+        using UnattendSnapshot snapshot = fixture.Service.Read(fixture.Selection, "x64", false, AutopilotProvisioningMode.JsonProfile);
+        string directory = Path.Combine(fixture.Target, "Windows", "Panther");
+        Directory.CreateDirectory(directory);
+        string path = Path.Combine(directory, "unattend.xml");
+        byte[] existingContent = Encoding.UTF8.GetBytes("<existing-answer-file />");
+        File.WriteAllBytes(path, existingContent);
+        using var cancellation = CancellationTokenSource.CreateLinkedTokenSource(TestContext.Current.CancellationToken);
+        cancellation.Cancel();
+
+        await Assert.ThrowsAnyAsync<OperationCanceledException>(() => snapshot.StageAsync(fixture.Target, cancellation.Token));
+
+        Assert.Equal(existingContent, File.ReadAllBytes(path));
+        Assert.Empty(Directory.EnumerateFiles(directory, ".foundry-unattend-*.tmp"));
+    }
+
+    [Fact]
+    public async Task Snapshot_WhenPublicationFails_PreservesExistingAnswerFileAndRemovesTemporaryPlaintext()
+    {
+        using var fixture = new Fixture();
+        using UnattendSnapshot snapshot = fixture.Service.Read(fixture.Selection, "x64", false, AutopilotProvisioningMode.JsonProfile);
+        string directory = Path.Combine(fixture.Target, "Windows", "Panther");
+        Directory.CreateDirectory(directory);
+        string path = Path.Combine(directory, "unattend.xml");
+        byte[] existingContent = Encoding.UTF8.GetBytes("<existing-answer-file />");
+        File.WriteAllBytes(path, existingContent);
+
+        using (var destinationLock = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.Read))
+        {
+            Exception? failure = await Record.ExceptionAsync(() => snapshot.StageAsync(fixture.Target, TestContext.Current.CancellationToken));
+            Assert.True(failure is IOException or UnauthorizedAccessException);
+        }
+
+        Assert.Equal(existingContent, File.ReadAllBytes(path));
+        Assert.Empty(Directory.EnumerateFiles(directory, ".foundry-unattend-*.tmp"));
     }
 
     [Theory]
@@ -98,6 +155,50 @@ public sealed class UnattendRuntimeTests
         preparation.SelectedUnattendOption = preparation.UnattendOptions[1];
         preparation.SelectedUnattendOption = preparation.UnattendOptions[0];
         Assert.Equal("NATIVE-PC", preparation.EffectiveComputerName);
+    }
+
+    [Theory]
+    [InlineData("native")]
+    [InlineData("custom")]
+    [InlineData("missing")]
+    public void Selection_WhenLanguageChanges_PreservesChoiceAndMissingDefaultError(string mode)
+    {
+        CultureInfo originalCulture = CultureInfo.CurrentCulture;
+        CultureInfo originalUiCulture = CultureInfo.CurrentUICulture;
+        try
+        {
+            using var fixture = new Fixture();
+            var localization = new LocalizationService();
+            localization.SetCulture(CultureInfo.GetCultureInfo("en-US"));
+            using var preparation = new DeploymentPreparationViewModel(localization, false, fixture.Service);
+            preparation.ApplyUnattendConfiguration(new CoreSettings
+            {
+                IsEnabled = true,
+                DefaultFileId = mode == "native" ? null : mode == "custom" ? fixture.Selection.File.Id : "missing",
+                Files = [fixture.Selection.File]
+            }, fixture.ConfigurationPath);
+            UnattendSelection? selection = preparation.SelectedUnattend;
+
+            localization.SetCulture(CultureInfo.GetCultureInfo("fr-FR"));
+
+            Assert.Same(selection, preparation.SelectedUnattend);
+            Assert.Equal(mode != "missing", preparation.IsUnattendSelectionValid);
+            Assert.Equal(localization.GetString("Unattend.Native"), preparation.UnattendOptions[0].DisplayName);
+            if (mode == "native")
+                Assert.Same(preparation.UnattendOptions[0], preparation.SelectedUnattendOption);
+            if (mode == "custom")
+                Assert.Equal(localization.GetString("Unattend.HookCompatibility"), preparation.UnattendWarning);
+            if (mode == "missing")
+            {
+                Assert.Null(preparation.SelectedUnattendOption);
+                Assert.Equal(localization.GetString("Unattend.MissingDefault"), preparation.UnattendValidationMessage);
+            }
+        }
+        finally
+        {
+            CultureInfo.CurrentCulture = originalCulture;
+            CultureInfo.CurrentUICulture = originalUiCulture;
+        }
     }
 
     [Fact]

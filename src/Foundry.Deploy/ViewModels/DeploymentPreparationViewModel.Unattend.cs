@@ -58,11 +58,11 @@ public sealed partial class DeploymentPreparationViewModel
             SelectedUnattendOption = settings.DefaultFileId is null ? UnattendOptions[0] :
                 UnattendOptions.FirstOrDefault(option => string.Equals(option.Selection?.File.Id, settings.DefaultFileId, StringComparison.OrdinalIgnoreCase));
             if (SelectedUnattendOption is null)
-                _unattendCatalogError = GetString("Unattend.MissingDefault");
+                _unattendCatalogError = "Unattend.MissingDefault";
         }
         catch (Exception ex) when (ex is InvalidDataException or IOException or ArgumentException or InvalidOperationException)
         {
-            _unattendCatalogError = GetString("Unattend.Invalid");
+            _unattendCatalogError = "Unattend.Invalid";
         }
         OnPropertyChanged(nameof(HasUnattendCatalog));
         RevalidateUnattend();
@@ -100,9 +100,25 @@ public sealed partial class DeploymentPreparationViewModel
         RaiseStateChanged();
     }
 
+    private void RefreshUnattendLocalization()
+    {
+        bool isNativeSelected = SelectedUnattendOption is { Selection: null };
+        if (UnattendOptions.Count > 0)
+        {
+            var nativeOption = new UnattendOption(GetString("Unattend.Native"), null);
+            UnattendOptions[0] = nativeOption;
+            if (isNativeSelected)
+                SelectedUnattendOption = nativeOption;
+        }
+
+        OnPropertyChanged(nameof(EffectiveComputerName));
+        OnPropertyChanged(nameof(UnattendSummary));
+        RevalidateUnattend();
+    }
+
     private void RevalidateUnattend()
     {
-        UnattendValidationMessage = _unattendCatalogError;
+        UnattendValidationMessage = GetString(_unattendCatalogError);
         UnattendWarning = string.Empty;
         if (SelectedUnattend is not null && _unattendCatalogError.Length == 0)
         {

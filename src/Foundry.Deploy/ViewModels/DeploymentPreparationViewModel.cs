@@ -591,6 +591,7 @@ public sealed partial class DeploymentPreparationViewModel : LocalizedViewModelB
             OnPropertyChanged(nameof(HasAutopilotProfileHint));
             OnPropertyChanged(nameof(AutopilotModeText));
             RefreshHardwareHashGroupTagOptions();
+            RefreshUnattendLocalization();
             RaiseHardwareHashPropertiesChanged();
             OnPropertyChanged(nameof(TargetDiskSelectionHint));
             OnPropertyChanged(nameof(TargetDisks));
