@@ -1485,13 +1485,13 @@ Fortsätt med implementeringen?</value>
     <value>Den här svarsfilen står i konflikt med det konfigurerade registreringsläget för Autopilot. Välj en annan fil eller ändra mediets konfiguration.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Egna kommandon kan stå i konflikt med Foundrys installationspunkter, överföring av nätverksprofiler, anpassning och registrering. Verifiera kombinationen med en testdistribution.</value>
+    <value>Egna kommandon kan stå i konflikt med Foundry. Testa konfigurationen.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>Uppladdning av maskinvaruhashen registrerar enheten; egen OOBE-konfiguration kan ändå förhindra efterföljande registrering i Autopilot.</value>
+    <value>Hashuppladdning garanterar inte registrering i Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>SetupComplete-körningspunkter beror på Windows-utgåvan och produktnyckelns kanal; verifiera uppskjuten drivrutinsinstallation, överföring av nätverksprofiler och borttagning av program i målavbildningen.</value>
+    <value>Verifiera uppskjuten drivrutinsinstallation, nätverksprofiler och borttagning av appar i denna Windows-avbildning.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Den valda svarsfilen är otillgänglig, ogiltig eller inkompatibel med den valda Windows-arkitekturen. Välj en annan fil eller skapa om mediet.</value>
@@ -1506,7 +1506,7 @@ Fortsätt med implementeringen?</value>
     <value>Använd Foundry-inställningar</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>En egen svarsfil ersätter Foundrys inställningar för datornamn, tidszon, konton och OOBE. Övriga distributionsfunktioner förblir aktiverade enligt konfigurationen.</value>
+    <value>Filen styr datornamn, tidszon, konton och OOBE.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Tidszon</value>

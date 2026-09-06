@@ -1485,13 +1485,13 @@ Sistema operativo: {4}
     <value>Este archivo de respuesta entra en conflicto con el modo de inscripción de Autopilot configurado. Elija otro archivo o cambie la configuración del medio.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Los comandos personalizados pueden interferir con los scripts de instalación de Foundry, la transferencia de perfiles de red, la personalización y la inscripción. Verifique esta combinación en una implementación de prueba.</value>
+    <value>Los comandos personalizados pueden entrar en conflicto con Foundry. Pruebe esta configuración.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>La carga del hash de hardware registra el dispositivo; una OOBE personalizada aún puede impedir la inscripción posterior en Autopilot.</value>
+    <value>La carga del hash no garantiza la inscripción en Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Los scripts de SetupComplete dependen de la edición de Windows y del canal de la clave de producto; compruebe la instalación diferida de controladores, la transferencia de perfiles de red y la eliminación de aplicaciones en la imagen de destino.</value>
+    <value>Verifique la instalación diferida de controladores, los perfiles de red y la eliminación de aplicaciones en esta imagen de Windows.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>El archivo de respuesta seleccionado no está disponible, no es válido o no es compatible con la arquitectura de Windows seleccionada. Elija otro archivo o vuelva a crear el medio.</value>
@@ -1506,7 +1506,7 @@ Sistema operativo: {4}
     <value>Usar la configuración de Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Un archivo de respuesta personalizado reemplaza las opciones de nombre de equipo, zona horaria, cuentas y OOBE de Foundry. Las demás características de implementación siguen habilitadas según su configuración.</value>
+    <value>El archivo controla el nombre del equipo, la zona horaria, las cuentas y OOBE.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Zona horaria</value>

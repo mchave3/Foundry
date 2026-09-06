@@ -1485,13 +1485,13 @@ Kas jätkata juurutamisega?</value>
     <value>See vastusefail on vastuolus seadistatud Autopiloti registreerimisrežiimiga. Valige teine fail või muutke andmekandja konfiguratsiooni.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Kohandatud käsud võivad kattuda Foundry installiskriptide, võrguprofiilide ülekandmise, kohanduste ja registreerimisega. Kontrollige seda kombinatsiooni proovijuurutusega.</value>
+    <value>Kohandatud käsud võivad Foundryga vastuollu minna. Testige seda konfiguratsiooni.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>Riistvararäsi üleslaadimine registreerib seadme; kohandatud OOBE võib siiski takistada hilisemat Autopiloti registreerimist.</value>
+    <value>Räsi üleslaadimine ei taga Autopiloti registreerimist.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>SetupComplete-skriptid sõltuvad Windowsi väljaandest ja tootevõtme kanalist. Kontrollige sihttõmmisel draiverite hilisemat installimist, võrguprofiilide ülekandmist ja rakenduste eemaldamist.</value>
+    <value>Kontrollige sellel Windowsi tõmmisel draiverite hilisemat installimist, võrguprofiile ja rakenduste eemaldamist.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Valitud vastusefail pole saadaval, on kehtetu või ei ühildu valitud Windowsi arhitektuuriga. Valige teine fail või looge andmekandja uuesti.</value>
@@ -1506,7 +1506,7 @@ Kas jätkata juurutamisega?</value>
     <value>Kasuta Foundry sätteid</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Kohandatud vastusefail asendab Foundry arvutinime, ajavööndi, kontode ja OOBE sätted. Muud juurutusfunktsioonid jäävad konfiguratsiooni kohaselt lubatuks.</value>
+    <value>Fail määrab arvutinime, ajavööndi, kontod ja OOBE.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Ajavöönd</value>

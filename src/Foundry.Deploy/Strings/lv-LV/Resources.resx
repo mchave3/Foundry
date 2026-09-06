@@ -1485,13 +1485,13 @@ Vai turpināt izvietošanu?</value>
     <value>Šis atbilžu fails konfliktē ar konfigurēto Autopilot reģistrācijas režīmu. Izvēlieties citu failu vai mainiet datu nesēja konfigurāciju.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Pielāgotas komandas var pārklāties ar Foundry uzstādīšanas darbībām, tīkla profilu pārnešanu, pielāgošanu un reģistrāciju. Pārbaudiet šo kombināciju testa izvietošanā.</value>
+    <value>Pielāgotas komandas var konfliktēt ar Foundry. Testējiet šo konfigurāciju.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>Aparatūras jaucējvērtības augšupielāde reģistrē ierīci; pielāgots OOBE joprojām var liegt turpmāku reģistrāciju pakalpojumā Autopilot.</value>
+    <value>Jaucējvērtības augšupielāde negarantē reģistrāciju pakalpojumā Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>SetupComplete darbības ir atkarīgas no Windows izdevuma un produkta atslēgas kanāla; mērķa attēlā pārbaudiet atlikto draiveru instalēšanu, tīkla profilu pārnešanu un lietojumprogrammu noņemšanu.</value>
+    <value>Šajā Windows attēlā pārbaudiet atlikto draiveru instalēšanu, tīkla profilus un lietotņu noņemšanu.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Atlasītais atbilžu fails nav pieejams, nav derīgs vai nav saderīgs ar atlasīto Windows arhitektūru. Izvēlieties citu failu vai izveidojiet datu nesēju no jauna.</value>
@@ -1506,7 +1506,7 @@ Vai turpināt izvietošanu?</value>
     <value>Izmantot Foundry iestatījumus</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Pielāgots atbilžu fails aizstāj Foundry datora nosaukuma, laika joslas, kontu un OOBE iestatījumus. Citi izvietošanas līdzekļi paliek iespējoti atbilstoši konfigurācijai.</value>
+    <value>Fails nosaka datora nosaukumu, laika joslu, kontus un OOBE.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Laika josla</value>

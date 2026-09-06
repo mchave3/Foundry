@@ -1485,13 +1485,13 @@ Doorgaan met de implementatie?</value>
     <value>Dit antwoordbestand conflicteert met de ingestelde Autopilot-inschrijvingsmodus. Kies een ander bestand of wijzig de mediaconfiguratie.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Aangepaste opdrachten kunnen overlappen met installatiehooks, netwerkroaming, aanpassingen en inschrijving van Foundry. Controleer deze combinatie in een implementatietest.</value>
+    <value>Aangepaste opdrachten kunnen conflicteren met Foundry. Test deze configuratie.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>Het uploaden van de hardwarehash registreert het apparaat. Aangepaste OOBE kan de daaropvolgende Autopilot-inschrijving nog steeds verhinderen.</value>
+    <value>Het uploaden van de hash garandeert geen Autopilot-inschrijving.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>SetupComplete-hooks zijn afhankelijk van de Windows-editie en het productsleutelkanaal. Controleer uitgestelde stuurprogramma-installatie, netwerkroaming en toepassingsverwijdering op de doelimage.</value>
+    <value>Controleer uitgestelde stuurprogramma-installatie, netwerkprofielen en appverwijdering op deze Windows-image.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Het geselecteerde antwoordbestand is niet beschikbaar, ongeldig of niet compatibel met de geselecteerde Windows-architectuur. Kies een ander bestand of maak de media opnieuw.</value>
@@ -1506,7 +1506,7 @@ Doorgaan met de implementatie?</value>
     <value>Foundry-instellingen gebruiken</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Een aangepast antwoordbestand vervangt de Foundry-instellingen voor computernaam, tijdzone, accounts en OOBE. Andere implementatiefuncties blijven ingeschakeld volgens de configuratie.</value>
+    <value>Het bestand bepaalt de computernaam, tijdzone, accounts en OOBE.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Tijdzone</value>

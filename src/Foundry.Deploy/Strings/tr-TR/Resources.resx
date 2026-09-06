@@ -1485,13 +1485,13 @@ Dağıtıma devam edilsin mi?</value>
     <value>Bu yanıt dosyası, yapılandırılmış Autopilot kayıt moduyla çakışıyor. Başka bir dosya seçin veya medya yapılandırmasını değiştirin.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Özel komutlar Foundry kurulum tetikleyicileriyle, ağ profili dolaşımıyla, özelleştirmeyle ve kayıt işlemiyle çakışabilir. Bu birleşimi bir dağıtım testiyle doğrulayın.</value>
+    <value>Özel komutlar Foundry ile çakışabilir. Bu yapılandırmayı test edin.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>Donanım karmasının yüklenmesi cihazı kaydeder; özel OOBE yine de sonraki Autopilot kaydını engelleyebilir.</value>
+    <value>Karma yüklemek Autopilot kaydını garanti etmez.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>SetupComplete tetikleyicileri Windows sürümüne ve ürün anahtarı kanalına bağlıdır; hedef görüntüde ertelenen sürücü kurulumunu, ağ profili dolaşımını ve uygulama kaldırmayı doğrulayın.</value>
+    <value>Bu Windows görüntüsünde ertelenen sürücü kurulumunu, ağ profillerini ve uygulama kaldırmayı doğrulayın.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Seçilen yanıt dosyası kullanılamıyor, geçersiz veya seçilen Windows mimarisiyle uyumsuz. Başka bir dosya seçin ya da medyayı yeniden oluşturun.</value>
@@ -1506,7 +1506,7 @@ Dağıtıma devam edilsin mi?</value>
     <value>Foundry ayarlarını kullan</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Özel yanıt dosyası, Foundry'nin bilgisayar adı, saat dilimi, hesap ve OOBE ayarlarının yerini alır. Diğer dağıtım özellikleri yapılandırıldığı şekilde etkin kalır.</value>
+    <value>Dosya bilgisayar adını, saat dilimini, hesapları ve OOBE'yi yönetir.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Saat dilimi</value>

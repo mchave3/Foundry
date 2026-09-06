@@ -1485,13 +1485,13 @@ Mit der Bereitstellung fortfahren?</value>
     <value>Diese Antwortdatei steht im Konflikt mit dem konfigurierten Autopilot-Registrierungsmodus. Wählen Sie eine andere Datei oder ändern Sie die Medienkonfiguration.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Benutzerdefinierte Befehle können mit Foundry-Setup-Skripts, der Übernahme von Netzwerkprofilen, Anpassungen und Registrierung interagieren. Prüfen Sie diese Kombination bei einer Testbereitstellung.</value>
+    <value>Benutzerdefinierte Befehle können mit Foundry in Konflikt stehen. Testen Sie diese Konfiguration.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>Das Hochladen des Hardwarehashs registriert das Gerät; eine angepasste OOBE kann die anschließende Autopilot-Registrierung dennoch verhindern.</value>
+    <value>Das Hochladen des Hashs garantiert keine Autopilot-Registrierung.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>SetupComplete-Skripts hängen von der Windows-Edition und dem Product-Key-Kanal ab. Prüfen Sie die verzögerte Treiberinstallation, die Übernahme von Netzwerkprofilen und die App-Entfernung auf dem Zielimage.</value>
+    <value>Prüfen Sie verzögerte Treiberinstallation, Netzwerkprofile und App-Entfernung auf diesem Windows-Image.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Die ausgewählte Antwortdatei ist nicht verfügbar, ungültig oder mit der ausgewählten Windows-Architektur inkompatibel. Wählen Sie eine andere Datei oder erstellen Sie das Medium neu.</value>
@@ -1506,7 +1506,7 @@ Mit der Bereitstellung fortfahren?</value>
     <value>Foundry-Einstellungen verwenden</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Eine benutzerdefinierte Antwortdatei ersetzt die Foundry-Einstellungen für Computernamen, Zeitzone, Konten und OOBE. Andere Bereitstellungsfeatures bleiben wie konfiguriert aktiviert.</value>
+    <value>Die Datei steuert Computernamen, Zeitzone, Konten und OOBE.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Zeitzone</value>

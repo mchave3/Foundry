@@ -1485,13 +1485,13 @@ Pokračovat v nasazování?</value>
     <value>Tento soubor odpovědí je v konfliktu s nastaveným režimem registrace do Autopilotu. Vyberte jiný soubor nebo změňte konfiguraci média.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Vlastní příkazy se mohou překrývat s instalačními skripty, síťovým roamingem, přizpůsobením a registrací Foundry. Ověřte tuto kombinaci při testovacím nasazení.</value>
+    <value>Vlastní příkazy mohou být v konfliktu s Foundry. Otestujte tuto konfiguraci.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>Nahrání hardwarového hashe zaregistruje zařízení. Vlastní OOBE může přesto zabránit následné registraci do Autopilotu.</value>
+    <value>Nahrání hashe nezaručuje registraci do Autopilotu.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Skripty SetupComplete závisejí na edici systému Windows a kanálu kódu Product Key. Ověřte odloženou instalaci ovladačů, síťový roaming a odebírání aplikací na cílové bitové kopii.</value>
+    <value>Ověřte odloženou instalaci ovladačů, síťové profily a odebírání aplikací v této bitové kopii Windows.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Vybraný soubor odpovědí je nedostupný, neplatný nebo nekompatibilní s vybranou architekturou systému Windows. Vyberte jiný soubor nebo znovu vytvořte médium.</value>
@@ -1506,7 +1506,7 @@ Pokračovat v nasazování?</value>
     <value>Použít nastavení Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Vlastní soubor odpovědí nahrazuje nastavení názvu počítače, časového pásma, účtů a OOBE ve Foundry. Ostatní funkce nasazení zůstávají povoleny podle konfigurace.</value>
+    <value>Soubor řídí název počítače, časové pásmo, účty a OOBE.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Časové pásmo</value>

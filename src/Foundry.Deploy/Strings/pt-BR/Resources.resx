@@ -1485,13 +1485,13 @@ Continuar com a implantação?</value>
     <value>Este arquivo de resposta entra em conflito com o modo de inscrição no Autopilot configurado. Escolha outro arquivo ou altere a configuração da mídia.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Comandos personalizados podem se sobrepor aos hooks de instalação, roaming de rede, personalizações e inscrição do Foundry. Verifique essa combinação em um teste de implantação.</value>
+    <value>Comandos personalizados podem entrar em conflito com o Foundry. Teste esta configuração.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>O envio do hash de hardware registra o dispositivo. Um OOBE personalizado ainda pode impedir a inscrição posterior no Autopilot.</value>
+    <value>O envio do hash não garante a inscrição no Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Os hooks do SetupComplete dependem da edição do Windows e do canal da chave do produto. Verifique a instalação adiada de drivers, o roaming de rede e a remoção de aplicativos na imagem de destino.</value>
+    <value>Verifique a instalação adiada de drivers, os perfis de rede e a remoção de aplicativos nesta imagem do Windows.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>O arquivo de resposta selecionado está indisponível, inválido ou é incompatível com a arquitetura do Windows selecionada. Escolha outro arquivo ou recrie a mídia.</value>
@@ -1506,7 +1506,7 @@ Continuar com a implantação?</value>
     <value>Usar configurações do Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Um arquivo de resposta personalizado substitui as configurações de nome do computador, fuso horário, contas e OOBE do Foundry. Os outros recursos de implantação permanecem habilitados conforme configurados.</value>
+    <value>O arquivo controla o nome do computador, o fuso horário, as contas e o OOBE.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Fuso horário</value>

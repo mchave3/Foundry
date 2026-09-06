@@ -1485,13 +1485,13 @@ Jatketaanko käyttöönottoa?</value>
     <value>Tämä vastaustiedosto on ristiriidassa määritetyn Autopilot-rekisteröintitilan kanssa. Valitse toinen tiedosto tai muuta tietovälineen asetuksia.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Mukautetut komennot voivat vaikuttaa Foundryn asennuskomentosarjoihin, verkkoprofiilien siirtoon, mukautuksiin ja rekisteröintiin. Varmista yhdistelmän toimivuus testikäyttöönotossa.</value>
+    <value>Mukautetut komennot voivat olla ristiriidassa Foundryn kanssa. Testaa tämä kokoonpano.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>Laitteistohajautuksen lataaminen rekisteröi laitteen; mukautettu OOBE voi silti estää myöhemmän Autopilot-rekisteröinnin.</value>
+    <value>Tiivisteen lataaminen ei takaa Autopilot-rekisteröintiä.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>SetupComplete-komentosarjat riippuvat Windows-versiosta ja tuoteavaimen kanavasta. Tarkista lykätty ohjainasennus, verkkoprofiilien siirto ja sovellusten poisto kohdenäköistiedostossa.</value>
+    <value>Tarkista lykätty ohjainasennus, verkkoprofiilit ja sovellusten poisto tässä Windows-näköistiedostossa.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Valittu vastaustiedosto ei ole käytettävissä, on virheellinen tai ei ole yhteensopiva valitun Windows-arkkitehtuurin kanssa. Valitse toinen tiedosto tai luo tietoväline uudelleen.</value>
@@ -1506,7 +1506,7 @@ Jatketaanko käyttöönottoa?</value>
     <value>Käytä Foundryn asetuksia</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Mukautettu vastaustiedosto korvaa Foundryn tietokonenimi-, aikavyöhyke-, tili- ja OOBE-asetukset. Muut käyttöönotto-ominaisuudet pysyvät käytössä asetusten mukaisesti.</value>
+    <value>Tiedosto määrittää tietokoneen nimen, aikavyöhykkeen, tilit ja OOBE:n.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Aikavyöhyke</value>

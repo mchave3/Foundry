@@ -1485,13 +1485,13 @@ Continuer le déploiement?</value>
     <value>Ce fichier de réponses est incompatible avec le mode d’inscription Autopilot configuré. Choisissez un autre fichier ou modifiez la configuration du média.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Les commandes personnalisées peuvent interagir avec les scripts d’installation de Foundry, le transfert des profils réseau, la personnalisation et l’inscription. Vérifiez cette combinaison lors d’un test de déploiement.</value>
+    <value>Les commandes personnalisées peuvent entrer en conflit avec Foundry. Testez cette configuration.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>Le chargement du hachage matériel enregistre l’appareil ; un OOBE personnalisé peut néanmoins empêcher l’inscription ultérieure à Autopilot.</value>
+    <value>L’envoi du hachage ne garantit pas l’inscription à Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Les scripts SetupComplete dépendent de l’édition de Windows et du canal de la clé de produit ; vérifiez l’installation différée des pilotes, le transfert des profils réseau et la suppression des applications sur l’image cible.</value>
+    <value>Vérifiez les pilotes différés, les profils réseau et la suppression des applications sur cette image Windows.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Le fichier de réponses sélectionné est indisponible, invalide ou incompatible avec l’architecture Windows sélectionnée. Choisissez un autre fichier ou recréez le média.</value>
@@ -1506,7 +1506,7 @@ Continuer le déploiement?</value>
     <value>Utiliser les paramètres de Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Un fichier de réponses personnalisé remplace les paramètres de nom d’ordinateur, de fuseau horaire, de comptes et d’OOBE de Foundry. Les autres fonctionnalités de déploiement restent activées selon la configuration.</value>
+    <value>Le fichier gère le nom du PC, le fuseau horaire, les comptes et l’OOBE.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Fuseau horaire</value>

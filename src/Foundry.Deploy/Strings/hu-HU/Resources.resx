@@ -1485,13 +1485,13 @@ Folytatja a telepítést?</value>
     <value>Ez a válaszfájl ütközik a beállított Autopilot-regisztrációs móddal. Válasszon másik fájlt, vagy módosítsa az adathordozó konfigurációját.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Az egyéni parancsok ütközhetnek a Foundry telepítési műveleteivel, a hálózati profilok átvitelével, a testreszabásokkal és a regisztrációval. Ellenőrizze ezt a kombinációt egy teszttelepítésben.</value>
+    <value>Az egyéni parancsok ütközhetnek a Foundryval. Tesztelje ezt a konfigurációt.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>A hardverkivonat feltöltése regisztrálja az eszközt; az egyéni OOBE továbbra is megakadályozhatja a későbbi Autopilot-regisztrációt.</value>
+    <value>A kivonat feltöltése nem garantálja az Autopilot-regisztrációt.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>A SetupComplete műveletei a Windows kiadásától és a termékkulcs csatornájától függenek; ellenőrizze a halasztott illesztőprogram-telepítést, a hálózati profilok átvitelét és az alkalmazások eltávolítását a célrendszerképen.</value>
+    <value>Ellenőrizze a halasztott illesztőprogram-telepítést, a hálózati profilokat és az alkalmazások eltávolítását ezen a Windows-rendszerképen.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>A kiválasztott válaszfájl nem érhető el, érvénytelen, vagy nem kompatibilis a kiválasztott Windows-architektúrával. Válasszon másik fájlt, vagy hozza létre újra az adathordozót.</value>
@@ -1506,7 +1506,7 @@ Folytatja a telepítést?</value>
     <value>A Foundry beállításainak használata</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Az egyéni válaszfájl felülváltja a Foundry számítógépnév-, időzóna-, fiók- és OOBE-beállításait. A többi telepítési funkció a konfigurációnak megfelelően engedélyezve marad.</value>
+    <value>A fájl szabályozza a számítógép nevét, az időzónát, a fiókokat és az OOBE-t.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Időzóna</value>

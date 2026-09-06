@@ -1485,13 +1485,13 @@
     <value>此应答文件与配置的 Autopilot 注册模式冲突。请选择其他文件或更改介质配置。</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>自定义命令可能与 Foundry 安装挂钩、网络配置文件漫游、自定义设置及注册操作发生冲突。请通过部署测试验证此组合。</value>
+    <value>自定义命令可能与 Foundry 冲突。请测试此配置。</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>上传硬件哈希会登记设备；自定义 OOBE 仍可能阻止后续的 Autopilot 注册。</value>
+    <value>上传哈希不保证能完成 Autopilot 注册。</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>SetupComplete 挂钩取决于 Windows 版本及产品密钥渠道；请在目标映像上验证延迟驱动程序安装、网络配置文件漫游和应用程序移除。</value>
+    <value>请在此 Windows 映像上验证延迟驱动程序安装、网络配置文件和应用移除。</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>选定的应答文件不可用、无效或与所选 Windows 体系结构不兼容。请选择其他文件或重新创建介质。</value>
@@ -1506,7 +1506,7 @@
     <value>使用 Foundry 设置</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>自定义应答文件将替代 Foundry 的计算机名称、时区、帐户和 OOBE 设置。其他部署功能仍按配置保持启用。</value>
+    <value>文件控制计算机名称、时区、帐户和 OOBE。</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>时区</value>

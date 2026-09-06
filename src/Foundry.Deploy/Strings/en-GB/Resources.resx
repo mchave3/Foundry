@@ -1485,13 +1485,13 @@ Continue with deployment?</value>
     <value>This answer file conflicts with the configured Autopilot enrollment mode. Choose another file or change the media configuration.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Custom commands may overlap with Foundry setup hooks, network roaming, customization and enrollment. Verify this combination in a deployment test.</value>
+    <value>Custom commands may conflict with Foundry. Test this configuration.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>Hardware hash upload registers the device; custom OOBE can still prevent subsequent Autopilot enrollment.</value>
+    <value>Hash upload does not guarantee Autopilot enrollment.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>SetupComplete hooks depend on the Windows edition and product-key channel; verify deferred drivers, network roaming and application removal on the target image.</value>
+    <value>Verify deferred drivers, network profiles, and app removal on this Windows image.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>The selected answer file is unavailable, invalid, or incompatible with the selected Windows architecture. Choose another file or rebuild the media.</value>
@@ -1506,7 +1506,7 @@ Continue with deployment?</value>
     <value>Use Foundry settings</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>A custom answer file replaces Foundry computer name, time zone, accounts and OOBE settings. Other deployment features remain enabled as configured.</value>
+    <value>The file controls naming, time zone, accounts, and OOBE.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Time zone</value>

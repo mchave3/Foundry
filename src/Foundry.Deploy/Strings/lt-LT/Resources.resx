@@ -1485,13 +1485,13 @@ Tęsti diegimą?</value>
     <value>Šis atsakymų failas konfliktuoja su sukonfigūruotu „Autopilot“ registravimo režimu. Pasirinkite kitą failą arba pakeiskite laikmenos konfigūraciją.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Pasirinktinės komandos gali dubliuoti „Foundry“ diegimo veiksmus, tinklo profilių perkėlimą, tinkinimą ir registravimą. Patikrinkite šį derinį atlikdami bandomąjį diegimą.</value>
+    <value>Pasirinktinės komandos gali prieštarauti „Foundry“ veiksmams. Išbandykite šią konfigūraciją.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>Įkėlus aparatinės įrangos maišą įrenginys užregistruojamas; pasirinktinis OOBE vis tiek gali neleisti vėliau užregistruoti įrenginio „Autopilot“.</value>
+    <value>Maišos įkėlimas negarantuoja registracijos „Autopilot“.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>„SetupComplete“ veiksmai priklauso nuo „Windows“ leidimo ir produkto kodo kanalo; paskirties atvaizde patikrinkite atidėtą tvarkyklių diegimą, tinklo profilių perkėlimą ir programų šalinimą.</value>
+    <value>Šiame „Windows“ atvaizde patikrinkite atidėtą tvarkyklių diegimą, tinklo profilius ir programų šalinimą.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Pasirinktas atsakymų failas nepasiekiamas, netinkamas arba nesuderinamas su pasirinkta „Windows“ architektūra. Pasirinkite kitą failą arba iš naujo sukurkite laikmeną.</value>
@@ -1506,7 +1506,7 @@ Tęsti diegimą?</value>
     <value>Naudoti „Foundry“ parametrus</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Pasirinktinis atsakymų failas pakeičia „Foundry“ kompiuterio pavadinimo, laiko juostos, paskyrų ir OOBE parametrus. Kitos diegimo funkcijos lieka įgalintos pagal konfigūraciją.</value>
+    <value>Failas valdo kompiuterio pavadinimą, laiko juostą, paskyras ir OOBE.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Laiko juosta</value>

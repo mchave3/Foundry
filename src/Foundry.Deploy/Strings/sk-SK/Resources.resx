@@ -1485,13 +1485,13 @@ Pokračovať v nasadzovaní?</value>
     <value>Tento súbor odpovedí je v konflikte s nakonfigurovaným režimom registrácie Autopilot. Vyberte iný súbor alebo zmeňte konfiguráciu média.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Vlastné príkazy môžu byť v konflikte so spúšťacími bodmi inštalácie Foundry, prenosom sieťových profilov, prispôsobením a registráciou. Overte túto kombináciu pri testovacom nasadení.</value>
+    <value>Vlastné príkazy môžu byť v konflikte s Foundry. Otestujte túto konfiguráciu.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>Nahratie hardvérového hashu zaregistruje zariadenie; vlastné nastavenie OOBE však môže zabrániť následnej registrácii v Autopilot.</value>
+    <value>Nahratie hashu nezaručuje registráciu v Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Spúšťacie body SetupComplete závisia od vydania systému Windows a kanála kódu Product Key; overte odloženú inštaláciu ovládačov, prenos sieťových profilov a odstraňovanie aplikácií v cieľovom obraze.</value>
+    <value>V tomto obraze Windows overte odloženú inštaláciu ovládačov, sieťové profily a odstraňovanie aplikácií.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Vybraný súbor odpovedí je nedostupný, neplatný alebo nekompatibilný s vybranou architektúrou systému Windows. Vyberte iný súbor alebo znova vytvorte médium.</value>
@@ -1506,7 +1506,7 @@ Pokračovať v nasadzovaní?</value>
     <value>Použiť nastavenia Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Vlastný súbor odpovedí nahrádza nastavenia Foundry pre názov počítača, časové pásmo, kontá a OOBE. Ostatné funkcie nasadenia zostávajú zapnuté podľa konfigurácie.</value>
+    <value>Súbor riadi názov počítača, časové pásmo, kontá a OOBE.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Časové pásmo</value>

@@ -38,7 +38,8 @@
                     <TextBlock
                         Margin="0,4,0,0"
                         Text="{Binding Strings[Unattend.Ownership]}"
-                        TextWrapping="Wrap" />
+                        TextWrapping="Wrap"
+                        Visibility="{Binding UsesCustomUnattend, Converter={StaticResource BooleanToVisibilityConverter}}" />
                     <TextBlock
                         Margin="0,4,0,0"
                         Foreground="{DynamicResource SystemFillColorCriticalBrush}"
@@ -71,9 +72,24 @@
                         <TextBlock
                             Margin="0,4,0,0"
                             Foreground="{DynamicResource TextFillColorSecondaryBrush}"
-                            Style="{StaticResource CaptionTextBlockStyle}"
-                            Text="{Binding ComputerNameHint}"
-                            TextWrapping="Wrap" />
+                            Text="{Binding Strings[Preparation.ComputerNameHint]}"
+                            TextWrapping="Wrap">
+                            <TextBlock.Style>
+                                <Style
+                                    BasedOn="{StaticResource CaptionTextBlockStyle}"
+                                    TargetType="TextBlock">
+                                    <Style.Triggers>
+                                        <DataTrigger
+                                            Binding="{Binding UsesCustomUnattend}"
+                                            Value="True">
+                                            <Setter
+                                                Property="Visibility"
+                                                Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
                         <TextBlock
                             Margin="0,4,0,0"
                             Foreground="{DynamicResource SystemFillColorCriticalBrush}"

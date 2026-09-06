@@ -1485,13 +1485,13 @@ ErrorCode=0x80070005
     <value>קובץ תשובות זה מתנגש במצב הרישום שהוגדר עבור Autopilot. בחרו קובץ אחר או שנו את תצורת המדיה.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>פקודות מותאמות אישית עשויות לחפוף לפעולות ההתקנה של Foundry, להעברת פרופילי רשת, להתאמות ולרישום. אמתו שילוב זה בפריסת בדיקה.</value>
+    <value>פקודות מותאמות אישית עלולות להתנגש עם Foundry. בדקו תצורה זו.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>העלאת גיבוב החומרה רושמת את המכשיר; OOBE מותאם אישית עדיין עלול למנוע רישום ל-Autopilot בהמשך.</value>
+    <value>העלאת הגיבוב אינה מבטיחה רישום ל-Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>פעולות SetupComplete תלויות במהדורת Windows ובערוץ מפתח המוצר; בדקו בתמונת היעד התקנת מנהלי התקנים נדחית, העברת פרופילי רשת והסרת יישומים.</value>
+    <value>בדקו התקנת מנהלי התקנים נדחית, פרופילי רשת והסרת יישומים בתמונת Windows זו.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>קובץ התשובות שנבחר אינו זמין, אינו תקין או אינו תואם לארכיטקטורת Windows שנבחרה. בחרו קובץ אחר או צרו מחדש את המדיה.</value>
@@ -1506,7 +1506,7 @@ ErrorCode=0x80070005
     <value>שימוש בהגדרות Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>קובץ תשובות מותאם אישית מחליף את הגדרות שם המחשב, אזור הזמן, החשבונות ו-OOBE של Foundry. תכונות פריסה אחרות נשארות מופעלות בהתאם לתצורה.</value>
+    <value>הקובץ קובע את שם המחשב, אזור הזמן, החשבונות ו-OOBE.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>אזור זמן</value>

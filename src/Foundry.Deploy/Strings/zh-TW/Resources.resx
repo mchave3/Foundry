@@ -1485,13 +1485,13 @@
     <value>此回應檔案與設定的 Autopilot 註冊模式衝突。請選擇其他檔案或變更媒體設定。</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>自訂命令可能與 Foundry 安裝掛鉤、網路設定檔漫遊、自訂設定及註冊作業發生衝突。請透過部署測試驗證此組合。</value>
+    <value>自訂命令可能與 Foundry 衝突。請測試此設定。</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>上傳硬體雜湊會登錄裝置；自訂 OOBE 仍可能阻止後續的 Autopilot 註冊。</value>
+    <value>上傳雜湊不保證能完成 Autopilot 註冊。</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>SetupComplete 掛鉤取決於 Windows 版本及產品金鑰通路；請在目標映像上驗證延後安裝驅動程式、網路設定檔漫遊及應用程式移除。</value>
+    <value>請在此 Windows 映像上驗證延後安裝驅動程式、網路設定檔及應用程式移除。</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>選取的回應檔案無法使用、無效或與所選 Windows 架構不相容。請選擇其他檔案或重新建立媒體。</value>
@@ -1506,7 +1506,7 @@
     <value>使用 Foundry 設定</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>自訂回應檔案會取代 Foundry 的電腦名稱、時區、帳戶和 OOBE 設定。其他部署功能仍依設定保持啟用。</value>
+    <value>檔案控制電腦名稱、時區、帳戶和 OOBE。</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>時區</value>

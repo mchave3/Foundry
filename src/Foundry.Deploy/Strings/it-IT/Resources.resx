@@ -1485,13 +1485,13 @@ Continuare con la distribuzione?</value>
     <value>Questo file di risposte è in conflitto con la modalità di registrazione Autopilot configurata. Scegli un altro file o modifica la configurazione del supporto.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>I comandi personalizzati possono sovrapporsi alle operazioni di installazione di Foundry, al trasferimento dei profili di rete, alle personalizzazioni e alla registrazione. Verifica questa combinazione con una distribuzione di prova.</value>
+    <value>I comandi personalizzati possono entrare in conflitto con Foundry. Prova questa configurazione.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>Il caricamento dell'hash hardware registra il dispositivo; un OOBE personalizzato può comunque impedire la successiva registrazione in Autopilot.</value>
+    <value>Il caricamento dell'hash non garantisce la registrazione in Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Le operazioni di SetupComplete dipendono dall'edizione di Windows e dal canale del codice Product Key; verifica i driver installati in un secondo momento, il trasferimento dei profili di rete e la rimozione delle applicazioni nell'immagine di destinazione.</value>
+    <value>Verifica l'installazione differita dei driver, i profili di rete e la rimozione delle app su questa immagine Windows.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Il file di risposte selezionato non è disponibile, non è valido o non è compatibile con l'architettura di Windows selezionata. Scegli un altro file o ricrea il supporto.</value>
@@ -1506,7 +1506,7 @@ Continuare con la distribuzione?</value>
     <value>Usa le impostazioni di Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Un file di risposte personalizzato sostituisce le impostazioni di Foundry relative a nome del computer, fuso orario, account e OOBE. Le altre funzionalità di distribuzione rimangono abilitate secondo la configurazione.</value>
+    <value>Il file gestisce nome del PC, fuso orario, account e OOBE.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Fuso orario</value>

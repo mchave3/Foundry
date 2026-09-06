@@ -1485,13 +1485,13 @@ Nastaviti s implementacijom?</value>
     <value>Ova je datoteka odgovora u sukobu s konfiguriranim načinom upisa u Autopilot. Odaberite drugu datoteku ili promijenite konfiguraciju medija.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Prilagođene naredbe mogu se preklapati s instalacijskim radnjama, prijenosom mrežnih profila, prilagodbama i upisom koje provodi Foundry. Provjerite ovu kombinaciju u probnoj implementaciji.</value>
+    <value>Prilagođene naredbe mogu biti u sukobu s Foundryjem. Testirajte ovu konfiguraciju.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>Prijenos hardverskog sažetka registrira uređaj; prilagođeni OOBE i dalje može spriječiti naknadni upis u Autopilot.</value>
+    <value>Prijenos sažetka ne jamči upis u Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Radnje SetupComplete ovise o izdanju sustava Windows i kanalu ključa proizvoda; provjerite odgođenu instalaciju upravljačkih programa, prijenos mrežnih profila i uklanjanje aplikacija na ciljnoj slici.</value>
+    <value>Provjerite odgođenu instalaciju upravljačkih programa, mrežne profile i uklanjanje aplikacija na ovoj slici sustava Windows.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Odabrana datoteka odgovora nije dostupna, nije valjana ili nije kompatibilna s odabranom arhitekturom sustava Windows. Odaberite drugu datoteku ili ponovno stvorite medij.</value>
@@ -1506,7 +1506,7 @@ Nastaviti s implementacijom?</value>
     <value>Koristi postavke sustava Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Prilagođena datoteka odgovora zamjenjuje postavke naziva računala, vremenske zone, računa i OOBE sustava Foundry. Ostale značajke implementacije ostaju omogućene prema konfiguraciji.</value>
+    <value>Datoteka upravlja nazivom računala, vremenskom zonom, računima i OOBE-om.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Vremenska zona</value>

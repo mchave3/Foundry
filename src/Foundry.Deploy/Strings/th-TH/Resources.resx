@@ -1485,13 +1485,13 @@
     <value>ไฟล์คำตอบนี้ขัดแย้งกับโหมดการลงทะเบียน Autopilot ที่กำหนดไว้ โปรดเลือกไฟล์อื่นหรือเปลี่ยนการกำหนดค่าของสื่อ</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>คำสั่งที่กำหนดเองอาจขัดแย้งกับจุดเรียกทำงานระหว่างการติดตั้งของ Foundry การถ่ายโอนโปรไฟล์เครือข่าย การปรับแต่ง และการลงทะเบียน โปรดตรวจสอบการใช้งานร่วมกันนี้ด้วยการทดสอบการปรับใช้</value>
+    <value>คำสั่งที่กำหนดเองอาจขัดแย้งกับ Foundry โปรดทดสอบการกำหนดค่านี้</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>การอัปโหลดแฮชฮาร์ดแวร์เป็นการลงทะเบียนอุปกรณ์ แต่ OOBE ที่กำหนดเองยังอาจขัดขวางการลงทะเบียนกับ Autopilot ในภายหลัง</value>
+    <value>การอัปโหลดแฮชไม่รับประกันการลงทะเบียนกับ Autopilot</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>จุดเรียกทำงาน SetupComplete ขึ้นอยู่กับรุ่นของ Windows และช่องทางของหมายเลขผลิตภัณฑ์ โปรดตรวจสอบการติดตั้งไดรเวอร์แบบเลื่อนเวลา การถ่ายโอนโปรไฟล์เครือข่าย และการลบแอปพลิเคชันบนอิมเมจเป้าหมาย</value>
+    <value>ตรวจสอบการติดตั้งไดรเวอร์แบบเลื่อนเวลา โปรไฟล์เครือข่าย และการลบแอปบนอิมเมจ Windows นี้</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>ไฟล์คำตอบที่เลือกไม่พร้อมใช้งาน ไม่ถูกต้อง หรือเข้ากันไม่ได้กับสถาปัตยกรรม Windows ที่เลือก โปรดเลือกไฟล์อื่นหรือสร้างสื่อใหม่</value>
@@ -1506,7 +1506,7 @@
     <value>ใช้การตั้งค่าของ Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>ไฟล์คำตอบที่กำหนดเองจะแทนที่การตั้งค่าชื่อคอมพิวเตอร์ เขตเวลา บัญชี และ OOBE ของ Foundry คุณลักษณะการปรับใช้อื่นยังคงเปิดใช้ตามการกำหนดค่า</value>
+    <value>ไฟล์ควบคุมชื่อคอมพิวเตอร์ เขตเวลา บัญชี และ OOBE</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>เขตเวลา</value>

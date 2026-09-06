@@ -1485,13 +1485,13 @@ Operativni sistem: {4}
     <value>Ova datoteka odgovora je u sukobu sa podešenim režimom upisa u Autopilot. Izaberite drugu datoteku ili promenite konfiguraciju medija.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Prilagođene komande mogu biti u sukobu sa tačkama izvršavanja instalacije programa Foundry, prenosom mrežnih profila, prilagođavanjem i upisom. Proverite ovu kombinaciju probnom primenom.</value>
+    <value>Prilagođene komande mogu biti u sukobu sa programom Foundry. Testirajte ovu konfiguraciju.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>Otpremanje hardverskog heša registruje uređaj; prilagođeni OOBE i dalje može sprečiti naknadni upis u Autopilot.</value>
+    <value>Otpremanje heša ne garantuje upis u Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Tačke izvršavanja SetupComplete zavise od izdanja sistema Windows i kanala ključa proizvoda; proverite odloženu instalaciju upravljačkih programa, prenos mrežnih profila i uklanjanje aplikacija na ciljnoj slici.</value>
+    <value>Na ovoj slici sistema Windows proverite odloženu instalaciju upravljačkih programa, mrežne profile i uklanjanje aplikacija.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Izabrana datoteka odgovora nije dostupna, nije važeća ili nije kompatibilna sa izabranom Windows arhitekturom. Izaberite drugu datoteku ili ponovo kreirajte medij.</value>
@@ -1506,7 +1506,7 @@ Operativni sistem: {4}
     <value>Koristi postavke programa Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Prilagođena datoteka odgovora zamenjuje postavke programa Foundry za ime računara, vremensku zonu, naloge i OOBE. Ostale funkcije primene ostaju omogućene prema konfiguraciji.</value>
+    <value>Datoteka određuje ime računara, vremensku zonu, naloge i OOBE.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Vremenska zona</value>

@@ -44,7 +44,6 @@ public sealed partial class DeploymentPreparationViewModel
         get => UsesCustomUnattend ? GetString("Unattend.Managed") : TargetComputerName;
         set { if (!UsesCustomUnattend) TargetComputerName = value; }
     }
-    public string ComputerNameHint => GetString(UsesCustomUnattend ? "Unattend.Ownership" : "Preparation.ComputerNameHint");
 
     /// <summary>Loads manifest choices while preserving a missing default as an error.</summary>
     public void ApplyUnattendConfiguration(DeployUnattendSettings settings, string configurationPath, string? failure = null)
@@ -86,7 +85,6 @@ public sealed partial class DeploymentPreparationViewModel
         OnPropertyChanged(nameof(UsesCustomUnattend));
         OnPropertyChanged(nameof(EffectiveComputerName));
         OnPropertyChanged(nameof(IsComputerNameInputReadOnly));
-        OnPropertyChanged(nameof(ComputerNameHint));
         OnPropertyChanged(nameof(IsTargetComputerNameValid));
         OnPropertyChanged(nameof(HasTargetComputerNameValidationError));
         OnPropertyChanged(nameof(UnattendSummary));

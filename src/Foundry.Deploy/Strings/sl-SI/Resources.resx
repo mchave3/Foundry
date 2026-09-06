@@ -1485,13 +1485,13 @@ Ali želite nadaljevati z uvajanjem?</value>
     <value>Ta datoteka odgovorov je v navzkrižju z nastavljenim načinom vpisa v Autopilot. Izberite drugo datoteko ali spremenite konfiguracijo medija.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Ukazi po meri so lahko v navzkrižju s sprožilci namestitve Foundry, prenosom omrežnih profilov, prilagoditvami in vpisom. To kombinacijo preverite s preizkusnim uvajanjem.</value>
+    <value>Ukazi po meri so lahko v navzkrižju s Foundry. Preizkusite to konfiguracijo.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>Nalaganje zgoščene vrednosti strojne opreme registrira napravo; OOBE po meri lahko še vedno prepreči poznejši vpis v Autopilot.</value>
+    <value>Nalaganje zgoščene vrednosti ne zagotavlja vpisa v Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Sprožilci SetupComplete so odvisni od izdaje sistema Windows in kanala ključa izdelka; v ciljni sliki preverite odloženo namestitev gonilnikov, prenos omrežnih profilov in odstranjevanje aplikacij.</value>
+    <value>V tej sliki Windows preverite odloženo namestitev gonilnikov, omrežne profile in odstranjevanje aplikacij.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Izbrana datoteka odgovorov ni na voljo, ni veljavna ali ni združljiva z izbrano arhitekturo sistema Windows. Izberite drugo datoteko ali znova ustvarite medij.</value>
@@ -1506,7 +1506,7 @@ Ali želite nadaljevati z uvajanjem?</value>
     <value>Uporabi nastavitve Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Datoteka odgovorov po meri nadomesti nastavitve Foundry za ime računalnika, časovni pas, račune in OOBE. Druge funkcije uvajanja ostanejo omogočene v skladu s konfiguracijo.</value>
+    <value>Datoteka določa ime računalnika, časovni pas, račune in OOBE.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Časovni pas</value>

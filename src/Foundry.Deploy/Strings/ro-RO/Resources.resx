@@ -1485,13 +1485,13 @@ Continuați cu implementarea?</value>
     <value>Acest fișier de răspuns intră în conflict cu modul de înscriere Autopilot configurat. Alegeți alt fișier sau modificați configurația suportului.</value>
   </data>
   <data name="Unattend.CommandsWarning" xml:space="preserve">
-    <value>Comenzile personalizate pot intra în conflict cu punctele de execuție ale instalării Foundry, transferul profilurilor de rețea, personalizarea și înscrierea. Verificați această combinație într-un test de implementare.</value>
+    <value>Comenzile personalizate pot intra în conflict cu Foundry. Testați această configurație.</value>
   </data>
   <data name="Unattend.HashWarning" xml:space="preserve">
-    <value>Încărcarea hashului hardware înregistrează dispozitivul; OOBE personalizat poate totuși împiedica înscrierea ulterioară în Autopilot.</value>
+    <value>Încărcarea hashului nu garantează înscrierea în Autopilot.</value>
   </data>
   <data name="Unattend.HookCompatibility" xml:space="preserve">
-    <value>Punctele de execuție SetupComplete depind de ediția Windows și de canalul cheii de produs; verificați driverele cu instalare amânată, transferul profilurilor de rețea și eliminarea aplicațiilor pe imaginea țintă.</value>
+    <value>Verificați driverele cu instalare amânată, profilurile de rețea și eliminarea aplicațiilor pe această imagine Windows.</value>
   </data>
   <data name="Unattend.Invalid" xml:space="preserve">
     <value>Fișierul de răspuns selectat este indisponibil, nevalid sau incompatibil cu arhitectura Windows selectată. Alegeți alt fișier sau recreați suportul.</value>
@@ -1506,7 +1506,7 @@ Continuați cu implementarea?</value>
     <value>Folosește setările Foundry</value>
   </data>
   <data name="Unattend.Ownership" xml:space="preserve">
-    <value>Un fișier de răspuns personalizat înlocuiește setările Foundry pentru numele computerului, fusul orar, conturi și OOBE. Celelalte funcționalități de implementare rămân activate conform configurației.</value>
+    <value>Fișierul controlează numele computerului, fusul orar, conturile și OOBE.</value>
   </data>
   <data name="Unattend.TimeZone" xml:space="preserve">
     <value>Fus orar</value>
