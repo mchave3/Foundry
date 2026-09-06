@@ -32,9 +32,9 @@ public sealed class ArtifactIntegrityPolicyTests
     [InlineData("C:\\image.esd", "revision", "source", "A")]
     [InlineData("CON.esd", "revision", "source", "A")]
     [InlineData("image.esd", "", "source", "A")]
-    [InlineData("image.esd", "revision", "../source", "A")]
-    [InlineData("image.esd", "revision", "..", "A")]
-    [InlineData("image.esd", "revision", "C:", "A")]
+    [InlineData("image.esd", "revision", "", "A")]
+    [InlineData("image.esd", "revision", " source", "A")]
+    [InlineData("image.esd", "revision", "source\nother", "A")]
     [InlineData("image.esd", "revision", "source", "Z")]
     public void MalformedIdentityOrDigest_IsRejected(string fileName, string revision, string source, string digit)
     {
@@ -57,12 +57,31 @@ public sealed class ArtifactIntegrityPolicyTests
         Assert.Equal(keys.Length, keys.Distinct(StringComparer.Ordinal).Count());
     }
 
+    [Theory]
+    [InlineData("105115|SurfaceThunderbolt4DockDrivers_Win11_arm64_22000_23.033.35231.0.msi")]
+    [InlineData("../source")]
+    [InlineData("C:\\source")]
+    public void OpaqueSourceId_IsPreservedWithoutBecomingAPath(string sourceId)
+    {
+        var artifact = new ArtifactIdentity("revision", sourceId, new Uri("https://example.test/image.esd"), "image.esd",
+            new FileIntegrity(new FileDigest(HashAlgorithmName.SHA256, new string('A', 64)), 10), "OperatingSystemImage", null);
+
+        ArtifactIntegrityPolicy.Validate(artifact);
+
+        Assert.Equal(sourceId, artifact.SourceId);
+        Assert.Matches("^[a-f0-9]{64}$", artifact.CacheKey);
+        Assert.NotEqual(artifact.CacheKey, (artifact with { SourceId = "other" }).CacheKey);
+    }
+
     [Fact]
     public void HashlessVendorRedirect_CannotLeaveQualifiedPublisherHost()
     {
         ArtifactIdentity artifact = ArtifactIntegrityPolicy.FromDriverPack(new Foundry.Deploy.Models.DriverPackCatalogItem
         {
-            CatalogRevision = "revision", Id = "driver-1", Manufacturer = "Dell", FileName = "driver.exe",
+            CatalogRevision = "revision",
+            Id = "driver-1",
+            Manufacturer = "Dell",
+            FileName = "driver.exe",
             DownloadUrl = "https://downloads.dell.com/driver.exe"
         });
         Assert.Throws<InvalidDataException>(() => ArtifactIntegrityPolicy.ValidateSourceUri(artifact, new Uri("https://example.test/driver.exe")));
@@ -76,7 +95,10 @@ public sealed class ArtifactIntegrityPolicyTests
     {
         var item = new Foundry.Deploy.Models.DriverPackCatalogItem
         {
-            CatalogRevision = "revision", Id = "driver-1", FileName = $"driver{extension}", DownloadUrl = $"https://example.test/driver{extension}"
+            CatalogRevision = "revision",
+            Id = "driver-1",
+            FileName = $"driver{extension}",
+            DownloadUrl = $"https://example.test/driver{extension}"
         };
         InvalidDataException error = Assert.Throws<InvalidDataException>(() => ArtifactIntegrityPolicy.FromDriverPack(item));
         Assert.Contains("Integrity unavailable", error.Message, StringComparison.Ordinal);

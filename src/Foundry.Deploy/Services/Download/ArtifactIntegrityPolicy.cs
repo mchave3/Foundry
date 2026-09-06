@@ -96,7 +96,11 @@ public static class ArtifactIntegrityPolicy
     /// <summary>Validates raw catalog fields without assigning an authentication revision to unbound rows.</summary>
     internal static void ValidateMetadata(string sourceId, Uri sourceUri, string fileName, FileIntegrity integrity)
     {
-        ValidateToken(sourceId, nameof(sourceId));
+        // Catalog IDs are opaque (vendor rows may contain '|'); only the cache digest becomes a path segment.
+        if (string.IsNullOrWhiteSpace(sourceId) || sourceId.Length > 512 || sourceId != sourceId.Trim() || sourceId.Any(char.IsControl))
+        {
+            throw new ArgumentException("Artifact source identity must be nonempty, bounded and free of control characters.", nameof(sourceId));
+        }
         ValidateFileName(fileName);
         ArgumentNullException.ThrowIfNull(sourceUri);
         if (!sourceUri.IsAbsoluteUri || !string.IsNullOrEmpty(sourceUri.UserInfo) || !string.IsNullOrEmpty(sourceUri.Fragment))

@@ -18,7 +18,7 @@ namespace Foundry.Deploy.Services.DriverPacks;
 
 public sealed class MicrosoftUpdateCatalogClient : IMicrosoftUpdateCatalogClient
 {
-    private static readonly HttpClient HttpClient = AcquisitionHttpClientFactory.Create(TimeSpan.FromSeconds(20));
+    private static readonly HttpClient DefaultHttpClient = AcquisitionHttpClientFactory.Create(TimeSpan.FromSeconds(20));
     private static readonly Uri HomeUri = new("https://www.catalog.update.microsoft.com/Home.aspx");
     private static readonly Uri DownloadDialogUri = new("https://www.catalog.update.microsoft.com/DownloadDialog.aspx");
     private static readonly Regex DownloadPropertyRegex = new(
@@ -26,10 +26,16 @@ public sealed class MicrosoftUpdateCatalogClient : IMicrosoftUpdateCatalogClient
         RegexOptions.IgnoreCase | RegexOptions.Compiled);
 
     private readonly ILogger<MicrosoftUpdateCatalogClient> _logger;
+    private readonly HttpClient _httpClient;
 
-    public MicrosoftUpdateCatalogClient(ILogger<MicrosoftUpdateCatalogClient> logger)
+    public MicrosoftUpdateCatalogClient(ILogger<MicrosoftUpdateCatalogClient> logger) : this(logger, DefaultHttpClient)
+    {
+    }
+
+    internal MicrosoftUpdateCatalogClient(ILogger<MicrosoftUpdateCatalogClient> logger, HttpClient httpClient)
     {
         _logger = logger;
+        _httpClient = httpClient;
     }
 
     public async Task<bool> IsAvailableAsync(CancellationToken cancellationToken = default)
@@ -64,12 +70,7 @@ public sealed class MicrosoftUpdateCatalogClient : IMicrosoftUpdateCatalogClient
         var document = new HtmlDocument();
         document.LoadHtml(html);
 
-        HtmlNode? errorNode = document.GetElementbyId("errorPageDisplayedError");
-        if (errorNode is not null)
-        {
-            _logger.LogWarning("Microsoft Update Catalog search returned an error page.");
-            return [];
-        }
+        ThrowIfCatalogError(document);
 
         if (document.GetElementbyId("ctl00_catalogBody_noResultText") is not null)
         {
@@ -79,21 +80,25 @@ public sealed class MicrosoftUpdateCatalogClient : IMicrosoftUpdateCatalogClient
         HtmlNode? table = document.GetElementbyId("ctl00_catalogBody_updateMatches");
         if (table is null)
         {
-            _logger.LogWarning("Microsoft Update Catalog search did not return the expected results table for query '{SearchQuery}'.", searchQuery);
-            return [];
+            throw new HttpRequestException("Microsoft Update Catalog search did not return the expected results table.");
         }
 
         HtmlNodeCollection? rows = table.SelectNodes(".//tr");
         if (rows is null || rows.Count == 0)
         {
-            return [];
+            throw new HttpRequestException("Microsoft Update Catalog search returned an empty results table without a no-results marker.");
         }
 
-        IEnumerable<MicrosoftUpdateCatalogUpdate> parsed = rows
+        MicrosoftUpdateCatalogUpdate[] parsed = rows
             .Where(row => !string.Equals(row.Id, "headerRow", StringComparison.OrdinalIgnoreCase))
             .Select(ParseUpdate)
             .Where(update => update is not null)
-            .Cast<MicrosoftUpdateCatalogUpdate>();
+            .Cast<MicrosoftUpdateCatalogUpdate>()
+            .ToArray();
+        if (parsed.Length == 0)
+        {
+            throw new HttpRequestException("Microsoft Update Catalog search returned no usable result rows without a no-results marker.");
+        }
 
         return descending
             ? parsed.OrderByDescending(update => update.LastUpdated ?? DateTimeOffset.MinValue).ThenBy(update => update.Title, StringComparer.OrdinalIgnoreCase).ToArray()
@@ -114,7 +119,18 @@ public sealed class MicrosoftUpdateCatalogClient : IMicrosoftUpdateCatalogClient
                 cancellationToken)
             .ConfigureAwait(false);
 
+        var document = new HtmlDocument();
+        document.LoadHtml(html);
+        ThrowIfCatalogError(document);
         return ParseDownloads(html, _logger);
+    }
+
+    private static void ThrowIfCatalogError(HtmlDocument document)
+    {
+        if (document.GetElementbyId("errorPageDisplayedError") is not null)
+        {
+            throw new HttpRequestException("Microsoft Update Catalog returned a remote error page.");
+        }
     }
 
     internal static IReadOnlyList<MicrosoftUpdateCatalogDownload> ParseDownloads(string html, ILogger<MicrosoftUpdateCatalogClient> logger)
@@ -208,7 +224,7 @@ public sealed class MicrosoftUpdateCatalogClient : IMicrosoftUpdateCatalogClient
 
     private Task<string> SendStringAsync(string requestUri, string operationName, CancellationToken cancellationToken)
     {
-        return HttpTextFetcher.SendStringWithRetryAsync(HttpClient, () =>
+        return HttpTextFetcher.SendStringWithRetryAsync(_httpClient, () =>
         {
             var request = new HttpRequestMessage(HttpMethod.Get, requestUri);
             ApplyNoCacheHeaders(request);
@@ -219,7 +235,7 @@ public sealed class MicrosoftUpdateCatalogClient : IMicrosoftUpdateCatalogClient
     private Task<string> SendFormAsync(string requestUri, IReadOnlyList<KeyValuePair<string, string>> formValues,
         string operationName, CancellationToken cancellationToken)
     {
-        return HttpTextFetcher.SendStringWithRetryAsync(HttpClient, () =>
+        return HttpTextFetcher.SendStringWithRetryAsync(_httpClient, () =>
         {
             var request = new HttpRequestMessage(HttpMethod.Post, requestUri) { Content = new FormUrlEncodedContent(formValues) };
             ApplyNoCacheHeaders(request);

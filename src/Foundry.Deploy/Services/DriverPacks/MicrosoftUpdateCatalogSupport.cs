@@ -10,122 +10,75 @@ namespace Foundry.Deploy.Services.DriverPacks;
 
 internal static partial class MicrosoftUpdateCatalogSupport
 {
-    public static string[] BuildReleaseSearchOrder(string targetReleaseId)
-    {
-        var order = new List<string>();
-        string normalizedTarget = string.IsNullOrWhiteSpace(targetReleaseId)
-            ? string.Empty
-            : targetReleaseId.Trim();
+    public static string[] BuildReleaseSearchOrder(string targetReleaseId) =>
+        OperatingSystemSupportMatrix.IsSupportedReleaseId(targetReleaseId.Trim()) ? [targetReleaseId.Trim()] : [];
 
-        if (OperatingSystemSupportMatrix.IsSupportedReleaseId(normalizedTarget))
-        {
-            order.Add(normalizedTarget);
-        }
-
-        foreach (string release in OperatingSystemSupportMatrix.ReleaseSearchOrder)
-        {
-            if (!order.Contains(release, StringComparer.OrdinalIgnoreCase))
-            {
-                order.Add(release);
-            }
-        }
-
-        return order.ToArray();
-    }
-
-    public static string? TryExtractDriverSearchHardwareId(PnpDeviceInfo device)
-    {
-        ArgumentNullException.ThrowIfNull(device);
-
-        string? match = TryExtractDriverSearchHardwareId(device.DeviceId);
-        if (!string.IsNullOrWhiteSpace(match))
-        {
-            return match;
-        }
-
-        foreach (string hardwareId in device.HardwareIds)
-        {
-            match = TryExtractDriverSearchHardwareId(hardwareId);
-            if (!string.IsNullOrWhiteSpace(match))
-            {
-                return match;
-            }
-        }
-
-        return null;
-    }
+    public static string? TryExtractDriverSearchHardwareId(PnpDeviceInfo device) => BuildHardwareSearchOrder(device).FirstOrDefault();
 
     public static string? TryExtractDriverSearchHardwareId(string value)
     {
-        if (string.IsNullOrWhiteSpace(value))
+        string[] parts = value.Trim().Split('\\');
+        if (parts.Length < 2 || parts[0].Length == 0 || parts[1].Length == 0)
         {
             return null;
         }
+        string hardwareId = $"{parts[0]}\\{parts[1]}";
+        return hardwareId.Length <= 512 && hardwareId.All(ch => char.IsAsciiLetterOrDigit(ch) || "\\_&{}.-".Contains(ch))
+            ? hardwareId : null;
+    }
 
-        Match match = DriverHardwareIdRegex().Match(value);
-        if (!match.Success)
+    internal static string[] BuildHardwareSearchOrder(PnpDeviceInfo device) => device.HardwareIds.Prepend(device.DeviceId)
+        .Select(TryExtractDriverSearchHardwareId)
+        .OfType<string>()
+        .Distinct(StringComparer.OrdinalIgnoreCase)
+        .OrderByDescending(id => id.Contains("&SUBSYS_", StringComparison.OrdinalIgnoreCase))
+        .ThenByDescending(id => id.Length)
+        .ToArray();
+
+    public static string BuildSearchQuery(params string[] segments) =>
+        string.Join("+", segments.Where(segment => !string.IsNullOrWhiteSpace(segment)).Select(segment => segment.Trim()));
+
+    public static string NormalizeArchitecture(string value) => value.Trim().ToLowerInvariant() switch
+    {
+        "amd64" or "x64" => "x64",
+        "aarch64" or "arm64" => "arm64",
+        "x86" => "x86",
+        var normalized => normalized
+    };
+
+    public static MicrosoftUpdateCatalogDownload? SelectPreferredCab(IReadOnlyList<MicrosoftUpdateCatalogDownload> downloads, string targetArchitecture) =>
+        GetCabCandidates(downloads, targetArchitecture).FirstOrDefault(download => HasExplicitArchitecture(download, targetArchitecture));
+
+    internal static MicrosoftUpdateCatalogDownload[] GetCabCandidates(IReadOnlyList<MicrosoftUpdateCatalogDownload> downloads, string targetArchitecture)
+    {
+        string target = NormalizeArchitecture(targetArchitecture);
+        if (target is not ("x64" or "arm64" or "x86"))
         {
-            match = SurfaceHardwareIdRegex().Match(value);
+            return [];
         }
-
-        return match.Success ? match.Value : null;
-    }
-
-    public static string BuildSearchQuery(params string[] segments)
-    {
-        return string.Join(
-            "+",
-            segments
-                .Where(segment => !string.IsNullOrWhiteSpace(segment))
-                .Select(segment => segment.Trim()));
-    }
-
-    public static string NormalizeArchitecture(string value)
-    {
-        string normalized = value.Trim().ToLowerInvariant();
-        return normalized switch
-        {
-            "amd64" => "x64",
-            "x64" => "x64",
-            "arm64" => "arm64",
-            "aarch64" => "arm64",
-            "x86" => "x86",
-            _ => normalized
-        };
-    }
-
-    public static MicrosoftUpdateCatalogDownload? SelectPreferredCab(IReadOnlyList<MicrosoftUpdateCatalogDownload> downloads, string targetArchitecture)
-    {
-        if (downloads.Count == 0)
-        {
-            return null;
-        }
-
-        string normalizedArchitecture = NormalizeArchitecture(targetArchitecture);
-        MicrosoftUpdateCatalogDownload[] cabDownloads = downloads
-            .Where(download => IsCabUrl(download.DownloadUrl))
-            .GroupBy(download => download.DownloadUrl, StringComparer.OrdinalIgnoreCase)
-            .Select(group => group.First())
+        return downloads.Where(download => IsCabUrl(download.DownloadUrl) &&
+                Path.GetExtension(download.FileName).Equals(".cab", StringComparison.OrdinalIgnoreCase) &&
+                !HasConflictingArchitecture(download, target))
+            .Distinct()
             .ToArray();
+    }
 
-        if (cabDownloads.Length == 0)
+    internal static bool AllowsTargetRelease(MicrosoftUpdateCatalogUpdate update, OperatingSystemCatalogItem target)
+    {
+        if (target.BuildMajor <= 0 || !OperatingSystemSupportMatrix.IsSupported(target))
         {
-            return null;
+            return false;
         }
-
-        if (string.IsNullOrWhiteSpace(normalizedArchitecture))
+        string metadata = $"{update.Products} {update.Title}";
+        MatchCollection windowsVersions = WindowsVersionRegex().Matches(metadata);
+        if (windowsVersions.Count > 0 && !windowsVersions.Any(match => match.Groups[1].Value == target.WindowsRelease.Trim()))
         {
-            return cabDownloads[0];
+            return false;
         }
-
-        MicrosoftUpdateCatalogDownload? exactMatch = cabDownloads.FirstOrDefault(download => MatchesArchitecture(download, normalizedArchitecture));
-        if (exactMatch is not null)
-        {
-            return exactMatch;
-        }
-
-        MicrosoftUpdateCatalogDownload? compatibleFallback = cabDownloads.FirstOrDefault(download => !HasConflictingArchitecture(download, normalizedArchitecture));
-        return compatibleFallback ?? cabDownloads[0];
+        MatchCollection releases = ReleaseRegex().Matches(metadata);
+        return releases.Count == 0 || releases.Any(match =>
+            match.Groups[1].Value.Equals(target.ReleaseId, StringComparison.OrdinalIgnoreCase) ||
+            (match.Groups[2].Success && string.Compare(match.Groups[1].Value, target.ReleaseId, StringComparison.OrdinalIgnoreCase) < 0));
     }
 
     /// <summary>Keeps fallback cache bytes on the staging volume but outside its recursively consumed raw tree.</summary>
@@ -147,72 +100,43 @@ internal static partial class MicrosoftUpdateCatalogSupport
                 return SanitizePathSegment(fileName);
             }
         }
-
         return $"catalog-{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}.cab";
     }
 
     public static string SanitizePathSegment(string value)
     {
-        if (string.IsNullOrWhiteSpace(value))
-        {
-            return "catalog";
-        }
-
+        if (string.IsNullOrWhiteSpace(value)) return "catalog";
         char[] invalid = Path.GetInvalidFileNameChars();
         string sanitized = new(value.Select(ch => invalid.Contains(ch) ? '_' : ch).ToArray());
         return sanitized.Trim().TrimEnd('.');
     }
 
-    private static bool IsCabUrl(string downloadUrl)
-    {
-        if (!Uri.TryCreate(downloadUrl, UriKind.Absolute, out Uri? uri))
-        {
-            return false;
-        }
+    private static bool IsCabUrl(string downloadUrl) => Uri.TryCreate(downloadUrl, UriKind.Absolute, out Uri? uri) &&
+        Path.GetExtension(uri.AbsolutePath).Equals(".cab", StringComparison.OrdinalIgnoreCase);
 
-        return Path.GetExtension(uri.AbsolutePath).Equals(".cab", StringComparison.OrdinalIgnoreCase);
+    private static bool HasExplicitArchitecture(MicrosoftUpdateCatalogDownload download, string target) =>
+        ArchitectureTokens(download).Contains(NormalizeArchitecture(target), StringComparer.Ordinal);
+
+    private static bool HasConflictingArchitecture(MicrosoftUpdateCatalogDownload download, string target)
+    {
+        string[] filenameArchitectures = ArchitectureTokens(download.FileName);
+        string[] catalogArchitectures = ArchitectureTokens(download.Architectures);
+        return filenameArchitectures.Length > 0 && !filenameArchitectures.Contains(target, StringComparer.Ordinal) ||
+            catalogArchitectures.Length > 0 && !catalogArchitectures.Contains(target, StringComparer.Ordinal);
     }
 
-    private static bool MatchesArchitecture(MicrosoftUpdateCatalogDownload download, string targetArchitecture)
-    {
-        string fileName = ResolveComparableName(download);
-        return targetArchitecture switch
-        {
-            "x64" => fileName.Contains("x64", StringComparison.Ordinal) || fileName.Contains("amd64", StringComparison.Ordinal),
-            "arm64" => fileName.Contains("arm64", StringComparison.Ordinal),
-            "x86" => fileName.Contains("x86", StringComparison.Ordinal) || fileName.Contains("32", StringComparison.Ordinal),
-            _ => false
-        };
-    }
+    private static string[] ArchitectureTokens(MicrosoftUpdateCatalogDownload download) =>
+        ArchitectureTokens($"{download.FileName} {download.Architectures}");
 
-    private static bool HasConflictingArchitecture(MicrosoftUpdateCatalogDownload download, string targetArchitecture)
-    {
-        string fileName = ResolveComparableName(download);
-        return targetArchitecture switch
-        {
-            "x64" => fileName.Contains("arm64", StringComparison.Ordinal) || fileName.Contains("x86", StringComparison.Ordinal),
-            "arm64" => fileName.Contains("x64", StringComparison.Ordinal) ||
-                       fileName.Contains("amd64", StringComparison.Ordinal) ||
-                       fileName.Contains("x86", StringComparison.Ordinal),
-            "x86" => fileName.Contains("arm64", StringComparison.Ordinal) ||
-                     fileName.Contains("x64", StringComparison.Ordinal) ||
-                     fileName.Contains("amd64", StringComparison.Ordinal),
-            _ => false
-        };
-    }
+    private static string[] ArchitectureTokens(string value) => ArchitectureRegex().Matches(value)
+            .Select(match => NormalizeArchitecture(match.Value)).Distinct(StringComparer.Ordinal).ToArray();
 
-    private static string ResolveComparableName(MicrosoftUpdateCatalogDownload download)
-    {
-        string fileName = string.IsNullOrWhiteSpace(download.FileName)
-            ? ResolveFileNameFromUrl(download.DownloadUrl)
-            : download.FileName;
+    [GeneratedRegex(@"(?<![a-z0-9])(amd64|x64|arm64|aarch64|x86)(?![a-z0-9])", RegexOptions.IgnoreCase)]
+    private static partial Regex ArchitectureRegex();
 
-        return $"{fileName} {download.Architectures}".ToLowerInvariant();
-    }
+    [GeneratedRegex(@"\b(\d{2}H[12])\b(\s+and\s+later)?", RegexOptions.IgnoreCase)]
+    private static partial Regex ReleaseRegex();
 
-    [GeneratedRegex("v[ei][dn]_([0-9a-f]){4}&[pd][ie][dv]_([0-9a-f]){4}", RegexOptions.IgnoreCase)]
-    private static partial Regex DriverHardwareIdRegex();
-
-    [GeneratedRegex("mshw0[0-1]([0-9]){2}", RegexOptions.IgnoreCase)]
-    private static partial Regex SurfaceHardwareIdRegex();
+    [GeneratedRegex(@"\bWindows\s+(10|11)\b", RegexOptions.IgnoreCase)]
+    private static partial Regex WindowsVersionRegex();
 }
