@@ -16,23 +16,44 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
 
     private readonly IWinPeProcessRunner _processRunner;
     private readonly IWinPeRuntimePayloadProvisioningService _runtimePayloadProvisioningService;
+    private readonly Func<string, string> _resolveVolumeRoot;
 
     public WinPeUsbMediaService()
-        : this(new WinPeProcessRunner(), new WinPeRuntimePayloadProvisioningService())
+        : this(
+            new WinPeProcessRunner(),
+            new WinPeRuntimePayloadProvisioningService(),
+            UseValidatedVolumeRoot)
     {
     }
 
     internal WinPeUsbMediaService(IWinPeProcessRunner processRunner)
-        : this(processRunner, new WinPeRuntimePayloadProvisioningService(processRunner))
+        : this(processRunner, new WinPeRuntimePayloadProvisioningService(processRunner), UseValidatedVolumeRoot)
+    {
+    }
+
+    internal WinPeUsbMediaService(
+        IWinPeProcessRunner processRunner,
+        Func<string, string> resolveVolumeRoot)
+        : this(processRunner, new WinPeRuntimePayloadProvisioningService(processRunner), resolveVolumeRoot)
     {
     }
 
     internal WinPeUsbMediaService(
         IWinPeProcessRunner processRunner,
         IWinPeRuntimePayloadProvisioningService runtimePayloadProvisioningService)
+        : this(processRunner, runtimePayloadProvisioningService, UseValidatedVolumeRoot)
     {
-        _processRunner = processRunner;
-        _runtimePayloadProvisioningService = runtimePayloadProvisioningService;
+    }
+
+    internal WinPeUsbMediaService(
+        IWinPeProcessRunner processRunner,
+        IWinPeRuntimePayloadProvisioningService runtimePayloadProvisioningService,
+        Func<string, string> resolveVolumeRoot)
+    {
+        _processRunner = processRunner ?? throw new ArgumentNullException(nameof(processRunner));
+        _runtimePayloadProvisioningService = runtimePayloadProvisioningService ??
+                                             throw new ArgumentNullException(nameof(runtimePayloadProvisioningService));
+        _resolveVolumeRoot = resolveVolumeRoot ?? throw new ArgumentNullException(nameof(resolveVolumeRoot));
     }
 
     public async Task<WinPeResult<IReadOnlyList<WinPeUsbDiskCandidate>>> GetUsbCandidatesAsync(
@@ -227,8 +248,8 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
         }
 
         WinPeUsbProvisionResult provisionedUsb = provisioningResult.Value!;
-        string bootRootPath = $"{provisionedUsb.BootDriveLetter}\\";
-        string cacheRootPath = $"{provisionedUsb.CacheDriveLetter}\\";
+        string bootRootPath = _resolveVolumeRoot($"{provisionedUsb.BootDriveLetter}\\");
+        string cacheRootPath = _resolveVolumeRoot($"{provisionedUsb.CacheDriveLetter}\\");
         ReportProgress(options.Progress, 55, "Copying WinPE media to USB.");
         WinPeResult copyResult = await CopyMediaAsync(
             artifact.MediaDirectoryPath,
@@ -350,7 +371,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
             return WinPeResult<WinPeUsbProvisionResult>.Failure(formatResult.Error!);
         }
 
-        string bootRootPath = $"{layout.BootDriveLetter}\\";
+        string bootRootPath = _resolveVolumeRoot($"{layout.BootDriveLetter}\\");
         ReportProgress(options.Progress, 55, "Copying WinPE media to USB.");
         WinPeResult copyResult = await CopyMediaAsync(
             artifact.MediaDirectoryPath,
@@ -387,7 +408,7 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
 
         if (options.RuntimePayloadProvisioning is not null)
         {
-            string cacheRootPath = $"{layout.CacheDriveLetter}\\";
+            string cacheRootPath = _resolveVolumeRoot($"{layout.CacheDriveLetter}\\");
             ReportProgress(options.Progress, 92, "Provisioning USB runtime payloads.");
             InitializeCachePartitionDirectories(cacheRootPath);
             WinPeResult runtimePayloadResult = await _runtimePayloadProvisioningService.ProvisionAsync(
@@ -1240,5 +1261,10 @@ public sealed class WinPeUsbMediaService : IWinPeUsbMediaService
         }
 
         return string.Empty;
+    }
+
+    private static string UseValidatedVolumeRoot(string volumeRootPath)
+    {
+        return volumeRootPath;
     }
 }
