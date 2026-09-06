@@ -69,6 +69,7 @@ public sealed class WindowsHardwareInspector : IHardwareInspector
         } | ConvertTo-Json -Compress -Depth 8
         """;
 
+    private readonly Func<WindowsFirmwareType> _readFirmware;
     private readonly Func<ProcessExecutionRequest, CancellationToken, Task<ProcessExecutionResult>> _executeProcess;
 
     /// <summary>
@@ -80,10 +81,12 @@ public sealed class WindowsHardwareInspector : IHardwareInspector
     }
 
     internal WindowsHardwareInspector(
-        Func<ProcessExecutionRequest, CancellationToken, Task<ProcessExecutionResult>> executeProcess)
+        Func<ProcessExecutionRequest, CancellationToken, Task<ProcessExecutionResult>> executeProcess,
+        Func<WindowsFirmwareType>? readFirmware = null)
     {
         ArgumentNullException.ThrowIfNull(executeProcess);
         _executeProcess = executeProcess;
+        _readFirmware = readFirmware ?? WindowsFirmwareInspector.GetCurrent;
     }
 
     /// <inheritdoc />
@@ -114,7 +117,7 @@ public sealed class WindowsHardwareInspector : IHardwareInspector
                 throw new JsonException("Hardware inspection must return exactly one object.");
             }
 
-            return ParseSnapshot(roots[0]);
+            return ParseSnapshot(roots[0]) with { FirmwareType = _readFirmware() };
         }
         catch (JsonException exception)
         {

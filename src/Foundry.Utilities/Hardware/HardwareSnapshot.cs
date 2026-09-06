@@ -19,6 +19,8 @@ public sealed record HardwareSnapshot(
     string SystemFirmwareHardwareId,
     IReadOnlyList<PnpDeviceSnapshot> PnpDevices)
 {
+    public WindowsFirmwareType FirmwareType { get; init; }
+
     public string AssetTag { get; init; } = string.Empty;
 
     public string SystemUuid { get; init; } = string.Empty;

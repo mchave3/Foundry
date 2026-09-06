@@ -21,6 +21,7 @@ public sealed class WindowsDiskInspector : IWindowsDiskInspector
             [pscustomobject]@{
                 Number = [int]$disk.Number
                 FriendlyName = [string]$disk.FriendlyName
+                UniqueId = [string]$disk.UniqueId
                 SerialNumber = [string]$disk.SerialNumber
                 BusType = [string]$disk.BusType
                 PartitionStyle = [string]$disk.PartitionStyle
@@ -167,7 +168,7 @@ if ($null -eq $partition) {{
             ReadRequiredBool(element, "IsBoot"),
             ReadRequiredBool(element, "IsReadOnly"),
             ReadRequiredBool(element, "IsOffline"),
-            ReadBool(element, "IsRemovable"));
+            ReadBool(element, "IsRemovable")) { UniqueId = ReadString(element, "UniqueId") };
     }
 
     private static string ReadString(JsonElement root, string propertyName)
